@@ -5177,7 +5177,6 @@ C
          else
             Target=180.0D0+lat - refraction ! target polar angle
          end if
-         write(*,*)myname,'Target:',target,lat
          inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarMoonAngle(Target,
@@ -6816,7 +6815,7 @@ C
       real getMoonElevation
       real dtin                 ! initial step length
 C
-      dtin=0.02D0
+      dtin=0.01D0
       call chop0(event100,100)
 C
       call reportLLMax(
@@ -7011,7 +7010,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0
+      dtin=0.01D0
       call reportLLMax(
      &     getSunElevation,
      &     lat,lon,hgt,
@@ -7525,7 +7524,7 @@ C
       real getMoonElevation
       real dtin                 ! initial step length
 C
-      dtin=0.02D0
+      dtin=0.01D0
       call chop0(event100,100)
 C
       call reportLLMin(
@@ -7717,7 +7716,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0
+      dtin=0.01D0
       call reportLLMin(
      &     getSunElevation,
      &     lat,lon,hgt,
@@ -7983,7 +7982,7 @@ C
       else
          angNight=angle + refraction ! target polar angle
       end if
-      write(*,*)myname,'Polar Moon ang:',angDay,angNight,loclat
+C      write(*,*)myname,'Polar Moon ang:',angDay,angNight,loclat
 C
 C     get moon phase
 C
@@ -8698,7 +8697,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0
+      dtin=0.01D0
       call reportLLTarget(Target,
      &     TargetCycle,getMoonUpperElevation,
      &     lat,lon,hgt,
@@ -9621,7 +9620,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0
+      dtin=0.01D0
       call reportLLTarget(Target,
      &     TargetCycle,getSunElevation,
      &     lat,lon,hgt,
@@ -9735,7 +9734,7 @@ C
          angNight=angle + refraction ! target polar angle
       end if
 C      
-      write(*,*)myname,'Polar Sun ang:',angDay,angNight,loclat
+CC      write(*,*)myname,'Polar Sun ang:',angDay,angNight,loclat
 C
 C     make report
 C
@@ -10347,7 +10346,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0
+      dtin=0.01D0
       call reportLLTarget(Target,
      &     TargetCycle,getSunUpperElevation,
      &     lat,lon,hgt,
@@ -12533,7 +12532,7 @@ C
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
-      dtin=0.02D0
+      dtin=0.01D0
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.5D0
       else
@@ -12760,7 +12759,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0                  ! initial time step
+      dtin=0.01D0                  ! initial time step
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.0D0
       else
@@ -13429,7 +13428,7 @@ C
       external getMoonElevation
       real getMoonElevation
 C
-      dtin=0.02D0
+      dtin=0.01D0
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.5D0
       else
@@ -13656,7 +13655,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0                  ! initial time step
+      dtin=0.01D0                  ! initial time step
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.0D0
       else
@@ -14131,7 +14130,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0
+      dtin=0.01D0
       if(direction.eq.1) then   ! forewards
          ipitch=pitch
          tendJD=tstartJD+1.5D0
@@ -14901,7 +14900,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0
+      dtin=0.01D0
       if(direction.eq.1) then
          ipitch=pitch
          tendJD=tstartJD+1.5D0
@@ -15224,7 +15223,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.02D0
+      dtin=0.01D0
       if(direction.eq.1) then   ! forewards
          ipitch=pitch
          tendJD=tstartJD+1.5D0
@@ -17910,7 +17909,6 @@ C
       axis(3)=1.0D0
 C
       ang0=getAngle(moonPos,axis) ! 0 -> 180.0D0
-      write(*,*)'Moon-north-pole:',ang0
 C
 C     correct for upper moon limb (assuming that Moon disc has same size locally as from GC)
 C     
@@ -18029,7 +18027,7 @@ C
       rEarth   =   6378.0D0 
       dist=getAbs(moonPos)
 C
-      write(*,*)'PolarMoonAngle:',ang0,moonPos
+C      write(*,*)'PolarMoonAngle:',ang,moonPos
 C
       if (locLat.gt.0.0D0) then
          ang=ang0 - ((rMoon-rEarth)/dist)*DEG
