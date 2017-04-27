@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# If arguments are given on the command line, the program uses these, otherwise
+# it tries to read from <stdin>.
+#
+# Running the program using an input file:
+./astro.bin < astro.in
+#
+# If you wish to give input on the command line,
+# * Use "short name" headers (without blanks). 
+# * <Carriage Return> can be achieved by using a blank seperated minus, " - ".
+# * Intrinsic commands can still be used on the command line, for instance
+#     ./moonsec.bin x - exit
+#   will list all available headers (long and short name).
+# * Comments are not available on the command line (use if-endif block).
+#
+# Here is a simple command-line example:
+# 
+#time ./astro.bin -V1.0 -F  ../../eph/JPLEPH.405 -LATLON   59.9134   10.7195   0.0  OSLO  -FROMDTG 2011/10/15 00:00  -TODTG 2011-10-15 24-00 -MOONSET -MOONELEV -SUNSET -SUNELEV -TWILIGHT -SOLARECLIPSE -LUNARECLIPSE -MOONILLUM -PLANETS > log
+#time ./moonsec.bin -V1.0 -F  ../../eph/JPLEPH.405 -LATLON   59.9134   10.7195   0.0  OSLO  -FROMDTG 2011/10/15 00:00  -TODTG 2011-10-15 24-00 -MOONSET -MOONELEV -SUNSET -SUNELEV -TWILIGHT -SOLARECLIPSE -LUNARECLIPSE -MOONILLUM  -PLANETS -TIMESTEP 60.0 -PRECISION 0.333 -SECDEC 0 -ANGDEC 5  > log2
+#

@@ -1,0 +1,3 @@
+#! /bin/csh
+./event.pl 'eventStart=2008-06-23T23:00:00Z;eventSearch=1;event1Id=600;event2Id=620;eventVal1=60.;eventVal2=0.;eventVal3=0.;'
+#

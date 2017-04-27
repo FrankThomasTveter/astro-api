@@ -1,0 +1,13 @@
+      SUBROUTINE F_C_STRING (F_STRING, C_STRING)
+      USE, INTRINSIC :: ISO_C_BINDING, ONLY: C_CHAR, C_NULL_CHAR
+      IMPLICIT NONE
+      CHARACTER(LEN=*), INTENT(IN) :: F_STRING
+      CHARACTER(LEN=1,KIND=C_CHAR), INTENT(INOUT) :: 
+     &     C_STRING(LEN(F_STRING)+1)
+      INTEGER                      :: N, I
+      N = LEN_TRIM(F_STRING)
+      DO I = 1, N
+         C_STRING(I) = F_STRING(I:I)
+      END DO
+      C_STRING(N + 1) = C_NULL_CHAR      
+      END SUBROUTINE F_C_STRING

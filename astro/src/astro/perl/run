@@ -1,0 +1,5 @@
+#valgrind --leak-check=full --track-origins=yes perl -Mblib -w t/11*.t
+# perl -Mblib -w bomb.pl
+ perl -Mblib -w t/04*.t
+#
+#for i in t/*.t; do perl -Mblib -w $i; done

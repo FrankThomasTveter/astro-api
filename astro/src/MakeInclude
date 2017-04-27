@@ -1,0 +1,45 @@
+#
+# user set variables:
+# STATIC = list of files/directories which should NOT be 'made'
+#
+STATIC += Makefile
+TARGETS = all
+LS_ALL    := $(shell echo *)
+LS_LIBS   := $(shell echo lib*)
+ ifeq "$(LS_LIBS)" "lib*"
+   LS_ORDER = $(LS_ALL)
+ else
+   LS_ORDER  := $(LS_LIBS) \
+             $(shell for dir in $(LS_ALL);do X="0";for key in $(LS_LIBS);\
+              do if test $$dir = $$key;then X="1";fi;done;\
+              if test $$X = "0";then echo $$dir;fi;done)
+ endif
+LS_OTHERS := $(shell for dir in $(LS_ORDER);do X="0";for key in $(STATIC);\
+              do if test $$dir = $$key;then X="1";fi;done;\
+              if test $$X = "0";then echo $$dir;fi;done)
+PWD       := $(shell pwd)
+
+#.IGNORE:
+#.KEEP_STATE:
+
+$(TARGETS):
+	$(MAKE) $(LS_OTHERS) TARGET=$@
+
+clean:
+	@echo "Cleaning:" `pwd`
+	@$(shell rm -f *.o *~ *.bak*) 
+	$(MAKE) $(LS_OTHERS) TARGET=$@
+
+$(LS_OTHERS):     FORCE 
+	cd $@ && $(MAKE) $(TARGET)
+
+FORCE:
+
+debug :
+	@echo " static:" $(STATIC)
+	@echo " ls all:" $(LS_ALL)
+	@echo " ls lib:" $(LS_LIBS)
+	@echo " ls ord:" $(LS_ORDER)
+	@echo " ls oth:" $(LS_OTHERS)
+	@echo " pwd   :" $(PWD)
+#

@@ -1,0 +1,103 @@
+#
+# user set variables :
+# MAINS    = list of all files containing main programs
+# LIB_NAM  = name of library for current object files
+# LIBS     = list of libraries
+# INCL     = list of directories to search for include files
+# COMPILER = compiler program (e.g. f77)
+# OPTIONS  = compiling options
+# 
+#
+ ifeq "$(COMPILER)" ""
+   # COMPILER = f90 -DF90 -n32
+   # COMPILER = f90 -DF90 -n32 -DEBUG:conform_check=YES:div_check=3:subscript_check=ON:trap_uninitialized=ON:verbose_runtime=ON
+   #                           -DEBUG:conform_check=YES:div_check=3:subscript_check=ON:trap_uninitialized=ON:verbose_runtime=ON 
+    COMPILER = pgf90 -DF90-DLITTLE_ENDIAN -DPREC32
+   # COMPILER = g77 -DF77
+   # COMPILER = /usr/local/gcc-3.4.6/bin/g77-3.4 -DF77
+ endif
+#
+ LS_F := $(shell echo *.F)
+ LIST_SRC  = $(LS_F)
+ LIST_OBJ  = $(LIST_SRC:%.F=%.o)
+#
+ ifeq "$(BIN)" ""
+  BIN      =   $(shell pwd)
+  MOVE_BIN = echo "Binary ($(@:$(BIN)/%=%)) put in current directory ($(BIN))."
+ else
+  MOVE_BIN = mv -f $(@:$(BIN)/%=%) $(BIN)
+ endif
+#
+ ifeq "$(MAINS)" ""
+  LIST_SUBS  := $(LIST_OBJ)
+  LIST_EXE   :=
+ else
+  XLS_SH     = for file in $(LIST_OBJ);do X="0";for key in $(MAINS:%.F=%.o);\
+              do if test $$file = $$key;then X="1";fi;done;\
+              if test $$X = "0";then echo $$file;fi;done
+  LIST_SUBS  := $(shell $(XLS_SH))
+  LIST_EXE   := $(MAINS:%.F=$(BIN)/%$(BIN_SUFFIX))
+ endif
+#
+ ifeq "$(LIST_SUBS)" ""
+  LIB_NAM = 
+ endif
+#
+ ifeq "$(LIB_NAM)" ""
+  LIST_AUX = $(LIST_SUBS)
+ endif
+#
+ FFLAGS    += $(INCL:%=-I%) $(OPTIONS)
+ AR         =   ar
+ ARFLAGS    =   ur
+#
+# Keep make status
+#
+.KEEP_STATE:
+#
+all:  $(LIST_EXE) $(LIB_NAM) $(LIST_AUX) Makefile
+#
+# intermediate target:
+#
+lib:    $(LIB_NAM)
+#
+# link binary (from library) and place in $(BIN)
+#
+$(LIST_EXE):  $(BIN)/%$(BIN_SUFFIX) : %.o $(LIB_NAM) $(LIST_AUX) $(LIBS) Makefile
+	@echo building $@ 
+	@echo "   " since $? has changed 
+	@echo @$(COMPILER) $(@:$(BIN)/%$(BIN_SUFFIX)=%.o) -o $(@:$(BIN)/%=%) $(FFLAGS) $(LIB_NAM) $(LIST_AUX) $(LIBS) $(BINOP)
+	@$(COMPILER) $(@:$(BIN)/%$(BIN_SUFFIX)=%.o) -o $(@:$(BIN)/%=%) $(FFLAGS) $(LIB_NAM) $(LIST_AUX) $(LIBS) $(BINOP)
+	@chmod a+x $(@:$(BIN)/%=%)
+	@$(MOVE_BIN)
+#
+# Library dependency
+#
+$(LIB_NAM):     $(LIST_SUBS)
+	@echo updating $@ 
+	@echo "   " since $? has changed 
+	@$(AR) $(ARFLAGS) $@ $?
+	@chmod a+rw $@
+#
+#
+# Build objects from source files
+#
+$(LIST_OBJ):   %.o:%.F Makefile
+	@echo $(COMPILER) $(FFLAGS) -c $*.F -o $*.o
+	@$(COMPILER) $(FFLAGS) -c $*.F -o $*.o
+#
+debug :
+	@echo " Src:" $(LIST_SRC)
+	@echo " Obj:" $(LIST_OBJ)
+	@echo " Lib:" $(LIBS)
+	@echo " Arc:" $(LIB_NAM)
+	@echo " Exe:" $(LIST_EXE)
+	@echo " Aux:" $(LIST_AUX)
+#
+clean:
+	@echo "Cleaning:" `pwd`
+	@$(shell rm -f *.o *~ *.bak* $(LIB_NAM)) 
+#
+install:
+	@echo "Install not implemented"
+#

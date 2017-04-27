@@ -1,0 +1,74 @@
+ dpkg-buildpackage -rfakeroot -D -us -uc -i -b
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_PAPER = "nb_NO.UTF-8",
+	LC_ADDRESS = "nb_NO.UTF-8",
+	LC_MONETARY = "nb_NO.UTF-8",
+	LC_NUMERIC = "nb_NO.UTF-8",
+	LC_TELEPHONE = "nb_NO.UTF-8",
+	LC_IDENTIFICATION = "nb_NO.UTF-8",
+	LC_MEASUREMENT = "nb_NO.UTF-8",
+	LC_TIME = "nb_NO.UTF-8",
+	LC_NAME = "nb_NO.UTF-8",
+	LANG = "en_US.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale ("en_US.UTF-8").
+dpkg-buildpackage: source package astroapi-perl
+dpkg-buildpackage: source version 0.10-1
+dpkg-buildpackage: source distribution ubuntu
+dpkg-buildpackage: source changed by Frank Tveter <frank.tveter@met.no>
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_PAPER = "nb_NO.UTF-8",
+	LC_ADDRESS = "nb_NO.UTF-8",
+	LC_MONETARY = "nb_NO.UTF-8",
+	LC_NUMERIC = "nb_NO.UTF-8",
+	LC_TELEPHONE = "nb_NO.UTF-8",
+	LC_IDENTIFICATION = "nb_NO.UTF-8",
+	LC_MEASUREMENT = "nb_NO.UTF-8",
+	LC_TIME = "nb_NO.UTF-8",
+	LC_NAME = "nb_NO.UTF-8",
+	LANG = "en_US.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale ("en_US.UTF-8").
+ dpkg-source -i --before-build perl
+dpkg-buildpackage: host architecture amd64
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_PAPER = "nb_NO.UTF-8",
+	LC_ADDRESS = "nb_NO.UTF-8",
+	LC_MONETARY = "nb_NO.UTF-8",
+	LC_NUMERIC = "nb_NO.UTF-8",
+	LC_TELEPHONE = "nb_NO.UTF-8",
+	LC_IDENTIFICATION = "nb_NO.UTF-8",
+	LC_MEASUREMENT = "nb_NO.UTF-8",
+	LC_TIME = "nb_NO.UTF-8",
+	LC_NAME = "nb_NO.UTF-8",
+	LANG = "en_US.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale ("en_US.UTF-8").
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_PAPER = "nb_NO.UTF-8",
+	LC_ADDRESS = "nb_NO.UTF-8",
+	LC_MONETARY = "nb_NO.UTF-8",
+	LC_NUMERIC = "nb_NO.UTF-8",
+	LC_TELEPHONE = "nb_NO.UTF-8",
+	LC_IDENTIFICATION = "nb_NO.UTF-8",
+	LC_MEASUREMENT = "nb_NO.UTF-8",
+	LC_TIME = "nb_NO.UTF-8",
+	LC_NAME = "nb_NO.UTF-8",
+	LANG = "en_US.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale ("en_US.UTF-8").
+dpkg-checkbuilddeps: error: Unmet build dependencies: debhelper (>= 5.0.0)
+dpkg-buildpackage: warning: build dependencies/conflicts unsatisfied; aborting
+dpkg-buildpackage: warning: (Use -d flag to override.)

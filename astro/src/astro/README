@@ -1,0 +1,31 @@
+HOW TO GET SOURCE CODE, COMPILE AND RUN
+
+#get source code
+cvs co fmprojects/moonsun/eph
+cvs co fmprojects/moonsun/src/Makefile
+cvs co fmprojects/moonsun/src/MakeInclude
+cvs co fmprojects/moonsun/src/libfmnuke
+cvs co fmprojects/moonsun/src/libfmorb
+cvs co fmprojects/moonsun/src/astro
+cd fmprojects/moonsun/src
+
+# compile
+make
+
+# run test-program
+cd astro
+./run
+
+
+Programming:
+
+in fmprojects/moonsun/src/libfmorb :
+
+JD2000 - converts from date to Julian day
+DJ2000 - converts from Julian day to date
+
+in fmprojects/moonsun/src/astro :
+
+mastro.F - main subroutine in test-program that shows how to run subroutines.
+
+Good Luck (call if any problems: Frank Tveter, 99640413)

@@ -1,0 +1,29 @@
+Revision history for Perl extension AstroApi.
+
+0.05  Thu May  3 16:15:35 CEST 2012
+    - using Moonsun libraries from F. Tveter internally
+    - better accuracy for moon-rise/set, some returned values will change!
+    - no longer supporting other "planets" than sun and moon
+    - ~1.5 times slower: all tests from 18s to 27s
+
+0.04 Thu Aug 28 16:24:27 CEST 2008
+    - Changed name to AstroApi
+
+0.03 Mon Aug 25 14:28:58 CEST 2008
+    - testing moonrise/set, difference: up to 15min
+    - fixing bug on selection of other object than sun
+
+0.02 Mon Aug 25 10:29:38 CEST 2008
+    - exporting TOPOC_ALT and TOPOC_AZ from altaz.c
+    - altitudeAzimuth function in perl
+    - no longer returning status from aa_calcSetRise in AstroApi.xs
+      croaking instead
+
+0.01 Mon Aug 25 08:28:09 CEST 2008
+        - first version with working riseSetTransit, julianDay2calendar
+        - fixed iteration in iteration_transit.c against Steves original
+          version, convergence on all days even on 0 deg lat
+        - original version; created by h2xs 1.23 with options
+                -A -n Astro::AstroApi -b 5.6.0 astroalgo.h -lm
+
+

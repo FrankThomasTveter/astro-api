@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://astro.met.no" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="astrodata">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="meta">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:string">
+                <xs:attribute type="xs:positiveInteger" name="licenseurl"/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Event" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Report">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute type="xs:positiveInteger" name="no" use="optional"/>
+                      <xs:attribute type="xs:dateTime" name="time" use="optional"/>
+                      <xs:attribute type="xs:positiveInteger" name="repId" use="optional"/>
+                      <xs:attribute type="xs:string" name="hint" use="optional"/>
+                      <xs:attribute type="xs:decimal" name="repVal" use="optional"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:positiveInteger" name="Seq" use="optional"/>
+            <xs:attribute type="xs:positiveInteger" name="Id" use="optional"/>
+            <xs:attribute type="xs:dateTime" name="Start" use="optional"/>
+            <xs:attribute type="xs:dateTime" name="Stop" use="optional"/>
+            <xs:attribute type="xs:positiveInteger" name="Search" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val1" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val2" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val3" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val4" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val5" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val6" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val7" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val8" use="optional"/>
+            <xs:attribute type="xs:decimal" name="Val9" use="optional"/>
+            <xs:attribute type="xs:positiveInteger" name="reports" use="optional"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

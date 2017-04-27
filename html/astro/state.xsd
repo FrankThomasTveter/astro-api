@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://astro.met.no" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="solarsystem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="location">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:string">
+                <xs:attribute type="xs:decimal" name="latitude"/>
+                <xs:attribute type="xs:decimal" name="longitude"/>
+                <xs:attribute type="xs:decimal" name="height"/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="initial">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="body" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute type="xs:decimal" name="ra" use="optional"/>
+                      <xs:attribute type="xs:decimal" name="dec" use="optional"/>
+                      <xs:attribute type="xs:decimal" name="w" use="optional"/>
+                      <xs:attribute type="xs:decimal" name="dwdt" use="optional"/>
+                      <xs:attribute type="xs:string" name="main" use="optional"/>
+                      <xs:attribute type="xs:decimal" name="xmu" use="optional"/>
+                      <xs:attribute type="xs:positiveInteger" name="id" use="optional"/>
+                      <xs:attribute type="xs:string" name="name" use="optional"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:positiveInteger" name="no"/>
+            <xs:attribute type="xs:string" name="ref"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="times">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="time" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="observer">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="i">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:decimal" name="x" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="y" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="z" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="j">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:decimal" name="x" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="y" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="z" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="k">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:decimal" name="x" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="y" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="z" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="location">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:decimal" name="x" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="y" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="z" use="optional"/>
+                                  <xs:attribute type="xs:string" name="origo" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="zenith">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:decimal" name="x" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="y" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="z" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute type="xs:positiveInteger" name="body" use="optional"/>
+                        <xs:attribute type="xs:string" name="ref" use="optional"/>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="state">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="body" maxOccurs="unbounded" minOccurs="0">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:decimal" name="x" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="y" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="z" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="vx" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="vy" use="optional"/>
+                                  <xs:attribute type="xs:decimal" name="vz" use="optional"/>
+                                  <xs:attribute type="xs:positiveInteger" name="id" use="optional"/>
+                                  <xs:attribute type="xs:string" name="name" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute type="xs:positiveInteger" name="no" use="optional"/>
+                        <xs:attribute type="xs:string" name="ref" use="optional"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:positiveInteger" name="id" use="optional"/>
+                  <xs:attribute type="xs:dateTime" name="dtg" use="optional"/>
+                  <xs:attribute type="xs:decimal" name="jd2000" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:positiveInteger" name="no"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" name="apple-mobile-web-app-capable" content="yes">
+<title>astro.met.no/sky.html</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src='sky/js/tween.min.js'></script>
+<script src='sky/js/vector2.js'></script>
+<script src='sky/js/vector3.js'></script>
+<script src='sky/js/eventdispatcher.js'></script>
+<script src='sky/js/resourceloader.js'></script>
+<script src='sky/js/constellations.js'></script>
+<script src='sky/js/milkyway.js'></script>
+<script src='sky/js/request.js'></script>
+<script src='sky/js/planets.js'></script>
+<script src='sky/js/stack.js'></script>
+<script src='sky/js/camera.js'></script>
+<script src='sky/js/controls.js'></script>
+<script src='sky/js/scene.js'></script>
+<script src='sky/js/penline.js'></script>
+<script src='sky/js/renderer.js'></script>
+<script src='sky/js/chain.js'>console.log("Reading chain.js");</script>
+<body style='margin: 0px; background-color: #000000; overflow: hidden;'>
+  <div id="container" width="100%" height="100%" >
+    <tr><div id="info" style="position:absolute;color:white;color:#f43336;font-size: 20px;"></div></tr>
+    <tr><button onclick="Chain.toggleFullScreen();" style="position:absolute;width:150px;top:0;right:0px;background-color:#f43336;border:none;color: white;padding: 3px 5px;text-align: center;text-decoration: none;display: inline-block;" >Screen</button></tr>
+    <tr><button onclick="Chain.toggleConstellations();" style="position:absolute;width:150px;top:35px;right:0;background-color:#f43336;border:none;color: white;padding: 3px 5px;text-align: center;text-decoration: none;display: inline-block;" >Constellations</button></tr>
+    <tr><button onclick="Chain.pushUrl();" style="position:absolute;width:150px;top:70px;right:0;background-color:#f43336;border:none;color: white;padding: 3px 5px;text-align: center;text-decoration: none;display: inline-block;" >URL</button></tr>
+    <tr><button onclick="Chain.play();" style="position:absolute;width:150px;top:105px;right:0;background-color:#f43336;border:none;color: white;padding: 3px 5px;text-align: center;text-decoration: none;display: inline-block;" >Play</button></tr>
+    <canvas id="canvas" width="100%" height="100%" style="border:none;">
+      Your browser does not support the HTML5 canvas tag.</canvas>
+    <div id="log" style="color:white;position:absolute;top:50%;right:10%;color:#f43336;font-size: 20px;"></div>
+  </div>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script>
+var renderer;
+var scene;
+var camera;
+var controls;
+var milkyway;
+var requests = { 0 : {location : {latitude : 60.0,
+				  longitude: 10.0,
+                                  height   : 0.0},
+                      play : { event : 0,
+			       speed : 0.0,       // stackEpoch = (epoch-e0) * speed + m0
+			       e0 : 0.0,
+			       m0 : 0.0 },
+		      events : [{ reqId : 1,
+				  label: "Sunrise", 
+				  pointAt : "The Sun",
+				  viewAngle : 25.0,
+				  dtg : "2016-01-02T16:56:00Z"
+				}
+			       ],
+		      current : 0
+		     },
+                 1 : {},
+		 current : 0
+	       };
+var stack = { reqId : -1,
+	      play : { },
+	      0 : {bodies:{},
+		   observer:{}}, // first stack state goes here
+	      1 : {bodies:{},
+		   observer:{}}, // second stack state goes here
+	      current : 1  // current state (0 or 1)?
+	    };
+
+var canvas=document.getElementById("canvas");
+Chain.init(canvas);
+onWindowResize();
+Chain.run();
+
+function onWindowResize() {
+    var context=document.getElementById("canvas").getContext("2d");
+    context.canvas.width  = window.innerWidth;
+    context.canvas.height = window.innerHeight;
+    controls.handleResize();
+    renderer.render( scene, camera );
+};
+window.addEventListener( 'resize', onWindowResize, false );
+
+</script>
+</body>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-67187855-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</html>

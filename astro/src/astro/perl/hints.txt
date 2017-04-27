@@ -1,0 +1,86 @@
+(logge inn paa development3 som seg selv,
+ kjoere "virsh list" for aa se kjoerende, 
+"virt-viewer dev-vm089" for aa se konsoll paa maskinen
+og tilslutt "virsh destroy dev-vm089" 
+og "virsh start dev-vm089")
+
+
+#logge inn paa: 
+  ssh development3 
+#som seg selv, kjoere 
+ virsh list			# for aa se kjoerende, 
+ virt-viewer dev-vm089 		# for aa se konsoll paa maskinen og tilslutt 
+ virsh destroy dev-vm089 	# og 
+ virsh start dev-vm089 
+
+ssh root@dev-vm089
+development
+
+# viser hvilken pakke en fil ligger i:
+dpkg -S /usr/share/perl5/AstroApi/Sunrise.pm
+
+# avinstallere pakker:
+apt-get purge astroapi-perl
+
+# installere pakker:
+apt-get install astroapi-perl
+
+
+# kan overskrive Sunrise.pm lokalt
+##### /usr/share/perl5/AstroApi/Sunrise.pm
+scp lib/AstroApi/Sunrise.pm root@dev-vm089:/usr/share/perl5/AstroApi/Sunrise.pm
+
+# her installerer du ny versjon av  AstroAlmanac til /usr/lib (maa vaere root)
+perl Makefile.PL INSTALLDIRS=vendor PREFIX=/usr LIB=/usr/lib/perl5 INSTALLVENDORARCH=/usr/lib/perl5
+
+
+# restarte apache web-server
+ /etc/init.d/apache2 restart
+#
+# check apache errors
+less  /var/log/apache2/error.log
+
+# apache konfigurasjons-fil
+emacs -nw /etc/apache2_wdb2ts/apache2.conf 
+
+# apache konfigurasjonsfil brukt av WeatherAPI...?
+emacs -nw /etc/apache2/conf.d/weatherapi.conf
+
+
+# minne lekkasje
+valgrind
+
+
+# Hvis subrutinen "croaker" kommer foelgende melding....
+
+<astrodata xsi:noNamespaceSchemaLocation="http://dev-vm089/weatherapi/sunrise/1.0/schema">
+<meta licenseurl="http://dev-vm089/license_data.html"/>
+<time date="2012-05-03"><location latitude="-56" longitude="-165">
+<sun never_rise="true"/>
+<moon phase="Full moon" never_rise="true"/>
+</location>
+</time>
+</astrodata>
+
+http://dev-vm089/weatherapi/sunrise/1.0/?lat=60.0;lon=0.0;date=2012-10-10
+http://dev-vm089/weatherapi/sunrise/1.0/?eventId=110;eventStart=2012-10-10T10:10:10Z";eventSearch=0;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;
+
+# changing a package :
+# 1) oppdater versjonsnr (lib/AstroApi/AstroApi.pm).
+# 2) oppdatere versjonsnr i debian/changelog
+# 3) fjerne Sunrise.pm fra pakken (manifest, cvs etc).
+# 4) debuild -i -us -uc -b (i AstroApi lager "pakken")
+# 5) sende libmetno-....changes etc. filer til siri
+# 6) lokal isntallasjon: dpkg --install astroapi-perl_0.05-1_amd64.deb 
+# 7) dpkg --contents astroapi-perl_0.05-1_amd64.deb
+
+# make dist
+# scp
+####583* tar xvfz AstroApi-0.05.tar.gz
+####  584  apt-cache search astroapi-perl
+####  585  mv AstroApi-0.05 astroapi-perl-0.05
+### # tar xvfz ..
+# mv Metno... astroapi-perl-...
+# dh-make-perl -e frank.tveter@met.no -p astroapi-perl astroapi-perl-0.05/
+# cd debian/
+# less control

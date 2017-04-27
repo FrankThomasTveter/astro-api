@@ -1,0 +1,15 @@
+Astro.xs
+Changes
+Makefile.PL
+MANIFEST
+ppport.h
+README
+hints.txt
+run
+bomb.pl
+lib/Astro/Api.pm
+lib/Astro/URL.pm
+lib/Astro/JPLEPH.405
+t/01-JulianDay_Epoch.t
+t/10-astroEvent.t
+t/99-StressTest.t

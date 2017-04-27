@@ -1,0 +1,443 @@
+
+# **astro-api** event documentation
+
+## Interface
+
+All times are in UTC. Coordinates are given with east and north as positive values.
+
+A `cgi-bin/event.pl?` URL-request has the following parameters:
+* **eventStart**:   start time given as "YYYY-MM-DDTHH:MI:SSZ"
+* **eventSearch**:  event search code; -1:previous, +1:next, 0: both, +2:until eventStop
+* **eventStop**:    report all events until eventStop given as "YYYY-MM-DDTHH:MI:SSZ", must only be present if eventSearch=+2.
+* **eventId**:      requested event id (SEE TABLES BELOW)
+* **eventVal**`<N>`:  input data (SEE TABLES BELOW) array, where `<N>` is the array index.
+* **debug**:  report CPU-usage: `1` for active otherwise inactive.
+
+Several event-requests can be processed in the same URL by 
+assigning a sequence number (from 1 to 9) immediately 
+after **event** in the parameter name, for instance **event3Id** or **event3Val1**.
+If sequence numbers are used, parameters without sequence numbers indicate default values and are not processed as a seperate request.
+
+The XML output contains a list of the events found, with attributes referring to the input URL parameters:
+* **Seq** : sequence number
+* **Id** : echo of **eventId**
+* **Start** : echo of **eventStart** time
+* **Stop** : echo of **eventStop** time
+* **Search** : echo of **eventSearch**
+* **Val1** : echo of **eventVal1**
+* **Val2** : echo of **eventVal2**
+* **Val3** : echo of **eventVal3**
+* **Val4** : echo of **eventVal4**
+* **Val5** : echo of **eventVal5**
+* **reports** : number of reports in the event
+* **cost** : CPU cost in milliseconds, if debug-mode is active
+
+Each event contains reports with data attributes:
+* **no** : report number, unique to the event
+* **time** : time of the event as "YYYY-MM-DDTHH:MI:SSZ"
+* **repId** : report identification, SEE TABLES BELOW for details
+* **repVal** : report value
+* **hint** : a redundant description of the report
+
+### Example of `cgi-bin/event.pl?` URL
+
+This is an example of a `cgi-bin/event.pl?` [URL](http://astro.met.no/astro/cgi-bin/event.pl/?debug=1;event1Id=600;event3Id=610;eventStart=2014-10-10T10:10:10Z;eventSearch=1;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;):
+
+    http://astro.met.no/astro/cgi-bin/event.pl/?debug=1;event1Id=600;event3Id=610;eventStart=2014-10-10T10:10:10Z;eventSearch=1;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;
+
+And this is the resulting XML output:  
+
+    <astrodata xsi:schemaLocation="http://astro.met.no/astro event.xsd"><meta licenseurl="1"/>  
+      <Event Seq="1" Id="600" Start="2014-10-10T10:10:10Z" Search="1" Val1="60.0" Val2="0.0" Val3="0.0" reports="1" cost="9.8ms">  
+        <Report no="1" time="2014-10-11T06:29:11Z" repId="600" hint="2014/10/11 06:29:11 LOCAL DIURNAL SUN RISE"/>  
+      </Event>  
+      <Event Seq="3" Id="610" Start="2014-10-10T10:10:10Z" Search="1" Val1="60.0" Val2="0.0" Val3="0.0" reports="1" cost="5.3ms">  
+        <Report no="1" time="2014-10-10T17:06:04Z" repId="610" hint="2014/10/10 17:06:04 LOCAL DIURNAL SUN SET"/>  
+      </Event>  
+    </astrodata>  
+
+***
+
+### 100 REPORT LOCAL INITIAL MOON STATE
+
+URL arguments:
+* **eventid**`=100;`
+* **eventVal1`=<latitude of observer (deg)>;`
+* **eventVal2`=<longtitude of observer (deg)>;`
+* **eventVal3`=<height of observer (deg)>;`
+
+XML report output:  
+* **repId**`=100` : if (**repVal**` >= 1`) "moon is above horison", (**repVal**` <=-1`) "moon is below"
+* **repId**`=101` : if (**repVal**` >= 1`) "lunar polar day", (**repVal**` ==0`) "no lunar polar effect", (**repVal**` <=-1`) "lunar polar night"
+* **repId**`=102` : moon phase (`0<=`**repVal**`<25` = "waxing crescent", `25<=`**repVal**`<50`="waxing gibbous",`50<=`**repVal**`<75`="waning gibbous",`75<=`**repVal**`<100`="waning crescent")
+
+### 105 REPORT LOCAL VISIBLE MOON IN PERIOD
+
+URL arguments: 
+* **eventid**`=105;`
+* **eventVal1**`=<latitude of observer (deg)>;`
+* **eventVal2**`=<longtitude of observer (deg)>;`
+* **eventVal3**`=<height of observer (deg)>`
+
+XML output:
+* **Id=105** : **repVal** = hours visible moon in period
+* **Id=106** : Moon rise.
+* **Id=107** : Moon set.
+
+Example: [http://astro.met.no/astro/cgi-bin/event.pl/?event1Id=100;event2Id=105;eventStart=2014-10-10T10:10:10Z;eventSearch=1;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;](http://astro.met.no/astro/cgi-bin/event.pl/?event1Id=100;event2Id=105;eventStart=2014-10-10T10:10:10Z;eventSearch=1;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;).
+ 
+***
+
+
+
+
+
+
+
+
+REPORT LOCAL TC EF MOON POSITION AT TIME INCREMENT
+ URL: ?eventid=110;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>;eventVal4=\<time increment (days)\>
+ XML:  Id=110 : repVal = \<moon elevation (deg)\>
+ XML:  Id=111 : repVal = \<moon azimuth (deg)\>
+ XML:  Id=112 : repVal = \<moon range (km)\>
+
+http://astro.met.no/astro/event.pl/?eventId=110;eventStart=2014-10-10T10:10:10Z;eventSearch=2;eventStop=2014-10-11T10:10:10Z;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventVal4=0.1
+ 
+REPORT LOCAL INITIAL SUN STATE
+ URL: ?eventid=120;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=120 : if (repVal \>= 1) "sun is above horison" (repVal \<=-1) "sun is below"
+ XML:  Id=121 : if (repVal \>= 1) "polar day" (repVal =0) "no polar effect" (repVal\<=-1) "polar night"
+REPORT LOCAL VISIBLE SUN IN PERIOD
+ URL: ?eventid=125;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=125 : repVal = \<hours visible sun in period\>
+ XML:  Id=126 : Sun rise.
+ XML:  Id=127 : Sun set.
+
+http://astro.met.no/astro/event.pl/?event1Id=120;event2Id=125;eventStart=2014-10-10T10:10:10Z;eventSearch=1;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0
+ 
+REPORT LOCAL TC EF SUN POSITION AT TIME INCREMENT
+ URL: ?eventid=130;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>;eventVal4=\<time increment (days)\>
+ XML:  Id=130 : repVal = \<sun elevation (deg)\>
+ XML:  Id=131 : repVal = \<sun azimuth (deg)\>
+ XML:  Id=132 : repVal = \<sun range (km)\>
+
+http://astro.met.no/astro/event.pl/?eventId=130;eventStart=2014-10-10T10:10:10Z;eventSearch=2;eventStop=2014-10-11T10:10:10Z;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventVal4=0.1
+
+DETECT WINTER SOLSTICE
+ URL: ?eventid=150
+ XML:  Id=150 : event found
+DETECT VERNAL EQUINOX
+ URL: ?eventid=160
+ XML:  Id=160 : event found
+DETECT SUMMER SOLSTICE
+ URL: ?eventid=170
+ XML:  Id=170 : event found
+DETECT AUTUMNAL EQUINOX
+ URL: ?eventid=180
+ XML:  Id=180 : event found
+DETECT EARTH IN PERIHELION
+ URL: ?eventid=190
+ XML:  Id=190 : repVal = \<sun range (km)\>
+DETECT EARTH IN APHELION
+ URL: ?eventid=200
+ XML:  Id=200 : repVal = \<sun range (km)\>
+
+http://astro.met.no/astro/event.pl/?event1Id=150;event2Id=160;event3Id=170;event4Id=180;event5Id=190;event6Id=200;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+      
+DETECT NEW MOON (PHASE=0/100)
+ URL: ?eventid=210
+ XML:  Id=210 : event found
+DETECT FIRST QUARTER MOON (PHASE=25)
+ URL: ?eventid=220
+ XML:  Id=220 : event found
+DETECT FULL MOON (PHASE=50)
+ URL: ?eventid=230
+ XML:  Id=230 : event found
+DETECT LAST QUARTER MOON (PHASE=75)
+ URL: ?eventid=240
+ XML:  Id=240 : event found
+DETECT MOON PHASE (0 TO 100)
+ URL: ?eventid=250;eventVal1=\<target moon phase\>
+ XML:  Id=250 : event found
+DETECT MOON ILLUMINATION MINIMUM
+ URL: ?eventid=260
+ XML:  Id=260 : event found
+DETECT MOON ILLUMINATION MAXIMUM
+ URL: ?eventid=270
+ XML:  Id=270 : event found
+DETECT MOON ILLUMINATION (0 TO 100)
+ URL: ?eventid=280;eventVal1=\<target moon illumination\>
+ XML:  Id=280 : event found
+
+http://astro.met.no/astro/event.pl/?event1Id=210;event2Id=220;event3Id=230;event4Id=240;event5Id=250;event5Val1=54.321;event6Id=260;event7Id=270;event8Id=280;event8Val1=12.345;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+      
+DETECT MERCURY INFERIOR CONJUNCTION
+ URL: ?eventid=300
+ XML:  Id=300 : event found
+DETECT MERCURY SUPERIOR CONJUNCTION
+ URL: ?eventid=310
+ XML:  Id=310 : event found
+DETECT MERCURY GREATEST WESTERN ELONGATION
+ URL: ?eventid=320
+ XML:  Id=320 : event found
+DETECT MERCURY GREATEST EASTERN ELONGATION
+ URL: ?eventid=330
+ XML:  Id=330 : event found
+      
+http://astro.met.no/astro/event.pl/?event1Id=300;event2Id=310;event3Id=320;event4Id=330;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT VENUS INFERIOR CONJUNCTION
+ URL: ?eventid=340
+ XML:  Id=340 : event found
+DETECT VENUS GREATEST WESTERN ELONGATION
+ URL: ?eventid=350
+ XML:  Id=350 : event found
+DETECT VENUS SUPERIOR CONJUNCTION
+ URL: ?eventid=360
+ XML:  Id=360 : event found
+DETECT VENUS GREATEST EASTERN ELONGATION
+ URL: ?eventid=370
+ XML:  Id=370 : event found
+      
+http://astro.met.no/astro/event.pl/?event1Id=340;event2Id=350;event3Id=360;event4Id=370;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT MARS CONJUNCTION
+ URL: ?eventid=380
+ XML:  Id=380 : event found
+DETECT MARS WESTERN QUADRATURE
+ URL: ?eventid=390
+ XML:  Id=390 : event found
+DETECT MARS OPPOSITION
+ URL: ?eventid=400
+ XML:  Id=400 : event found
+DETECT MARS EASTERN QUADRATURE
+ URL: ?eventid=410
+ XML:  Id=410 : event found
+      
+http://astro.met.no/astro/event.pl/?event1Id=380;event2Id=390;event3Id=400;event4Id=410;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT JUPITER CONJUNCTION
+ URL: ?eventid=420
+ XML:  Id=420 : event found
+DETECT JUPITER WESTERN QUADRATURE
+ URL: ?eventid=430
+ XML:  Id=430 : event found
+DETECT JUPITER OPPOSITION
+ URL: ?eventid=440
+ XML:  Id=440 : event found
+DETECT JUPITER EASTERN QUADRATURE
+ URL: ?eventid=450
+ XML:  Id=450 : event found
+      
+http://astro.met.no/astro/event.pl/?event1Id=420;event2Id=430;event3Id=440;event4Id=450;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT SATURN CONJUNCTION
+ URL: ?eventid=460
+ XML:  Id=460 : event found
+DETECT SATURN WESTERN QUADRATURE
+ URL: ?eventid=470
+ XML:  Id=470 : event found
+DETECT SATURN OPPOSITION
+ URL: ?eventid=480
+ XML:  Id=480 : event found
+DETECT SATURN EASTERN QUADRATURE
+ URL: ?eventid=490
+ XML:  Id=490 : event found
+      
+http://astro.met.no/astro/event.pl/?event1Id=460;event2Id=470;event3Id=480;event4Id=490;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT MERCURY TRANSIT (ANYWHERE ON EARTH)
+ URL: ?eventid=500
+ XML:  Id=500 : transit starts
+ XML:  Id=501 : transit ends
+DETECT VENUS TRANSIT (ANYWHERE ON EARTH)
+ URL: ?eventid=520
+ XML:  Id=520 : transit starts
+ XML:  Id=521 : transit ends
+      
+http://astro.met.no/astro/event.pl/?event1Id=500;event2Id=520;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT LUNAR ECLIPSE (MINOCC MAXOCC)
+ URL: ?eventid=550;eventVal1=\<minimum occultation (0 to 100)\>;eventVal2=\<maximum occultation (0 to 100)\>
+ XML:  Id=550 : penumbra contact starts (P1)
+ XML:  Id=551 : umbra contact starts (U1)
+ XML:  Id=552 : total eclipse starts (U2)
+ XML:  Id=553 : repVal = \<maximum occultation\>
+ XML:  Id=554 : total eclipse stops (U3)
+ XML:  Id=555 : umbra contact stops (U4)
+ XML:  Id=556 : penumbra contact stops (P2)
+DETECT LUNAR ECLIPSE -LUNECL[0]
+ URL: ?eventid=560
+ XML:  Id=560 : penumbra contact starts (P1)
+ XML:  Id=561 : umbra contact starts (U1)
+ XML:  Id=562 : total eclipse starts (U2)
+ XML:  Id=563 : repVal = \<maximum occultation\>
+ XML:  Id=564 : total eclipse stops (U3)
+ XML:  Id=565 : umbra contact stops (U4)
+ XML:  Id=566 : penumbra contact stops (P2)
+      
+http://astro.met.no/astro/event.pl/?event1Id=550;event1Val1=10.0;event1Val2=100.0;event2Id=560;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT LOCAL DIURNAL SUN RISE
+ URL: ?eventid=600;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=600 : event found
+DETECT LOCAL DIURNAL SUN SET
+ URL: ?eventid=610;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=610 : event found
+DETECT LOCAL DIURNAL MAXIMUM SOLAR ELEVATION
+ URL: ?eventid=620;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=620 : repVal = \<maximum solar elevation (deg)\>
+DETECT LOCAL DIURNAL MINIMUM SOLAR ELEVATION
+ URL: ?eventid=630;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=630 : repVal = \<minimum solar elevation (deg)\>
+
+http://astro.met.no/astro/event.pl/?event1Id=600;event2Id=610;event3Id=620;event4Id=630;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT LOCAL DIURNAL CIVIL TWILIGHT START
+ URL: ?eventid=640;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=640 : event found
+DETECT LOCAL DIURNAL CIVIL TWILIGHT STOP
+ URL: ?eventid=650;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=650 : event found
+DETECT LOCAL DIURNAL NAUTICAL TWILIGHT START
+ URL: ?eventid=660;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=660 : event found
+DETECT LOCAL DIURNAL NAUTICAL TWILIGHT STOP
+ URL: ?eventid=670;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=670 : event found
+DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT START
+ URL: ?eventid=680;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=680 : event found
+DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT STOP
+ URL: ?eventid=690;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=690 : event found
+DETECT LOCAL DIURNAL NIGHT START
+ URL: ?eventid=700;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=700 : event found
+DETECT LOCAL DIURNAL NIGHT STOP
+ URL: ?eventid=710;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=710 : event found
+
+http://astro.met.no/astro/event.pl/?event1Id=640;event2Id=650;event3Id=660;event4Id=670;event5Id=680;event6Id=690;event7Id=700;event8Id=710;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT LOCAL DIURNAL SUN AZIMUTH (0=NORTH, 90=EAST)
+ URL: ?eventid=750;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>;eventVal4=\<sun azimuth (deg)\>
+ XML:  Id=750 : event found
+DETECT LOCAL DIURNAL APPARENT SOLAR TIME
+ URL: ?eventid=760;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>;eventVal4=\<apparent solar time (0 to 24)\>
+ XML:  Id=760 : event found
+DETECT LOCAL DIURNAL APPARENT LUNAR TIME
+ URL: ?eventid=770;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>;eventVal4=\<apparent lunar time (0 to 24)\>
+ XML:  Id=770 : event found
+
+http://astro.met.no/astro/event.pl/?event1Id=750;event1Val4=11.1;event2Id=760;event2Val4=12.0;event3Id=770;event3Val4=12.0;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+
+DETECT LOCAL DIURNAL MOON RISE
+ URL: ?eventid=800;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=800 : event found
+DETECT LOCAL DIURNAL MOON SET
+ URL: ?eventid=810;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=810 : event found
+DETECT LOCAL DIURNAL MAXIMUM MOON ELEVATION
+ URL: ?eventid=820;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=820 : repVal = \<maximum moon elevation\>
+DETECT LOCAL DIURNAL MINIMUM MOON ELEVATION
+ URL: ?eventid=830;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=830 : repVal = \<minimum moon elevation\>
+DETECT LOCAL DIURNAL MOON AZIMUTH (0=NORTH, 90=EAST)
+ URL: ?eventid=840;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>;eventVal4=\<moon azimuth (deg)\>
+ XML:  Id=840 : event found
+
+http://astro.met.no/astro/event.pl/?event1Id=800;event2Id=810;event3Id=820;event4Id=830;event5Id=840;event5Val4=90;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+      
+DETECT LOCAL POLAR SUN DAY START
+ URL: ?eventid=900;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=900 : event found
+ XML:  Id=901 : previous sun rise
+DETECT LOCAL POLAR SUN DAY STOP
+ URL: ?eventid=910;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=910 : event found
+ XML:  Id=911 : next sun set
+DETECT LOCAL POLAR SUN NIGHT START
+ URL: ?eventid=920;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=920 : event found
+ XML:  Id=921 : previous sun set
+DETECT LOCAL POLAR SUN NIGHT STOP
+ URL: ?eventid=930;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=930 : event found
+ XML:  Id=931 : next sun rise
+
+http://astro.met.no/astro/event.pl/?event1Id=900;event2Id=910;event3Id=920;event4Id=930;eventVal1=70.0;eventVal2=0.0;eventVal3=0.0;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+ 
+DETECT LOCAL POLAR LUNAR DAY START
+ URL: ?eventid=940;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=940 : event found
+ XML:  Id=941 : previous moon rise
+DETECT LOCAL POLAR LUNAR DAY STOP
+ URL: ?eventid=950;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=950 : event found
+ XML:  Id=951 : next moon set
+DETECT LOCAL POLAR LUNAR NIGHT START
+ URL: ?eventid=960;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=960 : event found
+ XML:  Id=961 : previous moon set
+DETECT LOCAL POLAR LUNAR NIGHT STOP
+ URL: ?eventid=970;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=970 : event found
+ XML:  Id=971 : next moon rise
+ 
+http://astro.met.no/astro/event.pl/?event1Id=940;event2Id=950;event3Id=960;event4Id=970;eventVal1=70.0;eventVal2=0.0;eventVal3=0.0;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+DETECT LOCAL SOLAR ECLIPSE (MINOCC MAXOCC)
+ URL: ?eventid=980;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>;eventVal4=\<minimum occultation (0 to 100)\>;eventVal5=\<maximum occultation (0 to 100)\>
+ XML:  Id=980 : partial solar eclipse starts
+ XML:  Id=981 : total solar eclipse starts
+ XML:  Id=982 : repVal = \<maximum occultation\>
+ XML:  Id=983 : total solar eclipse stops
+ XML:  Id=984 : partial solar eclipse stops
+DETECT LOCAL SOLAR ECLIPSE
+ URL: ?eventid=990;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>
+ XML:  Id=990 : partial solar eclipse starts
+ XML:  Id=991 : total solar eclipse starts
+ XML:  Id=992 : repVal = \<maximum occultation\>
+ XML:  Id=993 : total solar eclipse stops
+ XML:  Id=994 : partial solar eclipse stops
+ 
+http://astro.met.no/astro/event.pl/?event1Id=980;event1Val4=10.0;event1Val5=100.0;event2Id=990;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+
+REPORT LOCAL TC EF SOLAR SYSTEM POSITIONS AT TIME INCREMENT
+ URL: ?eventid=1000;eventVal1=\<latitude of observer (deg)\>;eventVal2=\<longtitude of observer (deg)\>;eventVal3=\<height of observer (deg)\>;eventVal4=\<time increment (days)\>
+ XML:  Id=1000 : repVal = \<sun elevation (deg)\>
+ XML:  Id=1001 : repVal = \<sun azimuth (deg)\>
+ XML:  Id=1002 : repVal = \<sun range (km)\>
+ XML:  Id=1010 : repVal = \<mercury elevation (deg)\>
+ XML:  Id=1011 : repVal = \<mercury azimuth (deg)\>
+ XML:  Id=1012 : repVal = \<mercury range (km)\>
+ XML:  Id=1020 : repVal = \<venus elevation (deg)\>
+ XML:  Id=1021 : repVal = \<venus azimuth (deg)\>
+ XML:  Id=1022 : repVal = \<venus range (km)\>
+ XML:  Id=1030 : repVal = \<moon elevation (deg)\>
+ XML:  Id=1031 : repVal = \<moon azimuth (deg)\>
+ XML:  Id=1032 : repVal = \<moon range (km)\>
+ XML:  Id=1040 : repVal = \<mars elevation (deg)\>
+ XML:  Id=1041 : repVal = \<mars azimuth (deg)\>
+ XML:  Id=1042 : repVal = \<mars range (km)\>
+ XML:  Id=1050 : repVal = \<jupiter elevation (deg)\>
+ XML:  Id=1051 : repVal = \<jupiter azimuth (deg)\>
+ XML:  Id=1052 : repVal = \<jupiter range (km)\>
+ XML:  Id=1060 : repVal = \<saturn elevation (deg)\>
+ XML:  Id=1061 : repVal = \<saturn azimuth (deg)\>
+ XML:  Id=1062 : repVal = \<saturn range (km)\>
+ XML:  Id=1070 : repVal = \<uranus elevation (deg)\>
+ XML:  Id=1071 : repVal = \<uranus azimuth (deg)\>
+ XML:  Id=1072 : repVal = \<uranus range (km)\>
+ XML:  Id=1080 : repVal = \<neptun elevation (deg)\>
+ XML:  Id=1081 : repVal = \<neptun azimuth (deg)\>
+ XML:  Id=1082 : repVal = \<neptun range (km)\>
+ XML:  Id=1090 : repVal = \<pluto elevation (deg)\>
+ XML:  Id=1091 : repVal = \<pluto azimuth (deg)\>
+ XML:  Id=1092 : repVal = \<pluto range (km)\>
+
+http://astro.met.no/astro/event.pl/?eventId=1000;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventVal4=0.1;eventStart=2014-10-10T10:10:10Z;eventSearch=1
+(END)
