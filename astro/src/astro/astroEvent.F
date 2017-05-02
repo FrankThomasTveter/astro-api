@@ -6257,225 +6257,6 @@ C
       if (bdeb)write(*,*)myname,'Done.',irc
       return
       end subroutine reportLLMin
-
-      subroutine reportLLTarget(tval,
-     &     tValCycle,funk,
-     &     lat,lon,hgt,
-     &     tstartJD,tendJD,dtin,secdec,
-     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
-     &     crc250,irc)
-      implicit none
-      real tVal                 ! target value
-      real tValCycle            ! target value cycle (360.0D0 for degrees)
-      real funk                 ! function giving the value
-      external funk             ! 
-      real lat,lon,hgt          ! observer latitude (deg), longtitude (deg), height (not used)
-      real tstartJD           ! start time in Julian day JD
-      real tendJD             ! end time in Julian day JD
-      real dtin                 ! time interval (absolute value)
-      integer secdec            ! number of decimals in seconds output
-      integer eventId           ! event identification
-      character*100 event100     ! search description
-      integer maxrep            ! maximum number of reports
-      integer nrep              ! number of reports so far
-      real repJD(max(1,maxrep)) ! report time in Julian day JD
-      integer repid(max(1,maxrep)) ! report id
-      real repval(max(1,maxrep)) ! report value
-      character*250 rep250(max(1,maxrep)) ! report strings
-      integer pitch             ! 1: rising, -1: falling, 0:any
-      character*250 crc250      ! error description
-      integer irc               ! error return code (0: ok)
-      integer lencrc
-C
-      character*16 myname
-      data myname/'reportLLTarget'/
-C
-      character*250 buff250
-      integer YY1,MM1,DD1,HH1,MI1
-      real sec1,idt,mindt,fact,dt
-      real JD,val,val1,jstop
-      real xJD(3),xval(3),dval(3)
-      logical major,first
-      character*100 fmt100
-      character*30 T30
-      character*16 t16
-      real ndt
-      integer length,lend,lent
-      externale length
-      real diffcycle
-      external diffcycle
-      logical bdeb
-      data bdeb/.false./
-      integer cnt,cntmax
-      parameter (cntmax=10000)
-C
-      if (bdeb)write(*,*)myname,'Entering.',irc
-      lend=length(event100,100,20)
-      JD=tstartJD
-      mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
-      ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
-      dt=abs(tendJD-tstartJD)/ndt
-      dt=sign(max(6.9D-3,abs(dt)),tendJD-tstartJD)
-      if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
-      if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin
-      first=.true.
-      cnt=0
-      do while (cnt.lt.cntmax.and.
-     &     ((dt.gt.0.0D0.and.JD.le.tendJD+dt).or.
-     &     (dt.lt.0.0D0.and.JD.ge.tendJD+dt)))
-         cnt=cnt+1
-         CALL JD2DATE(JD,
-     &        YY1,
-     &        MM1,
-     &        DD1,
-     &        HH1,
-     &        MI1,
-     &        SEC1) 
-         WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
- 888     FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
-C
-C     get new value
-C
-         val=funk(JD,lat,lon,hgt,crc250,irc)
-         if (irc.ne.0) then
-            lencrc=length(crc250,250,10)
-            crc250=crc250(1:lencrc)//' < '//myname//
-     &           ' > Error return from FUNK.'
-            call chop0(crc250,250)
-            return
-         end if
-C
-         if (bdeb) write(*,'(4(X,A),4(X,F16.8))')
-     &        myname,'Step:',T16,event100(1:lend),val,tval,
-     &        dval(1),dval(2)
-C         write(*,*)myname,'JNK:',xval(1),xval(2),val
-C
-C     set boundaries (max/min)
-C
-         if (first.or.major) then
-            xJD(1)=xJD(2)
-            xJD(2)=JD
-            xval(1)=xval(2)
-            xval(2)=val
-         end if
-C
-         dval(1)=diffCycle(xval(1),tval,tValCycle)
-         dval(2)=diffCycle(xval(2),tval,tValCycle)
-         dval(3)=diffCycle(val,tval,tValCycle)
-C     
-C     determine if we are in major/minor loop, and increment time
-C
-         if (first) then
-            first=.false.
-            idt=dt
-            major=.true.        ! we always start in major loop
-         else if (major) then   ! check if we must switch to minor loop
-            major= (pitch.eq.-1.and.dval(2).gt.0.0D0).or.
-     &           (pitch.eq.1.and.dval(1).gt.0.0D0) .or.
-     &           ((dval(1).gt.0.0D0 .and. dval(2).gt.0.0D0).or.
-     &           (dval(1).lt.0.0D0 .and. dval(2).lt.0.0D0)).or.
-     &           (abs(dval(1)-dval(2)).gt.tValCycle*0.75D0)
-
-            if (.not.major) then ! check if we have a cycle change
-            end if
-            if (.not.major) then ! we have just switched to minor loop
-               if (bdeb)write(*,*)myname,'Entered minor loop.',dval(1),
-     &              dval(2),dval(3),idt,xval(1),xval(2),val,tval
-               xJD(3)=xJD(2)
-               xval(3)=xval(2)
-               idt= -0.5D0 * (xJD(2)-xJD(1))
-
-
-            end if
-         else if (abs(idt).lt.mindt) then ! we have completed the minor loop
-            if (abs(dval(1)-dval(2)).lt.tValCycle*0.25D0 ! check if discontinuity-hit
-     &           .or.tValCycle.lt.0.0D0) then ! check if discontinuity-hit
-C     make report
-               if ( (dt.gt.0.0D0.and.
-     &              JD.le.tendJD.and.
-     &              JD.ge.tstartJD).or.
-     &              (dt.lt.0.0D0.and.
-     &              JD.ge.tendJD.and.
-     &              JD.le.tstartJD) ) then
-                  nrep=nrep+1
-                  if (nrep.le.maxrep) then
-                     if (secdec.gt.0) then
-                        write(fmt100,'(A,I2.2,A,I1,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2,F",
-     &                       secdec+1,".",secdec,")"
-                        fact=10.0D0**(real(secdec))
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1),real(int((sec1-int(sec1))*
-     &                       fact))/fact
-                     else
-                        write(fmt100,'(A,I2.2,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2)"
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1)
-                     end if
-                     call chop0(T30,30)
-                     lent=length(T30,30,30)
-                     write(rep250(nrep),'(A,X,A)')T30(1:lent),
-     &                    event100(1:lend)
-                     repJD(nrep)=JD
-                     repid(nrep)=eventid
-                     repval(nrep)=-99999.0D0
-                  end if
-                  if (bdeb)write(*,*)myname,'Ended minor loop.',idt
-               end if
-            else if (bdeb) then
-               write(*,*)myname,'False hit:',dval(1),dval(2),tValCycle
-            end if
-            
-C     reset variables and continue search
-            major=.true.
-            xJD(2)=xJD(3)
-            xval(2)=xval(3)
-            JD=xJD(3)
-            idt=dt
-         else                   ! we are in minor loop
-C            write(*,*)myname,'Minor before:',dval(1),dval(2),dval(3),idt
-            if ((dval(3).gt.0.0D0.and.dval(1).gt.0.0D0).or.
-     &           (dval(3).lt.0.0D0.and.dval(1).lt.0.0D0)) then
-               xJD(1)=xJD(2) ! swap
-               xval(1)=xval(2)
-               dval(1)=dval(2)
-            end if
-            xJD(2)=JD
-            xval(2)=val
-            dval(2)=dval(3)
-            idt= -0.5D0 * (xJD(2)-xJD(1)) ! go back half-a-step
-C            write(*,*)myname,'Minor  after:',dval(1),dval(2),dval(3),idt
-         end if
-C     increment time
-         JD=JD+idt
-      end do
-      if (cnt.eq.cntmax)then
-         write(buff250,*)
-     &        ' < '//myname,' > Too many iterations.'
-         lencrc=length(crc250,250,10)
-         crc250=crc250(1:lencrc)//buff250
-         call chop0(crc250,250)
-         irc=457
-         return
-      end if
-      if (nrep.gt.maxrep.and.maxrep.ne.0) then
-         write(buff250,*)
-     &        ' < '//myname,' > Too many reports.',nrep,maxrep
-         lencrc=length(crc250,250,10)
-         crc250=crc250(1:lencrc)//buff250
-         call chop0(crc250,250)
-         irc=459
-         return
-      end if
-C
-      if (bdeb)write(*,*)myname,'Done.',irc
-      return
-      end subroutine reportLLTarget
-C
       subroutine reportLunarTime(Target,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,secdec,
@@ -6508,7 +6289,7 @@ C
       parameter (targetCycle=24.0D0) ! target value which correponds to 0.0D0
       real dtin                   ! initial time increment
 C
-      dtin=0.1D0
+      dtin=0.05D0
       call chop0(event100,100)
 C
       call reportLLTarget(Target,
@@ -6815,7 +6596,7 @@ C
       real getMoonElevation
       real dtin                 ! initial step length
 C
-      dtin=0.01D0
+      dtin=0.05D0
       call chop0(event100,100)
 C
       call reportLLMax(
@@ -7010,7 +6791,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.01D0
+      dtin=0.05D0
       call reportLLMax(
      &     getSunElevation,
      &     lat,lon,hgt,
@@ -7146,6 +6927,7 @@ C
       integer irc               ! error return code (0=ok)
       integer lencrc
 C
+      logical bbok              ! did we find target
       character*18 myname
       data myname /'reportMercTransit'/
       external getMercRelLon,getMercTransit
@@ -7185,7 +6967,7 @@ C
          xrep=0
          tstartJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getMercRelLon,
-     &        tstartJD,tendJD,dt,secdec,
+     &        tstartJD,tendJD,dt,secdec,bbok,
      &        eventId,event100,maxxrep,xrep,repJD,repid,repval,rep250,
      &        0,
      &        crc250,irc)
@@ -7216,7 +6998,7 @@ C
                call chop0(crc250,250)
                return
             end if
-C            write(*,*) myname,'Rp:',rp,rm,rp.le.rm
+C            !write(*,*) myname,'Rp:',rp,rm,rp.le.rm
             if (Rp.le.Rm) then  ! Mercury eclipses the Sun
                lend=length(event100,100,10)
                dt=10.0D0       ! eclipse starts not more than 10 day earlier
@@ -7228,7 +7010,7 @@ C            write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -7248,7 +7030,7 @@ C            write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -7259,7 +7041,7 @@ C            write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                   call chop0(crc250,250)
                   return
                end if
-C               write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
+C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
             end if
          end if
          if ((dtin.gt.0.0D0.and.tstartJD+0.5*dtin
@@ -7524,7 +7306,7 @@ C
       real getMoonElevation
       real dtin                 ! initial step length
 C
-      dtin=0.01D0
+      dtin=0.05D0
       call chop0(event100,100)
 C
       call reportLLMin(
@@ -7716,7 +7498,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.01D0
+      dtin=0.05D0
       call reportLLMin(
      &     getSunElevation,
      &     lat,lon,hgt,
@@ -7814,7 +7596,7 @@ C
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
       real dtin                   ! initial time increment
 C
-      dtin=0.1D0
+      dtin=0.05D0
       call chop0(event100,100)
 C
       call reportLLTarget(Target,
@@ -7982,7 +7764,7 @@ C
       else
          angNight=angle + refraction ! target polar angle
       end if
-C      write(*,*)myname,'Polar Moon ang:',angDay,angNight,loclat
+C      !write(*,*)myname,'Polar Moon ang:',angDay,angNight,loclat
 C
 C     get moon phase
 C
@@ -8447,10 +8229,12 @@ C
      &        moonPolar,        ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &        crc250,irc)
          if(irc.ne.0) then
-            write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+            lencrc=length(crc250,250,10)
+            crc250=crc250(1:lencrc)//' < '//myname//
+     &           ' > Error return from JPLephEFtoTC.'
+            call chop0(crc250,250)
             return
          end if
-
 C     
          azimuth=moonPolar(3)*DEG
          elevation=moonPolar(2)*DEG
@@ -8697,7 +8481,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.01D0
+      dtin=0.05D0
       call reportLLTarget(Target,
      &     TargetCycle,getMoonUpperElevation,
      &     lat,lon,hgt,
@@ -8903,7 +8687,7 @@ C
       parameter (targetCycle=24.0D0) ! target value which correponds to 0.0D0
       real dtin                   ! initial time increment
 C
-      dtin=0.1D0
+      dtin=0.05D0
       call chop0(event100,100)
 C
       call reportLLTarget(Target,
@@ -9149,7 +8933,10 @@ C
      &           polar,         ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &           crc250,irc)
             if(irc.ne.0) then
-               write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+               lencrc=length(crc250,250,10)
+               crc250=crc250(1:lencrc)//' < '//myname//
+     &              ' > Error return from JPLephEFtoTC.'
+               call chop0(crc250,250)
                return
             end if
 C     
@@ -9269,7 +9056,7 @@ C
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
       real dtin                   ! initial time increment
 C
-      dtin=0.1D0
+      dtin=0.05D0
       call chop0(event100,100)
 C
       call reportLLTarget(Target,
@@ -9319,6 +9106,8 @@ C
 C     
       character*18 myname
       data myname /'reportSunEclipse'/
+C
+      logical bbok              ! did we find target
       external getMoonPhase,getSunEclipse,getSunEclipseOcc,getSunOcc
       real getMoonPhase,getSunEclipse,getSunEclipseOcc,getSunOcc
       real targetCycle
@@ -9366,7 +9155,7 @@ C
          xrep=0
          xJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getMoonPhase,
-     &        tstartJD,tendJD,dt,secdec,
+     &        tstartJD,tendJD,dt,secdec,bbok,
      &        eventId,event100,maxxrep,xrep,repJD,repid,repval,rep250,
      &        0,
      &        crc250,irc)
@@ -9443,7 +9232,7 @@ C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
                xJD=searchLLTarget(Rm, ! find start
      &              xCycle,getSunEclipse,
      &              lat,lon,hgt,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -9454,7 +9243,7 @@ C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
                   call chop0(crc250,250)
                   return
                end if
-C     write(*,*) myname,'Ru:',rp,rm,rp.le.rm
+C     !write(*,*) myname,'Ru:',rp,rm,rp.le.rm
                if (Rp.le.-Rm) then               
 C     search backwards for Rp .eq. -Rm (TOTAL ECLIPSE START)
                   dt=-0.2D0     ! eclipse starts not more than 1 day earlier
@@ -9468,7 +9257,8 @@ C     search backwards for Rp .eq. -Rm (TOTAL ECLIPSE START)
                   xJD=searchLLTarget(-Rm, ! find start
      &                 xCycle,getSunEclipse,
      &                 lat,lon,hgt,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -9524,7 +9314,8 @@ C     search forwards for Ru .eq. -Rm (TOTAL ECLIPSE STOP)
                   xJD=searchLLTarget(-Rm, ! find stop
      &                 xCycle,getSunEclipse,
      &                 lat,lon,hgt,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -9548,7 +9339,8 @@ C     search forwards for Rp .eq. Rm (PARTIAL ECLIPSE STOP)
                xJD=searchLLTarget(Rm, ! find stop
      &              xCycle,getSunEclipse,
      &              lat,lon,hgt,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -9620,7 +9412,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.01D0
+      dtin=0.05D0
       call reportLLTarget(Target,
      &     TargetCycle,getSunElevation,
      &     lat,lon,hgt,
@@ -9734,7 +9526,7 @@ C
          angNight=angle + refraction ! target polar angle
       end if
 C      
-CC      write(*,*)myname,'Polar Sun ang:',angDay,angNight,loclat
+CC      !write(*,*)myname,'Polar Sun ang:',angDay,angNight,loclat
 C
 C     make report
 C
@@ -9887,7 +9679,7 @@ C         nrep=nrep+1
 C         repJD(nrep)=tendJD
 C      end if
 C      do ii=1,rnrep
-C         write(*,*)ii,rep250(ii)(1:60)
+C         !write(*,*)ii,rep250(ii)(1:60)
 C      end do
 C
 C     get list of sun-set
@@ -9918,7 +9710,7 @@ C      end if
          repJD(nrep)=tendJD
       end if
 C      do ii=1,rnrep
-C         write(*,*)ii,irep250(ii)(1:60)
+C         !write(*,*)ii,irep250(ii)(1:60)
 C      end do
 C
 C     do the math....
@@ -10124,7 +9916,10 @@ C
      &        sunPolar,        ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &        crc250,irc)
          if(irc.ne.0) then
-            write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+            lencrc=length(crc250,250,10)
+            crc250=crc250(1:lencrc)//' < '//myname//
+     &           ' > Error return from JPLephEFtoTC.'
+            call chop0(crc250,250)
             return
          end if
 
@@ -10346,7 +10141,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.01D0
+      dtin=0.05D0
       call reportLLTarget(Target,
      &     TargetCycle,getSunUpperElevation,
      &     lat,lon,hgt,
@@ -10361,226 +10156,8 @@ C
          call chop0(crc250,250)
          return
       end if
-C
-C
       return
       end subroutine reportSunUpperElevation
-      subroutine reportTarget(tval,
-     &     tValCycle,funk,
-     &     tstartJD,tendJD,dtin,secdec,
-     &     eventId,event100,
-     &     maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
-     &     crc250,irc)
-      implicit none
-      real tVal
-      real tValCycle
-      real funk
-      external funk
-      real tstartJD
-      real tendJD
-      real dtin
-      integer secdec
-      integer eventId           ! event identification
-      character*100 event100     ! search description
-      integer maxrep
-      integer nrep
-      real repJD(max(1,maxrep))
-      integer repid(max(1,maxrep))
-      real repval(max(1,maxrep))
-      character*250 rep250(max(1,maxrep))
-      integer pitch             ! 1: rising, -1: falling, 0:any
-      character*250 crc250      ! error description
-      integer irc
-      integer lencrc
-C
-      character*12 myname
-      data myname/'reportTarget'/
-C
-      character*250 buff250
-      integer YY1,MM1,DD1,HH1,MI1
-      real sec1,idt,mindt,fact,dt
-      real JD,val,val1,jstop
-      real xJD(3),xval(3),dval(3)
-      logical major,first
-      character*100 fmt100
-      character*30 T30
-      character*16 t16
-      real ndt
-      integer length,lend,lent
-      externale length
-      real diffcycle
-      external diffcycle
-      logical bdeb
-      data bdeb/.false./
-      integer cnt,cntmax
-      parameter (cntmax=10000)
-C
-      if (bdeb)write(*,*)myname,'Entering.',irc
-      lend=length(event100,100,20)
-      JD=tstartJD
-      mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
-      ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
-      dt=abs(tendJD-tstartJD)/ndt
-      dt=sign(max(6.9D-3,abs(dt)),tendJD-tstartJD)
-      if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
-      if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin
-      first=.true.
-      cnt=0
-      do while (cnt.lt.cntmax.and.
-     &     ((dt.gt.0.0D0.and.JD.le.tendJD+dt).or.
-     &     (dt.lt.0.0D0.and.JD.ge.tendJD+dt)))
-         cnt=cnt+1
-         CALL JD2DATE(JD,
-     &        YY1,
-     &        MM1,
-     &        DD1,
-     &        HH1,
-     &        MI1,
-     &        SEC1) 
-         WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
- 888     FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
-C
-C     get new value
-C
-         val=funk(JD,crc250,irc)
-         if (irc.ne.0) then
-            lencrc=length(crc250,250,10)
-            crc250=crc250(1:lencrc)//' < '//myname//
-     &           ' > Error return from FUNK.'
-            call chop0(crc250,250)
-            return
-         end if
-C
-         if (bdeb) write(*,'(4(X,A),4(X,F16.8))')
-     &        myname,'Step:',T16,event100(1:lend),val,tval,
-     &        dval(1),dval(2)
-C         write(*,*)myname,'JNK:',xval(1),xval(2),val
-C
-C     set boundaries (max/min)
-C
-         if (first.or.major) then
-            xJD(1)=xJD(2)
-            xJD(2)=JD
-            xval(1)=xval(2)
-            xval(2)=val
-         end if
-C
-         dval(1)=diffCycle(xval(1),tval,tValCycle)
-         dval(2)=diffCycle(xval(2),tval,tValCycle)
-         dval(3)=diffCycle(val,tval,tValCycle)
-C     
-C     determine if we are in major/minor loop, and increment time
-C
-         if (first) then
-            first=.false.
-            idt=dt
-            major=.true.        ! we always start in major loop
-         else if (major) then   ! check if we must switch to minor loop
-            major= (pitch.eq.-1.and.dval(2).gt.0.0D0).or.
-     &           (pitch.eq.1.and.dval(1).gt.0.0D0) .or.
-     &           ((dval(1).gt.0.0D0 .and. dval(2).gt.0.0D0).or.
-     &           (dval(1).lt.0.0D0 .and. dval(2).lt.0.0D0)).or.
-     &           (abs(dval(1)-dval(2)).gt.tValCycle*0.75D0)
-
-            if (.not.major) then ! check if we have a cycle change
-            end if
-            if (.not.major) then ! we have just switched to minor loop
-               if (bdeb)write(*,*)myname,'Entered minor loop.',dval(1),
-     &              dval(2),dval(3),idt,xval(1),xval(2),val,tval
-               xJD(3)=xJD(2)
-               xval(3)=xval(2)
-               idt= -0.5D0 * (xJD(2)-xJD(1))
-
-
-            end if
-         else if (abs(idt).lt.mindt) then ! we have completed the minor loop
-            if (abs(dval(1)-dval(2)).lt.tValCycle*0.25D0 ! check if discontinuity-hit
-     &           .or.tValCycle.lt.0.0D0) then ! check if discontinuity-hit
-C     make report
-               if ( (dt.gt.0.0D0.and.
-     &              JD.le.tendJD.and.
-     &              JD.ge.tstartJD).or.
-     &              (dt.lt.0.0D0.and.
-     &              JD.ge.tendJD.and.
-     &              JD.le.tstartJD) ) then
-                  nrep=nrep+1
-                  if (nrep.le.maxrep) then
-                     if (secdec.gt.0) then
-                        write(fmt100,'(A,I2.2,A,I1,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2,F",
-     &                       secdec+1,".",secdec,")"
-                        fact=10.0D0**(real(secdec))
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1),real(int((sec1-int(sec1))*
-     &                       fact))/fact
-                     else
-                        write(fmt100,'(A,I2.2,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2)"
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1)
-                     end if
-                     call chop0(T30,30)
-                     lent=length(T30,30,30)
-                     write(rep250(nrep),'(A,X,A)')T30(1:lent),
-     &                    event100(1:lend)
-                     repJD(nrep)=JD
-                     repid(nrep)=eventId
-                     repval(nrep)=-99999.0D0
-                     if (bdeb)write(*,*)myname,'Ended minor loop.',idt
-                  end if
-               end if
-            else if (bdeb) then
-               write(*,*)myname,'False hit:',dval(1),dval(2),tValCycle
-            end if
-            
-C     reset variables and continue search
-            major=.true.
-            xJD(2)=xJD(3)
-            xval(2)=xval(3)
-            JD=xJD(3)
-            idt=dt
-         else                   ! we are in minor loop
-C            write(*,*)myname,'Minor before:',dval(1),dval(2),dval(3),idt
-            if ((dval(3).gt.0.0D0.and.dval(1).gt.0.0D0).or.
-     &           (dval(3).lt.0.0D0.and.dval(1).lt.0.0D0)) then
-               xJD(1)=xJD(2) ! swap
-               xval(1)=xval(2)
-               dval(1)=dval(2)
-            end if
-            xJD(2)=JD
-            xval(2)=val
-            dval(2)=dval(3)
-            idt= -0.5D0 * (xJD(2)-xJD(1)) ! go back half-a-step
-C            write(*,*)myname,'Minor  after:',dval(1),dval(2),dval(3),idt
-         end if
-C     increment time
-         JD=JD+idt
-      end do
-      if (cnt.eq.cntmax)then
-         write(buff250,*)
-     &        ' < '//myname,' > Too many iterations.'
-         lencrc=length(crc250,250,10)
-         crc250=crc250(1:lencrc)//buff250
-         call chop0(crc250,250)
-         irc=457
-         return
-      end if
-      if (nrep.gt.maxrep.and.maxrep.ne.0) then
-         write(buff250,*)
-     &        ' < '//myname,' > Too many reports.',nrep,maxrep
-         lencrc=length(crc250,250,10)
-         crc250=crc250(1:lencrc)//buff250
-         call chop0(crc250,250)
-         irc=465
-         return
-      end if
-C
-      if (bdeb)write(*,*)myname,'Done.',irc
-      return
-      end subroutine reportTarget
 C
       subroutine reportUmbra(
      &     tstartJDin,tendJDin,secdec,
@@ -10611,6 +10188,8 @@ C
 C     
       character*18 myname
       data myname /'reportUmbra'/
+C
+      logical bbok              ! did we find target
       external getMoonPhase,getUmbra,getPenUmbra,getUmbraOcc,getMoonOcc
       real getMoonPhase,getUmbra,getPenUmbra,getUmbraOcc,getMoonOcc
       real targetCycle
@@ -10653,7 +10232,7 @@ C
          xrep=0
          tstartJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getMoonPhase,
-     &        tstartJD,tendJD,dt,secdec,
+     &        tstartJD,tendJD,dt,secdec,bbok,
      &        eventId,event100,maxxrep,xrep,repJD,repid,repval,rep250,
      &        0,
      &        crc250,irc)
@@ -10664,7 +10243,7 @@ C
             call chop0(crc250,250)
             return
          end if
-         if (xrep.gt.0) then    ! found a match, search backwards for Umbra entry
+         if (bbok) then    ! found a match, search backwards for Umbra entry
 C            CALL JD2DATE(tstartJD,
 C     &           YY1,
 C     &           MM1,
@@ -10673,7 +10252,7 @@ C     &           HH1,
 C     &           MI1,
 C     &           SEC1) 
 C            WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
-C            write(*,*)myname,'Full moon:',t16
+C            !write(*,*)myname,'Full moon:',t16
             maxxrep=0
             xrep=0
             tstartJD=searchMin( ! only get time of 
@@ -10707,7 +10286,7 @@ C            write(*,*)myname,'Full moon:',t16
      &           SEC1) 
             WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
  888        FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
-C     write(*,*)myname,'Umbra:',t16, rp,rm,proceed
+C     !write(*,*)myname,'Umbra:',t16, rp,rm,proceed
             if (proceed) then
                Ru=getUmbra(tstartJD,crc250,irc) ! distance between Moon center and earth-penumbra
                occ=getUmbraOcc()
@@ -10727,7 +10306,8 @@ C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getPenumbra,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -10739,7 +10319,7 @@ C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
                   return
                end if
                
-C     write(*,*) myname,'Ru:',rp,rm,rp.le.rm
+C     !write(*,*) myname,'Ru:',rp,rm,rp.le.rm
                if (Ru.le.Rm) then               
 C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
                   dt=-0.2D0     ! eclipse starts not more than 1 day earlier
@@ -10753,7 +10333,8 @@ C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
                   dt=dt*0.1D0
                   xJD=searchTarget(Rm, ! find start
      &                 xCycle,getUmbra,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -10778,7 +10359,8 @@ C     search backwards for Ru .eq. -Rm (UMBRA TOTAL START)
                   dt=dt*0.1D0
                   xJD=searchTarget(-Rm, ! find start
      &                 xCycle,getUmbra,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -10835,7 +10417,8 @@ C     search forwards for Ru .eq. -Rm (UMBRA TOTAL STOP)
                   dt=dt*0.1D0
                   xJD=searchTarget(-Rm, ! find stop
      &                 xCycle,getUmbra,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -10860,7 +10443,8 @@ C     search forwards for Ru .eq. Rm (UMBRA PARTIAL STOP)
                   dt=dt*0.1D0
                   xJD=searchTarget(Rm, ! find stop
      &                 xCycle,getUmbra,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -10871,7 +10455,7 @@ C     search forwards for Ru .eq. Rm (UMBRA PARTIAL STOP)
                      call chop0(crc250,250)
                      return
                   end if
-C     write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
+C     !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
                end if
 C     search forwards for Rp .eq. -Rm (PENUMBRA TOTAL STOP)
                dt=0.2D0         ! eclipse stops not more than 1 day later
@@ -10885,7 +10469,8 @@ C     search forwards for Rp .eq. -Rm (PENUMBRA TOTAL STOP)
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find stop
      &              xCycle,getPenumbra,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -10994,6 +10579,8 @@ C
 C
       character*20 myname
       data myname /'reportVenusTransit'/
+C
+      logical bbok              ! did we find target
       external getVenusRelLon,getVenusTransit
       real targetCycle,getVenusRelLon,getVenusTransit
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -11032,7 +10619,7 @@ C
          xrep=0
          tstartJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getVenusRelLon,
-     &        tstartJD,tendJD,dt,secdec,
+     &        tstartJD,tendJD,dt,secdec,bbok,
      &        eventId,event100,maxxrep,xrep,repJD,repid,repval,rep250,
      &        0,
      &        crc250,irc)
@@ -11058,7 +10645,7 @@ C
 
             Rp=getVenusTransit(tstartJD,crc250,irc) ! distance between Venus and earth-sun cone
 
-C            write(*,*) myname,'Rp:',rp,rm,rp.le.rm
+C            !write(*,*) myname,'Rp:',rp,rm,rp.le.rm
             if (Rp.le.Rm) then  ! Venus eclipses the Sun
                lend=length(event100,100,10)
                dt=10.0D0       ! eclipse starts not more than 10 day earlier
@@ -11070,7 +10657,8 @@ C            write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getVenusTransit,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -11090,7 +10678,8 @@ C            write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getVenusTransit,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -11101,7 +10690,7 @@ C            write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                   call chop0(crc250,250)
                   return
                end if
-C               write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
+C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
             end if
          end if
          if ((dtin.gt.0.0D0.and.tstartJD+0.5*dtin
@@ -11151,6 +10740,8 @@ C
 C
       character*18 myname
       data myname /'searchJupiterLon'/
+C
+      logical bbok              ! did we find target
       external getJupiterLon
       real targetCycle,getJupiterLon
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -11168,7 +10759,7 @@ C
 C
       searchJupiterLon=searchTarget(Target,
      &     TargetCycle,getJupiterLon,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -11201,7 +10792,7 @@ C
       real dtin                 ! time interval (absolute value)
       integer secdec            ! number of decimals in seconds output
       integer eventId           ! event identification
-      character*100 event100     ! search description
+      character*100 event100    ! search description
       integer maxrep            ! maximum number of reports
       integer nrep              ! number of reports so far
       real repJD(max(1,maxrep)) ! report time in Julian day JD
@@ -11219,7 +10810,7 @@ C
       integer YY1,MM1,DD1,HH1,MI1
       real sec1,fact,dt
       real JD,val,val1,maxval,tol
-      parameter (tol=1.0D-6)
+      parameter (tol=1.0D-7)
       real xJD(3),xval(3),xa,xb,xc
       character*100 fmt100
       character*30 T30
@@ -11270,7 +10861,7 @@ C
             return
          end if
 C
-         if (bdeb) write(*,'(X,A,A,A,F10.3)')
+         if (bdeb)write(*,'(X,A,A,A,F10.3)')
      &        myname,T16,'Funk:',val
 C     need 3 points before we can check for maximum
          xJD(1)=xJD(2)
@@ -11305,33 +10896,35 @@ C     need 3 points before we can check for maximum
      &                 HH1,
      &                 MI1,
      &                 SEC1) 
-                  nrep=nrep+1
-                  if (nrep.le.maxrep) then ! make report
-                     if (secdec.gt.0) then
-                        write(fmt100,'(A,I2.2,A,I1,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2,F",
-     &                       secdec+1,".",secdec,")"
-                        fact=10.0D0**(real(secdec))
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1),real(int((sec1-int(sec1))*fact))
-     &                       /fact
-                     else
-                        write(fmt100,'(A,I2.2,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2)"
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1)
+                  if (maxrep.ne.0) then
+                     nrep=nrep+1
+                     if (nrep.le.maxrep) then ! make report
+                        if (secdec.gt.0) then
+                           write(fmt100,'(A,I2.2,A,I1,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2,F",
+     &                          secdec+1,".",secdec,")"
+                           fact=10.0D0**(real(secdec))
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1),real(int((sec1-
+     &                          int(sec1))*fact))/fact
+                        else
+                           write(fmt100,'(A,I2.2,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2)"
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1)
+                        end if
+                        call chop0(T30,30)
+                        lent=length(T30,30,30)
+                        write(rep250(nrep),'(A,X,A," (",F17.5,")")')
+     &                       T30(1:lent),event100(1:lend),maxval
+                        repJD(nrep)=JD
+                        repid(nrep)=eventId
+                        repval(nrep)=maxval
                      end if
-                     call chop0(T30,30)
-                     lent=length(T30,30,30)
-                     write(rep250(nrep),'(A,X,A," (",F17.5,")")')
-     &                    T30(1:lent),event100(1:lend),maxval
-                     repJD(nrep)=JD
-                     repid(nrep)=eventId
-                     repval(nrep)=maxval
-                     if (bdeb)write(*,*)myname,'Ended minor loop.'
                   end if
+                  if (bdeb)write(*,*)myname,'Ended minor loop.'
                   searchLLMax=JD
                   bdone=.true.
                end if
@@ -11349,7 +10942,7 @@ C     need 3 points before we can check for maximum
          irc=457
          return
       end if
-      if (nrep.eq.inrep) then ! no local minimum, check end points
+      if (maxrep.ne.0.and.nrep.eq.inrep) then ! no local minimum, check end points
          vals=funk(tstartJD,lat,lon,hgt,crc250,irc)
          if (irc.ne.0) then
             lencrc=length(crc250,250,10)
@@ -11580,7 +11173,7 @@ C
             call chop0(crc250,250)
             return
          end if
-         if (bdeb) write(*,'(X,A,A,A,F10.3)')
+         if (bdeb)write(*,'(X,A,A,A,F10.3)')
      &        myname,T16,'Funk:',val
 C     need 3 points before we can check for maximum
          xJD(1)=xJD(2)
@@ -11615,32 +11208,34 @@ C     need 3 points before we can check for maximum
      &                 HH1,
      &                 MI1,
      &                 SEC1) 
-                  nrep=nrep+1
-                  if (nrep.le.maxrep) then ! make report
-                     if (secdec.gt.0) then
-                        write(fmt100,'(A,I2.2,A,I1,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2,F",
-     &                       secdec+1,".",secdec,")"
-                        fact=10.0D0**(real(secdec))
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1),real(int((sec1-int(sec1))*fact))
-     &                       /fact
-                     else
-                        write(fmt100,'(A,I2.2,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2)"
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1)
+                  if (maxrep.ne.0) then
+                     nrep=nrep+1
+                     if (nrep.le.maxrep) then ! make report
+                        if (secdec.gt.0) then
+                           write(fmt100,'(A,I2.2,A,I1,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2,F",
+     &                          secdec+1,".",secdec,")"
+                           fact=10.0D0**(real(secdec))
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1),real(int((sec1-
+     &                          int(sec1))*fact))/fact
+                        else
+                           write(fmt100,'(A,I2.2,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2)"
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1)
+                        end if
+                        call chop0(T30,30)
+                        lent=length(T30,30,30)
+                        write(rep250(nrep),'(A,X,A," (",F17.5,")")')
+     &                       T30(1:lent),event100(1:lend),minval
+                        repJD(nrep)=JD
+                        repid(nrep)=eventId
+                        repval(nrep)=minval
+                        if (bdeb)write(*,*)myname,'Ended minor loop.'
                      end if
-                     call chop0(T30,30)
-                     lent=length(T30,30,30)
-                     write(rep250(nrep),'(A,X,A," (",F17.5,")")')
-     &                    T30(1:lent),event100(1:lend),minval
-                     repJD(nrep)=JD
-                     repid(nrep)=eventId
-                     repval(nrep)=minval
-                     if (bdeb)write(*,*)myname,'Ended minor loop.'
                   end if
                   searchLLMin=JD
                   bdone=.true.
@@ -11659,7 +11254,7 @@ C     need 3 points before we can check for maximum
          irc=457
          return
       end if
-      if (nrep.eq.inrep) then ! no local minimum, check end points
+      if (maxrep.ne.0.and.nrep.eq.inrep) then ! no local minimum, check end points
          vals=funk(tstartJD,lat,lon,hgt,crc250,irc)
          if (irc.ne.0) then
             lencrc=length(crc250,250,10)
@@ -11805,7 +11400,7 @@ C     Parameters: The golden ratios.
       return
       END function goldenLLMin
 C
-      real function searchLLTarget(tval,
+      subroutine reportLLTarget(tval,
      &     tValCycle,funk,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
@@ -11820,12 +11415,118 @@ C
       real lat                  ! observer latitude (deg)
       real lon                  ! observer longtitude (deg)
       real hgt                  ! observer height (not used)
-      real tstartJD           ! start time in Julian day JD
-      real tendJD             ! end time in Julian day JD
+      real tstartJD             ! start time in Julian day JD
+      real tendJD               ! end time in Julian day JD
       real dtin                 ! time interval (absolute value)
       integer secdec            ! number of decimals in seconds output
       integer eventId           ! event identification
-      character*100 event100     ! search description
+      character*100 event100    ! search description
+      integer maxrep            ! maximum number of reports
+      integer nrep              ! number of reports so far
+      real repJD(max(1,maxrep)) ! report time in Julian day JD
+      integer repid(max(1,maxrep)) ! report time in Julian day JD
+      real repval(max(1,maxrep)) ! report time in Julian day JD
+      character*250 rep250(max(1,maxrep)) ! report strings
+      integer pitch             ! 1: rising, -1: falling, 0:any
+      character*250 crc250      ! error description
+      integer irc               ! error return code (0: ok)
+      integer lencrc
+      real buff
+      character*16 myname
+      data myname/'reportLLTarget'/
+C
+      logical bbok              ! did we find target
+      buff = XsearchLLTarget(tval,
+     &     tValCycle,funk,
+     &     lat,lon,hgt,
+     &     tstartJD,tendJD,dtin,secdec,.false.,bbok, ! report all events
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from xsearchLLTarget.'
+         call chop0(crc250,250)
+         return
+      end if
+      return
+      end subroutine reportLLTarget
+C
+      real function searchLLTarget(tval,
+     &     tValCycle,funk,
+     &     lat,lon,hgt,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      implicit none
+      real tVal                 ! target value
+      real tValCycle            ! target value cycle (360.0D0 for degrees)
+      real funk                 ! function giving the value
+      external funk
+      real lat                  ! observer latitude (deg)
+      real lon                  ! observer longtitude (deg)
+      real hgt                  ! observer height (not used)
+      real tstartJD             ! start time in Julian day JD
+      real tendJD               ! end time in Julian day JD
+      real dtin                 ! time interval (absolute value)
+      integer secdec            ! number of decimals in seconds output
+      logical  bbok             ! did we find target?
+      integer eventId           ! event identification
+      character*100 event100    ! search description
+      integer maxrep            ! maximum number of reports
+      integer nrep              ! number of reports so far
+      real repJD(max(1,maxrep)) ! report time in Julian day JD
+      integer repid(max(1,maxrep)) ! report time in Julian day JD
+      real repval(max(1,maxrep)) ! report time in Julian day JD
+      character*250 rep250(max(1,maxrep)) ! report strings
+      integer pitch             ! 1: rising, -1: falling, 0:any
+      character*250 crc250      ! error description
+      integer irc               ! error return code (0: ok)
+      integer lencrc
+      character*16 myname
+      data myname/'searchLLTarget'/
+      searchLLtarget = XsearchLLTarget(tval,
+     &     tValCycle,funk,
+     &     lat,lon,hgt,
+     &     tstartJD,tendJD,dtin,secdec,.true.,bbok,
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from xsearchLLTarget.'
+         call chop0(crc250,250)
+         return
+      end if
+      return
+      end function searchLLTarget
+C
+      real function XsearchLLTarget(tval,
+     &     tValCycle,funk,
+     &     lat,lon,hgt,
+     &     tstartJD,tendJD,dtin,secdec,bfirst,bbok,
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      implicit none
+      real tVal                 ! target value
+      real tValCycle            ! target value cycle (360.0D0 for degrees)
+      real funk                 ! function giving the value
+      external funk
+      real lat                  ! observer latitude (deg)
+      real lon                  ! observer longtitude (deg)
+      real hgt                  ! observer height (not used)
+      real tstartJD             ! start time in Julian day JD
+      real tendJD               ! end time in Julian day JD
+      real dtin                 ! time interval (absolute value)
+      integer secdec            ! number of decimals in seconds output
+      logical bfirst            ! only report first event
+      logical bbok              ! did we find target?
+      integer eventId           ! event identification
+      character*100 event100    ! search description
       integer maxrep            ! maximum number of reports
       integer nrep              ! number of reports so far
       real repJD(max(1,maxrep)) ! report time in Julian day JD
@@ -11837,56 +11538,63 @@ C
       integer irc               ! error return code (0: ok)
       integer lencrc
 C     
-      character*14 myname
-      data myname/'searchLLTarget'/
+      character*16 myname
+      data myname/'xsearchLLTarget'/
 C
       character*250 buff250
       integer YY1,MM1,DD1,HH1,MI1
       real sec1,idt,mindt,fact,dt
-      real JD,val,val1,jstop
-      real xJD(3),xval(3),dval(3)
-      logical major,first
+      real JD,TJD,val,val1,jstop
+      real xJD(0:5),xval(0:5),dval(0:5)! 0+4=max/min-possible, 1+2+3=actual, 5=max/min-actual
       character*100 fmt100
       character*30 T30
-      character*16 t16
+      character*22 t22
+      logical up(0:5),dn(0:5),zero(0:5),maxpoint,minpoint,grayzone
       real ndt
       integer length,lend,lent
       externale length
       real diffcycle
       external diffcycle
-      logical bdeb,bdone
-      data bdeb/.false./
-      integer cnt,cntmax
+      logical bdone,bok
+C      logical bdeb
+C      data bdeb/.true./
+      integer tcnt,scnt,cntmax
       parameter (cntmax=10000)
+      logical forward
+      real eps
+      parameter (eps = 2.0d0/86400.0d0) ! 2 seconds
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
+      bbok=.false.
       lend=length(event100,100,20)
+C
+      bok=.false.
+      xsearchLLTarget=tstartJD
+C      
+      forward=tendJD.gt.tstartJD
       JD=tstartJD
-      searchLLTarget=tstartJD
       mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
       ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
-      dt=abs(tendJD-tstartJD)/ndt
-      dt=sign(max(6.9D-3,abs(dt)),tendJD-tstartJD)
+      idt=(tendJD-tstartJD)/ndt
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin
-      searchLLTarget=tendJD
-      first=.true.
+C
       bdone=.false.
-      cnt=0
-      do while (cnt.lt.cntmax.and.
-     &     (.not.bdone.and.(
-     &     (dt.gt.0.0D0.and.JD.le.tendJD).or.
-     &     (dt.lt.0.0D0.and.JD.ge.tendJD))))
-         cnt=cnt+1
-         CALL JD2DATE(JD,
-     &        YY1,
-     &        MM1,
-     &        DD1,
-     &        HH1,
-     &        MI1,
-     &        SEC1) 
-         WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
- 888     FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
+C     in case we are starting/stopping at a maximum/minimum value...
+      tcnt=-2 ! add 2 steps, 1 before start, 1 after stop
+      JD=JD-idt
+C
+      scnt=0
+      bdone=(tcnt.gt.cntmax.or.tcnt.gt.ndt)
+      do while (.not.bdone)
+         tcnt=tcnt+1 ! total count
+         scnt=scnt+1 ! spinup count
+C
+C     get current date
+C
+         CALL JD2DATE(JD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+         WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+ 999     FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2,':',F5.2) ! 22
 C
 C     get new value
 C
@@ -11899,107 +11607,322 @@ C
             return
          end if
 C
-         if (bdeb)write(*,'(4(X,A),2(X,F20.8))')
-     &        myname,'Step:',T16,event100(1:lend),val,tval
-C         write(*,*)myname,'JNK:',xval(1),xval(2),val,val1
+C     set history...
 C
-C     set boundaries (max/min)
-C
-         if (first.or.major) then
+         if (scnt.eq.1) then
+            xJD(0)=JD
+            xJD(1)=JD
+            xJD(2)=JD
+            xJD(3)=JD
+            xJD(4)=JD
+            xval(0)=val
+            xval(1)=val
+            xval(2)=val
+            xval(3)=val
+            xval(4)=val
+         else
+            xJD(0)=xJD(2)
             xJD(1)=xJD(2)
-            xJD(2)=JD
-            xval(1)=xval(2)
-            xval(2)=val
-         end if
-C
-         dval(1)=diffCycle(xval(1),tval,tValCycle)
-         dval(2)=diffCycle(xval(2),tval,tValCycle)
-         dval(3)=diffCycle(val,tval,tValCycle)
-C     
-C     determine if we are in major/minor loop, and increment time
-C
-         if (first) then
-            first=.false.
-            idt=dt
-            major=.true.        ! we always start in major loop
-         else if (major) then   ! check if we must switch to minor loop
-            major= (pitch.eq.-1.and.dval(2).gt.0.0D0).or.
-     &           (pitch.eq.1.and.dval(1).gt.0.0D0) .or.
-     &           ((dval(1).gt.0.0D0 .and. dval(2).gt.0.0D0).or.
-     &           (dval(1).lt.0.0D0 .and. dval(2).lt.0.0D0)).or.
-     &           (tvalcycle.gt.0.0D0.and.
-     &           abs(dval(1)-dval(2)).gt.tValCycle*0.75D0)
-
-            if (.not.major) then ! check if we have a cycle change
-            end if
-            if (.not.major) then ! we have just switched to minor loop
-               if (bdeb)write(*,*)myname,'Entered minor loop.',dval(1),
-     &              dval(2),dval(3),idt,xval(1),xval(2),val,tval
-               xJD(3)=xJD(2)
-               xval(3)=xval(2)
-               idt= -0.5D0 * (xJD(2)-xJD(1))
-
-
-            end if
-         else if (abs(idt).lt.mindt) then ! we have completed the minor loop
-            if (abs(dval(1)-dval(2)).lt.tValCycle*0.25D0 ! check if discontinuity-hit
-     &           .or.tValCycle.lt.0.0D0) then
-               nrep=nrep+1
-               if (maxrep.ne.0) then ! make report
-                  if (nrep.le.maxrep) then
-                     if (secdec.gt.0) then
-                        write(fmt100,'(A,I2.2,A,I1,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2,F",
-     &                       secdec+1,".",secdec,")"
-                        fact=10.0D0**(real(secdec))
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1),real(int((sec1-int(sec1))
-     &                       *fact))/fact
-                     else
-                        write(fmt100,'(A,I2.2,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2)"
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1)
-                     end if
-                     call chop0(T30,30)
-                     lent=length(T30,30,30)
-                     write(rep250(nrep),'(A,X,A)')T30(1:lent),
-     &                    event100(1:lend)
-                     repJD(nrep)=JD
-                     repid(nrep)=eventId
-                     repval(nrep)=-99999.0D0
-                     if (bdeb)write(*,*)myname,'Ended minor loop.',idt
-                  end if
-               end if
-               searchLLTarget=JD
-               bdone=.true.
-            end if
-C     reset variables
-            major=.true.
             xJD(2)=xJD(3)
+            xJD(3)=JD
+            xJD(4)=JD
+            xval(0)=2.0D0*xval(3)-val
+            xval(1)=xval(2)
             xval(2)=xval(3)
-            JD=xJD(3)
-            idt=dt
-         else                   ! we are in minor loop
-C            write(*,*)myname,'Minor before:',dval(1),dval(2),dval(3),idt
-            if ((dval(3).gt.0.0D0.and.dval(1).gt.0.0D0).or.
-     &           (dval(3).lt.0.0D0.and.dval(1).lt.0.0D0)) then
-               xJD(1)=xJD(2) ! swap
-               xval(1)=xval(2)
-               dval(1)=dval(2)
-            end if
-            xJD(2)=JD
-            xval(2)=val
-            dval(2)=dval(3)
-            idt= -0.5D0 * (xJD(2)-xJD(1)) ! go back half-a-step
-C            write(*,*)myname,'Minor  after:',dval(1),dval(2),dval(3),idt
+            xval(3)=val
+            xval(4)=2.0D0*xval(2)-xval(1)
          end if
-C     increment time
+C
+         if (scnt.ge.3) then
+            bok=.false.
+            dval(0)=diffCycle(xval(0),tval,tValCycle)
+            dval(1)=diffCycle(xval(1),tval,tValCycle)
+            dval(2)=diffCycle(xval(2),tval,tValCycle)
+            dval(3)=diffCycle(xval(3),tval,tValCycle)
+            dval(4)=diffCycle(xval(4),tval,tValCycle)
+C     
+            if (bdeb)write(*,'(4(X,A),10(X,F10.3))')
+     &           myname,'Step:',T22,event100(1:lend),val,dval
+C     !write(*,*)myname,'JNK:',xval(1),xval(2),val,val1
+C     
+C     
+C     determine if we must do a fine search
+C     
+            do ii=0,4
+               if (dval(ii).gt.0.0D0) then
+                  up(ii)=.true.
+                  dn(ii)=.false.
+                  zero(ii)=.false.
+               else if (dval(ii).lt.0.0D0) then
+                  up(ii)=.false.
+                  dn(ii)=.true.
+                  zero(ii)=.false.
+               else
+                  up(ii)=.false.
+                  dn(ii)=.false.
+                  zero(ii)=.true.
+               end if
+            end do
+C     check if local max/min and in "grayzone" (ie. crossing is possible)
+            maxpoint = dval(2).ge.dval(1).and.dval(2).gt.dval(3)
+            minpoint = dval(2).le.dval(1).and.dval(2).lt.dval(3)
+            grayzone= ((dn(0).or.dn(1).or.zero(0).or.zero(1)).and.
+     &           (up(3).or.up(4))).or.(
+     &           (up(0).or.up(1).or.zero(0).or.zero(1)).and.
+     &           (dn(3).or.dn(4)))
+C     
+            if (pitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
+               if (up(2)) then
+                  TJD=dsearchLLTarget(tval,
+     &                 tValCycle,funk,
+     &                 lat,lon,hgt,
+     &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
+     &                 eventId,event100,maxrep,nrep,
+     &                 repJD,repid,repval,rep250,
+     &                 pitch,
+     &                 crc250,irc)
+               else
+                  TJD=dsearchLLTarget(tval,
+     &                 tValCycle,funk,
+     &                 lat,lon,hgt,
+     &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
+     &                 eventId,event100,maxrep,nrep,
+     &                 repJD,repid,repval,rep250,
+     &                 pitch,
+     &                 crc250,irc)
+               end if
+               if (irc.ne.0) then
+                  lencrc=length(crc250,250,10)
+                  crc250=crc250(1:lencrc)//' < '//myname//
+     &                 ' > Error return from dsearchLLTarget.'
+                  call chop0(crc250,250)
+                  return
+               end if
+               scnt=1           ! only use last point in remainding search...
+            else if (pitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
+               if (dval(2).le.0.0D0) then
+                  TJD=dsearchLLTarget(tval,
+     &                 tValCycle,funk,
+     &                 lat,lon,hgt,
+     &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
+     &                 eventId,event100,maxrep,nrep,
+     &                 repJD,repid,repval,rep250,
+     &                 pitch,
+     &                 crc250,irc)
+               else
+                  TJD=dsearchLLTarget(tval,
+     &                 tValCycle,funk,
+     &                 lat,lon,hgt,
+     &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
+     &                 eventId,event100,maxrep,nrep,
+     &                 repJD,repid,repval,rep250,
+     &                 pitch,
+     &                 crc250,irc)
+               end if
+               if (irc.ne.0) then
+                  lencrc=length(crc250,250,10)
+                  crc250=crc250(1:lencrc)//' < '//myname//
+     &                 ' > Error return from dsearchLLTarget.'
+                  call chop0(crc250,250)
+                  return
+               end if
+               scnt=1           ! only use last point in remainding search...
+            else if (maxpoint.and.grayzone.and.(dn(1).or.dn(3))) then
+               if(bdeb)write(*,*) 'Gray zone maxpoint:',dn
+C     find max-point...
+               xJD(5)=searchLLMax(
+     &              funk,
+     &              lat,lon,hgt,
+     &              xJD(1),xJD(3),dtin*0.1D0,secdec,
+     &              eventId,event100,0,nrep,repJD,repid,repval,rep250,
+     &              crc250,irc)
+               xval(5)=funk(xJD(5),lat,lon,hgt,crc250,irc)
+               if (irc.ne.0) then
+                  lencrc=length(crc250,250,10)
+                  crc250=crc250(1:lencrc)//' < '//myname//
+     &                 ' > Error return from FUNK.'
+                  call chop0(crc250,250)
+                  return
+               end if
+               dval(5)=diffCycle(xval(5),tval,tValCycle)
+               if(bdeb)write(*,*)myname,'Local max:',xjd(5),xval(5),
+     &              tval,dval(5)
+               if (dval(5).gt.0.0D0) then
+                  up(5)=.true.
+                  dn(5)=.false.
+                  zero(5)=.false.
+               else if (dval(5).lt.0.0D0) then
+                  up(5)=.false.
+                  dn(5)=.true.
+                  zero(5)=.false.
+               else
+                  up(5)=.false.
+                  dn(5)=.false.
+                  zero(5)=.true.
+               end if
+C     do fine search...
+               if (up(5).or.zero(5)) then ! possible match
+                  if (pitch.ge.0) then
+                     TJD=dsearchLLTarget(tval,
+     &                    tValCycle,funk,
+     &                    lat,lon,hgt,
+     &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
+     &                    eventId,event100,maxrep,nrep,
+     &                    repJD,repid,repval,rep250,
+     &                    pitch,
+     &                    crc250,irc)
+                  end if
+                  if (pitch.le.0) then
+                     TJD=dsearchLLTarget(tval,
+     &                    tValCycle,funk,
+     &                    lat,lon,hgt,
+     &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
+     &                    eventId,event100,maxrep,nrep,
+     &                    repJD,repid,repval,rep250,
+     &                    pitch,
+     &                    crc250,irc)
+                  end if
+                  if (irc.ne.0) then
+                     lencrc=length(crc250,250,10)
+                     crc250=crc250(1:lencrc)//' < '//myname//
+     &                    ' > Error return from dsearchLLTarget.'
+                     call chop0(crc250,250)
+                     return
+                  end if
+               else             ! no crossing possible, do noooothing...
+               end if
+               scnt=1           ! only use last point in remainding search...
+            else if (minpoint.and.grayzone.and.(up(1).or.up(3))) then
+               !write(*,*) 'Gray zone minpoint:',up
+C     find min-point...
+               xJD(5)=searchLLMin(
+     &              funk,
+     &              lat,lon,hgt,
+     &              xJD(1),xJD(3),dtin*0.1D0,secdec,
+     &              eventId,event100,0,nrep,repJD,repid,repval,rep250,
+     &              crc250,irc)
+               xval(5)=funk(xJD(5),lat,lon,hgt,crc250,irc)
+               if (irc.ne.0) then
+                  lencrc=length(crc250,250,10)
+                  crc250=crc250(1:lencrc)//' < '//myname//
+     &                 ' > Error return from FUNK.'
+                  call chop0(crc250,250)
+                  return
+               end if
+               dval(5)=diffCycle(xval(5),tval,tValCycle)
+               if(bdeb)write(*,*)myname,'Local min:',xjd(5),dval(5)
+               if (dval(5).gt.0.0D0) then
+                  up(5)=.true.
+                  dn(5)=.false.
+                  zero(5)=.false.
+               else if (dval(5).lt.0.0D0) then
+                  up(5)=.false.
+                  dn(5)=.true.
+                  zero(5)=.false.
+               else
+                  up(5)=.false.
+                  dn(5)=.false.
+                  zero(5)=.true.
+               end if
+C     do fine search...
+               if (dn(5).or.zero(5)) then ! possible match
+                  if (pitch-1.eq.1) then
+                     TJD=dsearchLLTarget(tval,
+     &                    tValCycle,funk,
+     &                    lat,lon,hgt,
+     &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
+     &                    eventId,event100,maxrep,nrep,
+     &                    repJD,repid,repval,rep250,
+     &                    pitch,
+     &                    crc250,irc)
+                  else
+                     TJD=dsearchLLTarget(tval,
+     &                    tValCycle,funk,
+     &                    lat,lon,hgt,
+     &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
+     &                    eventId,event100,maxrep,nrep,
+     &                    repJD,repid,repval,rep250,
+     &                    pitch,
+     &                    crc250,irc)
+                  end if
+                  if (irc.ne.0) then
+                     lencrc=length(crc250,250,10)
+                     crc250=crc250(1:lencrc)//' < '//myname//
+     &                    ' > Error return from dsearchLLTarget.'
+                     call chop0(crc250,250)
+                     return
+                  end if
+               else             ! no crossing possible, do noooothing...
+               end if
+               scnt=1           ! only use last point in remainding search...
+            else if (minpoint.or.maxpoint) then
+               if(bdeb)write(*,*) 'Extremal:',up,dn
+            else
+            end if
+            if(bdeb.and.bok) write(*,*) '>>>>>>> Found:',tjd,nrep,maxrep
+            if (bok) then
+               if (bdeb) then
+                  CALL JD2DATE(TJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+                  write(*,*)myname,'Found:   ',t22,tjd
+                  CALL JD2DATE(TstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+                  write(*,*)myname,'Start   :',t22,tstartjd
+                  CALL JD2DATE(TendJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+                  write(*,*)myname,'End:     ',t22,tendjd
+               end if
+               if ((forward.and.Tjd.le.tendJD.and.tjd.ge.tstartJD).or.
+     &              (.not.forward.and.Tjd.ge.tendJD.and.Tjd.le.tstartJD)
+     &              ) then      ! search may in theory go outside its bounaries...
+                  bbok=.true.
+                  if (maxrep.ne.0) then
+                     nrep=nrep+1
+                     if(bdeb)write(*,*) myname,'*** Making report.',
+     &                    nrep,Tjd
+                     CALL JD2DATE(TJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                     WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+                     if (nrep.le.maxrep) then
+                        if (secdec.gt.0) then
+                           write(fmt100,'(A,I2.2,A,I1,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2,F",
+     &                          secdec+1,".",secdec,")"
+                           fact=10.0D0**(real(secdec))
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1),real(int((sec1-int(sec1))
+     &                          *fact))/fact
+                        else
+                           write(fmt100,'(A,I2.2,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2)"
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1)
+                        end if
+                        call chop0(T30,30)
+                        lent=length(T30,30,30)
+                        write(rep250(nrep),'(A,X,A)')T30(1:lent),
+     &                       event100(1:lend)
+                        repJD(nrep)=TJD
+                        repid(nrep)=eventId
+                        repval(nrep)=-99999.0D0
+                     end if
+                  else if (bdeb) then
+                     write(*,*) myname,'Omitting report.',
+     &                    maxrep,nrep,Tjd,bfirst,bbok
+                  end if
+                  xsearchLLTarget=TJD
+                  bdone=bfirst  ! should we only report first event??
+               else if (bdeb) then
+                  write(*,*)myname,'Out of range:',
+     &                 tjd,tstartjd,tendjd
+               end if
+            end if
+         end if
          JD=JD+idt
+         bdone=(bdone.or.tcnt.gt.cntmax.or.tcnt.gt.ndt)
       end do
-      if (cnt.eq.cntmax)then
+      if (tcnt.eq.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -12020,7 +11943,804 @@ C     increment time
 C
       if (bdeb)write(*,*)myname,'Done.',irc
       return
-      end function searchLLTarget
+      end function xsearchLLTarget
+C     at this point we know that the target can be reached...
+      real function dsearchLLTarget(tval,
+     &     tValCycle,funk,
+     &     lat,lon,hgt,
+     &     tstartJD,tendJD,dvalstart,dvalend,
+     &     bok,secdec,
+     &     eventId,event100,maxrep,nrep,
+     &     repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      implicit none
+      real tVal                 ! target value
+      real tValCycle            ! target value cycle (360.0D0 for degrees)
+      real funk                 ! function giving the value
+      external funk
+      real lat                  ! observer latitude (deg)
+      real lon                  ! observer longtitude (deg)
+      real hgt                  ! observer height (not used)
+      real tstartJD             ! start time in Julian day JD
+      real tendJD               ! end time in Julian day JD
+      real dvalstart            ! start delta-value
+      real dvalend              ! end delta-value
+      logical bok               ! did we find what we were looking for?
+      integer secdec            ! number of decimals in seconds output
+      integer eventId           ! event identification
+      character*100 event100    ! search description
+      integer maxrep            ! maximum number of reports
+      integer nrep              ! number of reports so far
+      real repJD(max(1,maxrep)) ! report time in Julian day JD
+      integer repid(max(1,maxrep)) ! report time in Julian day JD
+      real repval(max(1,maxrep)) ! report time in Julian day JD
+      character*250 rep250(max(1,maxrep)) ! report strings
+      integer pitch             ! 1: rising, -1: falling, 0:any
+      character*250 crc250      ! error description
+      integer irc               ! error return code (0: ok)
+C
+      real diffcycle
+      external diffcycle
+      logical bdone
+      real tstart,tend,dt,dtmin,dstart,dend,dval,val,dd,jd,ff
+      integer cnt,maxcnt,ipitch
+      parameter (dtmin=1.0D0/86400.0D0, maxcnt=100)
+      logical forward
+      character*16 myname
+      data myname/'dsearchLLTarget'/
+C
+      if (bdeb)write(*,*)myname,'Entering.',pitch,tstartJD,tendJD,
+     &     dvalstart,dvalend
+      tstart=tstartjd
+      tend=tendjd
+      forward=(tend.gt.tstart) ! search direction
+      dstart=dvalstart
+      dend=dvalend
+      if ( (forward.and.dend.gt.0.0D0).or.
+     &     (.not.forward.and.dstart.gt.0.0D0) ) then
+         ipitch=1
+      else
+         ipitch=-1
+      end if
+C     sanity check
+      if (bdeb.and.ipitch*pitch .lt. 0) then
+         write(*,*)myname,'Strange pitch:',dstart,dend,pitch,ipitch
+      end if
+      cnt=0
+      bok=.false.
+      bdone=(cnt.gt.maxcnt)
+C
+      dd=dend-dstart
+      dt=tend-tstart
+      if (abs(dd).gt.1.0D-10) then
+         ff = max(0.0D0,min(1.0D0,(dstart/dd)))
+         jd=tstart + dt * ff
+      else                      ! already at target
+         jd=(tstart+tend)*0.5D0
+         bok=(abs(dd).le.tValCycle*0.25D0).or. ! discontinuity??
+     &        (tValCycle.lt.0.0D0)
+         bdone=.true.
+      end if
+C     
+      do while (.not.bdone)
+         val=funk(JD,lat,lon,hgt,crc250,irc)
+         if (irc.ne.0) then
+            lencrc=length(crc250,250,10)
+            crc250=crc250(1:lencrc)//' < '//myname//
+     &           ' > Error return from FUNK.'
+            call chop0(crc250,250)
+            return
+         end if
+         dval=diffCycle(val,tval,tValCycle)
+         if (dval.gt.0.0D0) then
+            if ((forward.and.ipitch.eq.1).or.
+     &           (.not.forward.and.ipitch.eq.-1)) then
+               dend=dval
+               tend=jd
+            else
+               dstart=dval
+               tstart=jd
+            end if
+         else
+            if ((forward.and.ipitch.eq.1).or.
+     &           (.not.forward.and.ipitch.eq.-1)) then
+               dstart=dval
+               tstart=jd
+            else
+               dend=dval
+               tend=jd
+            end if
+         end if
+         dd=dend-dstart
+         dt=tend-tstart
+         if (abs(dd).gt.1.0D-10.and.abs(dt).gt.dtmin) then
+            ff = 0.5D0!max(0.0D0,min(1.0D0,-(dstart/dd)*1.5D0))
+            jd = tstart + dt * ff
+            if (bdeb)write(*,*)myname,'Looping:',cnt,ipitch,
+     &           dstart,dend,dd,ff
+         else ! already at target
+            jd = (tstart+tend)*0.5D0
+            bok=(abs(dd).le.tValCycle*0.25D0).or. ! discontinuity??
+     &           (tValCycle.lt.0.0D0)
+            bdone=.true.
+            if (bdeb)write(*,*)myname,'Target:',jd,dt,dd,bok
+         end if
+         cnt=cnt+1
+         bdone=(bdone.or.cnt.gt.maxcnt.or.bok)
+      end do
+      dsearchLLTarget=jd
+      if (cnt.eq.maxcnt)then
+         write(buff250,*)
+     &        ' < '//myname,' > Too many iterations.'
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//buff250
+         call chop0(crc250,250)
+         irc=457
+         return
+      end if
+      if (bdeb)write(*,*)myname,'Found:',bok,jd,tstart,tend,dstart,dend
+      return
+      end function dsearchLLTarget
+C
+      subroutine reportTarget(tval,
+     &     tValCycle,funk,
+     &     tstartJD,tendJD,dtin,secdec,
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      implicit none
+      real tVal                 ! target value
+      real tValCycle            ! target value cycle (360.0D0 for degrees)
+      real funk                 ! function giving the value
+      external funk
+      real tstartJD             ! start time in Julian day JD
+      real tendJD               ! end time in Julian day JD
+      real dtin                 ! time interval (absolute value)
+      integer secdec            ! number of decimals in seconds output
+      integer eventId           ! event identification
+      character*100 event100    ! search description
+      integer maxrep            ! maximum number of reports
+      integer nrep              ! number of reports so far
+      real repJD(max(1,maxrep)) ! report time in Julian day JD
+      integer repid(max(1,maxrep)) ! report time in Julian day JD
+      real repval(max(1,maxrep)) ! report time in Julian day JD
+      character*250 rep250(max(1,maxrep)) ! report strings
+      integer pitch             ! 1: rising, -1: falling, 0:any
+      character*250 crc250      ! error description
+      integer irc               ! error return code (0: ok)
+      integer lencrc
+      real buff
+      logical bbok
+      character*16 myname
+      data myname/'reportTarget'/
+      buff = XsearchTarget(tval,
+     &     tValCycle,funk,
+     &     tstartJD,tendJD,dtin,secdec,.false., bbok,! report all events
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from xsearchTarget.'
+         call chop0(crc250,250)
+         return
+      end if
+      return
+      end subroutine reportTarget
+C
+      real function searchTarget(tval,
+     &     tValCycle,funk,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      implicit none
+      real tVal                 ! target value
+      real tValCycle            ! target value cycle (360.0D0 for degrees)
+      real funk                 ! function giving the value
+      external funk
+      real tstartJD             ! start time in Julian day JD
+      real tendJD               ! end time in Julian day JD
+      real dtin                 ! time interval (absolute value)
+      integer secdec            ! number of decimals in seconds output
+      logical bbok              ! did we find target?
+      integer eventId           ! event identification
+      character*100 event100    ! search description
+      integer maxrep            ! maximum number of reports
+      integer nrep              ! number of reports so far
+      real repJD(max(1,maxrep)) ! report time in Julian day JD
+      integer repid(max(1,maxrep)) ! report time in Julian day JD
+      real repval(max(1,maxrep)) ! report time in Julian day JD
+      character*250 rep250(max(1,maxrep)) ! report strings
+      integer pitch             ! 1: rising, -1: falling, 0:any
+      character*250 crc250      ! error description
+      integer irc               ! error return code (0: ok)
+      integer lencrc
+      character*16 myname
+      data myname/'searchTarget'/
+      searchtarget = XsearchTarget(tval,
+     &     tValCycle,funk,
+     &     tstartJD,tendJD,dtin,secdec,.true.,bbok,
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from xsearchTarget.'
+         call chop0(crc250,250)
+         return
+      end if
+      return
+      end function searchTarget
+C
+      real function XsearchTarget(tval,
+     &     tValCycle,funk,
+     &     tstartJD,tendJD,dtin,secdec,bfirst,bbok,
+     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      implicit none
+      real tVal                 ! target value
+      real tValCycle            ! target value cycle (360.0D0 for degrees)
+      real funk                 ! function giving the value
+      external funk
+      real tstartJD             ! start time in Julian day JD
+      real tendJD               ! end time in Julian day JD
+      real dtin                 ! time interval (absolute value)
+      integer secdec            ! number of decimals in seconds output
+      logical bfirst            ! only report first event
+      logical bbok              ! did we find target ?
+      integer eventId           ! event identification
+      character*100 event100    ! search description
+      integer maxrep            ! maximum number of reports
+      integer nrep              ! number of reports so far
+      real repJD(max(1,maxrep)) ! report time in Julian day JD
+      integer repid(max(1,maxrep)) ! report time in Julian day JD
+      real repval(max(1,maxrep)) ! report time in Julian day JD
+      character*250 rep250(max(1,maxrep)) ! report strings
+      integer pitch             ! 1: rising, -1: falling, 0:any
+      character*250 crc250      ! error description
+      integer irc               ! error return code (0: ok)
+      integer lencrc
+C     
+      character*16 myname
+      data myname/'xsearchTarget'/
+C
+      character*250 buff250
+      integer YY1,MM1,DD1,HH1,MI1
+      real sec1,idt,mindt,fact,dt
+      real JD,TJD,val,val1,jstop
+      real xJD(0:5),xval(0:5),dval(0:5)! 0+4=max/min-possible, 1+2+3=actual, 5=max/min-actual
+      character*100 fmt100
+      character*30 T30
+      character*22 t22
+      logical up(0:5),dn(0:5),zero(0:5),maxpoint,minpoint,grayzone
+      real ndt
+      integer length,lend,lent
+      externale length
+      real diffcycle
+      external diffcycle
+      logical bdone,bok
+C      logical bdeb
+C      data bdeb/.true./
+      integer tcnt,scnt,cntmax
+      parameter (cntmax=10000)
+      logical forward
+      real eps
+      parameter (eps = 2.0d0/86400.0d0) ! 2 seconds
+C
+      if (bdeb)write(*,*)myname,'Entering.',irc
+      bbok=.false.
+      lend=length(event100,100,20)
+C
+      bok=.false.
+      xsearchTarget=tstartJD
+C      
+      forward=tendJD.gt.tstartJD
+      JD=tstartJD
+      mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
+      ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
+      idt=(tendJD-tstartJD)/ndt
+      if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,ndt,pitch
+C
+      bdone=.false.
+C     in case we are starting/stopping at a maximum/minimum value...
+      tcnt=-2 ! add 2 steps, 1 before start, 1 after stop
+      JD=JD-idt
+C
+      scnt=0
+      bdone=(tcnt.gt.cntmax.or.tcnt.gt.ndt)
+      do while (.not.bdone)
+         tcnt=tcnt+1 ! total count
+         scnt=scnt+1 ! spinup count
+C
+C     get current date
+C
+         CALL JD2DATE(JD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+         WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+ 999     FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2,':',F5.2) ! 22
+C
+C     get new value
+C
+         val=funk(JD,crc250,irc)
+         if (irc.ne.0) then
+            lencrc=length(crc250,250,10)
+            crc250=crc250(1:lencrc)//' < '//myname//
+     &           ' > Error return from FUNK.'
+            call chop0(crc250,250)
+            return
+         end if
+C
+C     set history...
+C
+         if (scnt.eq.1) then
+            xJD(0)=JD
+            xJD(1)=JD
+            xJD(2)=JD
+            xJD(3)=JD
+            xJD(4)=JD
+            xval(0)=val
+            xval(1)=val
+            xval(2)=val
+            xval(3)=val
+            xval(4)=val
+         else
+            xJD(0)=xJD(2)
+            xJD(1)=xJD(2)
+            xJD(2)=xJD(3)
+            xJD(3)=JD
+            xJD(4)=JD
+            xval(0)=2.0D0*xval(3)-val
+            xval(1)=xval(2)
+            xval(2)=xval(3)
+            xval(3)=val
+            xval(4)=2.0D0*xval(2)-xval(1)
+         end if
+C
+         dval(0)=diffCycle(xval(0),tval,tValCycle)
+         dval(1)=diffCycle(xval(1),tval,tValCycle)
+         dval(2)=diffCycle(xval(2),tval,tValCycle)
+         dval(3)=diffCycle(xval(3),tval,tValCycle)
+         dval(4)=diffCycle(xval(4),tval,tValCycle)
+C     
+         if (scnt.ge.3) then
+            bok=.false.
+C     !write(*,*)myname,'JNK:',xval(1),xval(2),val,val1
+C     
+C     
+C     determine if we must do a fine search
+C     
+            do ii=0,4
+               if (dval(ii).gt.0.0D0) then
+                  up(ii)=.true.
+                  dn(ii)=.false.
+                  zero(ii)=.false.
+               else if (dval(ii).lt.0.0D0) then
+                  up(ii)=.false.
+                  dn(ii)=.true.
+                  zero(ii)=.false.
+               else
+                  up(ii)=.false.
+                  dn(ii)=.false.
+                  zero(ii)=.true.
+               end if
+            end do
+C     check if local max/min and in "grayzone" (ie. crossing is possible)
+            maxpoint = dval(2).ge.dval(1).and.dval(2).gt.dval(3)
+            minpoint = dval(2).le.dval(1).and.dval(2).lt.dval(3)
+            grayzone= ((dn(0).or.dn(1).or.zero(0).or.zero(1)).and.
+     &           (up(3).or.up(4))).or.(
+     &           (up(0).or.up(1).or.zero(0).or.zero(1)).and.
+     &           (dn(3).or.dn(4)))
+C     
+            if (bdeb)write(*,'(4(X,A),2(X,F20.3),3(X,L1))')
+     &           myname,event100(1:lend),'Step:',T22,val,dval(3),
+     &           up(1),up(2),up(3)
+C     
+            if (pitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
+               if (up(2)) then
+                  TJD=dsearchTarget(tval,
+     &                 tValCycle,funk,
+     &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
+     &                 eventId,event100,maxrep,nrep,
+     &                 repJD,repid,repval,rep250,
+     &                 pitch,
+     &                 crc250,irc)
+               else
+                  TJD=dsearchTarget(tval,
+     &                 tValCycle,funk,
+     &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
+     &                 eventId,event100,maxrep,nrep,
+     &                 repJD,repid,repval,rep250,
+     &                 pitch,
+     &                 crc250,irc)
+               end if
+               if (irc.ne.0) then
+                  lencrc=length(crc250,250,10)
+                  crc250=crc250(1:lencrc)//' < '//myname//
+     &                 ' > Error return from dsearchTarget.'
+                  call chop0(crc250,250)
+                  return
+               end if
+               scnt=1           ! only use last point in remainding search...
+            else if (pitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
+               if (dval(2).le.0.0D0) then
+                  TJD=dsearchTarget(tval,
+     &                 tValCycle,funk,
+     &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
+     &                 eventId,event100,maxrep,nrep,
+     &                 repJD,repid,repval,rep250,
+     &                 pitch,
+     &                 crc250,irc)
+               else
+                  TJD=dsearchTarget(tval,
+     &                 tValCycle,funk,
+     &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
+     &                 eventId,event100,maxrep,nrep,
+     &                 repJD,repid,repval,rep250,
+     &                 pitch,
+     &                 crc250,irc)
+               end if
+               if (irc.ne.0) then
+                  lencrc=length(crc250,250,10)
+                  crc250=crc250(1:lencrc)//' < '//myname//
+     &                 ' > Error return from dsearchTarget.'
+                  call chop0(crc250,250)
+                  return
+               end if
+               scnt=1           ! only use last point in remainding search...
+            else if (maxpoint.and.grayzone.and.(dn(1).or.dn(3))) then
+               if(bdeb)write(*,*) 'Gray zone maxpoint:',dn
+C     find max-point...
+               xJD(5)=searchMax(
+     &              funk,
+     &              xJD(1),xJD(3),dtin*0.1D0,secdec,
+     &              eventId,event100,0,nrep,repJD,repid,repval,rep250,
+     &              crc250,irc)
+               xval(5)=funk(xJD(5),crc250,irc)
+               if (irc.ne.0) then
+                  lencrc=length(crc250,250,10)
+                  crc250=crc250(1:lencrc)//' < '//myname//
+     &                 ' > Error return from FUNK.'
+                  call chop0(crc250,250)
+                  return
+               end if
+               dval(5)=diffCycle(xval(5),tval,tValCycle)
+               if(bdeb)write(*,*)myname,'Local max:',xjd(5),xval(5),
+     &              tval,dval(5)
+               if (dval(5).gt.0.0D0) then
+                  up(5)=.true.
+                  dn(5)=.false.
+                  zero(5)=.false.
+               else if (dval(5).lt.0.0D0) then
+                  up(5)=.false.
+                  dn(5)=.true.
+                  zero(5)=.false.
+               else
+                  up(5)=.false.
+                  dn(5)=.false.
+                  zero(5)=.true.
+               end if
+C     do fine search...
+               if (up(5).or.zero(5)) then ! possible match
+                  if (pitch.ge.0) then
+                     TJD=dsearchTarget(tval,
+     &                    tValCycle,funk,
+     &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
+     &                    eventId,event100,maxrep,nrep,
+     &                    repJD,repid,repval,rep250,
+     &                    pitch,
+     &                    crc250,irc)
+                  end if
+                  if (pitch.le.0) then
+                     TJD=dsearchTarget(tval,
+     &                    tValCycle,funk,
+     &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
+     &                    eventId,event100,maxrep,nrep,
+     &                    repJD,repid,repval,rep250,
+     &                    pitch,
+     &                    crc250,irc)
+                  end if
+                  if (irc.ne.0) then
+                     lencrc=length(crc250,250,10)
+                     crc250=crc250(1:lencrc)//' < '//myname//
+     &                    ' > Error return from dsearchTarget.'
+                     call chop0(crc250,250)
+                     return
+                  end if 
+               else             ! no crossing possible, do noooothing...
+               end if
+               scnt=1           ! only use last point in remainding search...
+            else if (minpoint.and.grayzone.and.(up(1).or.up(3))) then
+               !write(*,*) 'Gray zone minpoint:',up
+C     find min-point...
+               xJD(5)=searchMin(
+     &              funk,
+     &              xJD(1),xJD(3),dtin*0.1D0,secdec,
+     &              eventId,event100,0,nrep,repJD,repid,repval,rep250,
+     &              crc250,irc)
+               xval(5)=funk(xJD(5),crc250,irc)
+               if (irc.ne.0) then
+                  lencrc=length(crc250,250,10)
+                  crc250=crc250(1:lencrc)//' < '//myname//
+     &                 ' > Error return from FUNK.'
+                  call chop0(crc250,250)
+                  return
+               end if
+               dval(5)=diffCycle(xval(5),tval,tValCycle)
+               if(bdeb)write(*,*)myname,'Local min:',xjd(5),dval(5)
+               if (dval(5).gt.0.0D0) then
+                  up(5)=.true.
+                  dn(5)=.false.
+                  zero(5)=.false.
+               else if (dval(5).lt.0.0D0) then
+                  up(5)=.false.
+                  dn(5)=.true.
+                  zero(5)=.false.
+               else
+                  up(5)=.false.
+                  dn(5)=.false.
+                  zero(5)=.true.
+               end if
+C     do fine search...
+               if (dn(5).or.zero(5)) then ! possible match
+                  if (pitch.ge.0) then
+                     TJD=dsearchTarget(tval,
+     &                    tValCycle,funk,
+     &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
+     &                    eventId,event100,maxrep,nrep,
+     &                    repJD,repid,repval,rep250,
+     &                    pitch,
+     &                    crc250,irc)
+                  end if
+                  if (pitch.le.0) then
+                     TJD=dsearchTarget(tval,
+     &                    tValCycle,funk,
+     &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
+     &                    eventId,event100,maxrep,nrep,
+     &                    repJD,repid,repval,rep250,
+     &                    pitch,
+     &                    crc250,irc)
+                  end if
+                  if (irc.ne.0) then
+                     lencrc=length(crc250,250,10)
+                     crc250=crc250(1:lencrc)//' < '//myname//
+     &                    ' > Error return from dsearchTarget.'
+                     call chop0(crc250,250)
+                     return
+                  end if
+               else             ! no crossing possible, do noooothing...
+               end if
+               scnt=1           ! only use last point in remainding search...
+            else if (minpoint.or.maxpoint) then
+               if(bdeb)write(*,*) 'Extremal:',up,dn
+            else
+            end if
+            if(bdeb.and.bok) write(*,*) '>>>>>>> Found:',tjd,nrep,maxrep
+            if (bok) then
+               if (bdeb) then
+                  CALL JD2DATE(TJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+                  write(*,*)myname,'Found:   ',t22,tjd
+                  CALL JD2DATE(TstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+                  write(*,*)myname,'Start   :',t22,tstartjd
+                  CALL JD2DATE(TendJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+                  write(*,*)myname,'End:     ',t22,tendjd
+               end if
+               if ((forward.and.Tjd.le.tendJD.and.tjd.ge.tstartJD).or.
+     &              (.not.forward.and.Tjd.ge.tendJD.and.Tjd.le.tstartJD)
+     &              ) then      ! search may in theory go outside its bounaries...
+                  bbok=.true.
+                  if (maxrep.ne.0) then
+                     nrep=nrep+1
+                     if(bdeb)write(*,*) myname,'*** Making report.',
+     &                    nrep,Tjd
+                     CALL JD2DATE(TJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                     WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
+                     if (nrep.le.maxrep) then
+                        if (secdec.gt.0) then
+                           write(fmt100,'(A,I2.2,A,I1,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2,F",
+     &                          secdec+1,".",secdec,")"
+                           fact=10.0D0**(real(secdec))
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1),real(int((sec1-int(sec1))
+     &                          *fact))/fact
+                        else
+                           write(fmt100,'(A,I2.2,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2)"
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1)
+                        end if
+                        call chop0(T30,30)
+                        lent=length(T30,30,30)
+                        write(rep250(nrep),'(A,X,A)')T30(1:lent),
+     &                       event100(1:lend)
+                        repJD(nrep)=TJD
+                        repid(nrep)=eventId
+                        repval(nrep)=-99999.0D0
+                     end if
+                  else if (bdeb) then
+                     write(*,*) myname,'Omitting report.',
+     &                    maxrep,nrep,Tjd,bfirst,bbok
+                  end if
+                  xsearchTarget=TJD
+                  bdone=bfirst  ! should we only report first event??
+               else if (bdeb) then
+                  write(*,*)myname,'Ignoring out of range:',
+     &                 tjd,tstartjd,tendjd
+               end if
+            end if
+         else
+            if (bdeb)write(*,'(4(X,A),2(X,F20.3))')
+     &           myname,event100(1:lend),'Step:',T22,val,dval(3)
+         end if
+         JD=JD+idt
+         bdone=(bdone.or.tcnt.gt.cntmax.or.tcnt.gt.ndt)
+      end do
+      if (tcnt.eq.cntmax)then
+         write(buff250,*)
+     &        ' < '//myname,' > Too many iterations.'
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//buff250
+         call chop0(crc250,250)
+         irc=457
+         return
+      end if
+      if (nrep.gt.maxrep.AND.MAXREP.NE.0) then
+         write(buff250,*)
+     &        ' < '//myname,' > Too many reports.',nrep,maxrep
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//buff250
+         call chop0(crc250,250)
+         irc=468
+         return
+      end if
+C
+      if (bdeb)write(*,*)myname,'Done.',irc
+      return
+      end function xsearchTarget
+C     at this point we know that the target can be reached...
+      real function dsearchTarget(tval,
+     &     tValCycle,funk,
+     &     tstartJD,tendJD,dvalstart,dvalend,
+     &     bok,secdec,
+     &     eventId,event100,maxrep,nrep,
+     &     repJD,repid,repval,rep250,
+     &     pitch,
+     &     crc250,irc)
+      implicit none
+      real tVal                 ! target value
+      real tValCycle            ! target value cycle (360.0D0 for degrees)
+      real funk                 ! function giving the value
+      external funk
+      real tstartJD             ! start time in Julian day JD
+      real tendJD               ! end time in Julian day JD
+      real dvalstart            ! start delta-value
+      real dvalend              ! end delta-value
+      logical bok               ! did we find what we were looking for?
+      integer secdec            ! number of decimals in seconds output
+      integer eventId           ! event identification
+      character*100 event100    ! search description
+      integer maxrep            ! maximum number of reports
+      integer nrep              ! number of reports so far
+      real repJD(max(1,maxrep)) ! report time in Julian day JD
+      integer repid(max(1,maxrep)) ! report time in Julian day JD
+      real repval(max(1,maxrep)) ! report time in Julian day JD
+      character*250 rep250(max(1,maxrep)) ! report strings
+      integer pitch             ! 1: rising, -1: falling, 0:any
+      character*250 crc250      ! error description
+      integer irc               ! error return code (0: ok)
+C
+      real diffcycle
+      external diffcycle
+      logical bdone
+      real tstart,tend,dt,dtmin,dstart,dend,dval,val,dd,jd,ff
+      integer cnt,maxcnt,ipitch
+      parameter (dtmin=1.0D0/86400.0D0, maxcnt=100)
+      logical forward
+      character*16 myname
+      data myname/'dsearchTarget'/
+C
+      if (bdeb)write(*,*)myname,'Entering.',pitch,tstartJD,tendJD,
+     &     dvalstart,dvalend
+      tstart=tstartjd
+      tend=tendjd
+      forward=(tend.gt.tstart) ! search direction
+      dstart=dvalstart
+      dend=dvalend
+      if ( (forward.and.dend.gt.0.0D0).or.
+     &     (.not.forward.and.dstart.gt.0.0D0) ) then
+         ipitch=1
+      else
+         ipitch=-1
+      end if
+C     sanity check
+      if (bdeb.and.ipitch*pitch .lt. 0) then
+         write(*,*)myname,'Strange pitch:',dstart,dend,pitch,ipitch
+      end if
+      cnt=0
+      bok=.false.
+      bdone=(cnt.gt.maxcnt)
+C
+      dd=dend-dstart
+      dt=tend-tstart
+      if (abs(dd).gt.1.0D-10) then
+         ff = max(0.0D0,min(1.0D0,(dstart/dd)))
+         jd=tstart + dt * ff
+      else                      ! already at target
+         jd=(tstart+tend)*0.5D0
+         bok=(abs(dd).le.tValCycle*0.25D0).or. ! discontinuity??
+     &        (tValCycle.lt.0.0D0)
+         bdone=.true.
+      end if
+C     
+      do while (.not.bdone)
+         val=funk(JD,crc250,irc)
+         if (irc.ne.0) then
+            lencrc=length(crc250,250,10)
+            crc250=crc250(1:lencrc)//' < '//myname//
+     &           ' > Error return from FUNK.'
+            call chop0(crc250,250)
+            return
+         end if
+         dval=diffCycle(val,tval,tValCycle)
+         if (dval.gt.0.0D0) then
+            if ((forward.and.ipitch.eq.1).or.
+     &           (.not.forward.and.ipitch.eq.-1))then
+               dend=dval
+               tend=jd
+            else
+               dstart=dval
+               tstart=jd
+            end if
+         else
+            if ((forward.and.ipitch.eq.1).or.
+     &           (.not.forward.and.ipitch.eq.-1)) then
+               dstart=dval
+               tstart=jd
+            else
+               dend=dval
+               tend=jd
+            end if
+         end if
+         dd=dend-dstart
+         dt=tend-tstart
+         if (abs(dd).gt.1.0D-10.and.abs(dt).gt.dtmin) then
+            ff = 0.5D0!max(0.0D0,min(1.0D0,-(dstart/dd)*1.5D0))
+            jd = tstart + dt * ff
+            if (bdeb)write(*,*)myname,'Looping:',cnt,ipitch,
+     &           dstart,dend,dd,ff
+         else ! already at target
+            jd = (tstart+tend)*0.5D0
+            bok=(abs(dd).le.tValCycle*0.25D0).or. ! discontinuity??
+     &           (tValCycle.lt.0.0D0)
+            bdone=.true.
+            if (bdeb)write(*,*)myname,'Target:',jd,dt,dd,bok
+         end if
+         cnt=cnt+1
+         bdone=(bdone.or.cnt.gt.maxcnt.or.bok)
+      end do
+      dsearchTarget=jd
+      if (cnt.eq.maxcnt)then
+         write(buff250,*)
+     &        ' < '//myname,' > Too many iterations.'
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//buff250
+         call chop0(crc250,250)
+         irc=457
+         return
+      end if
+      if (bdeb)write(*,*)myname,'Found:',bok,jd,tstart,tend,dstart,dend
+      return
+      end function dsearchTarget
 C
       real function searchLunarTime(Target,
      &     lat,lon,hgt,
@@ -12051,13 +12771,15 @@ C
 C
       character*20 myname
       data myname /'searchLunarTime'/
+C
+      logical bbok              ! did we find target
       external getLunarTime
       real targetCycle,getLunarTime
       parameter (targetCycle=24.0D0) ! target value which correponds to 0.0D0
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
-      dtin=0.1D0
+      dtin=0.05D0
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.5D0
       else
@@ -12069,7 +12791,7 @@ C
       searchLunarTime=searchLLTarget(Target,
      &     TargetCycle,getLunarTime,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -12152,6 +12874,8 @@ C
 C
       character*18 myname
       data myname /'searchMarsLon'/
+C
+      logical bbok
       external getMarsLon
       real targetCycle,getMarsLon
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -12169,7 +12893,7 @@ C
 C
       searchMarsLon=searchTarget(Target,
      &     TargetCycle,getMarsLon,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -12275,7 +12999,7 @@ C
             vmax=val
             tmax=JD
          end if
-         if (bdeb) write(*,'(X,A,A,A,F10.3)')
+         if (bdeb)write(*,'(X,A,A,A,F10.3)')
      &        myname,T16,'Funk:',val
 C     need 3 points before we can check for maximum
          xJD(1)=xJD(2)
@@ -12310,33 +13034,35 @@ C     need 3 points before we can check for maximum
      &                 HH1,
      &                 MI1,
      &                 SEC1) 
-                  nrep=nrep+1
-                  if (nrep.le.maxrep) then ! make report
-                     if (secdec.gt.0) then
-                        write(fmt100,'(A,I2.2,A,I1,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2,F",
-     &                       secdec+1,".",secdec,")"
-                        fact=10.0D0**(real(secdec))
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1),real(int((sec1-int(sec1))*fact))
-     &                       /fact
-                     else
-                        write(fmt100,'(A,I2.2,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2)"
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1)
+                  if (maxrep.ne.0) then
+                     nrep=nrep+1
+                     if (nrep.le.maxrep) then ! make report
+                        if (secdec.gt.0) then
+                           write(fmt100,'(A,I2.2,A,I1,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2,F",
+     &                          secdec+1,".",secdec,")"
+                           fact=10.0D0**(real(secdec))
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1),real(int((sec1-int(sec1))*
+     &                          fact))/fact
+                        else
+                           write(fmt100,'(A,I2.2,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2)"
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1)
+                        end if
+                        call chop0(T30,30)
+                        lent=length(T30,30,30)
+                        write(rep250(nrep),'(A,X,A," (",F17.5,")")')
+     &                       T30(1:lent),event100(1:lend),maxval
+                        repJD(nrep)=JD
+                        repid(nrep)=eventId
+                        repval(nrep)=maxval
+                        if (bdeb)write(*,*)myname,'Ended minor loop.',
+     *                       JD,bdone
                      end if
-                     call chop0(T30,30)
-                     lent=length(T30,30,30)
-                     write(rep250(nrep),'(A,X,A," (",F17.5,")")')
-     &                    T30(1:lent),event100(1:lend),maxval
-                     repJD(nrep)=JD
-                     repid(nrep)=eventId
-                     repval(nrep)=maxval
-                     if (bdeb)write(*,*)myname,'Ended minor loop.',
-     *                    JD,bdone
                   end if
                   searchMax=JD
                   bdone=.true.
@@ -12366,7 +13092,7 @@ C     need 3 points before we can check for maximum
          return
       end if
 C
-      if (bdeb) write(*,*)myname,'Found:',found,tmax,vmax
+      if (bdeb)write(*,*)myname,'Found:',found,tmax,vmax
       if (.not.found) then
          searchMax=tmax
       end if
@@ -12532,7 +13258,7 @@ C
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
-      dtin=0.01D0
+      dtin=0.05D0
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.5D0
       else
@@ -12863,6 +13589,8 @@ C
 C
       character*18 myname
       data myname /'searchMercRelLon'/
+C
+      logical bbok
       external getMercRelLon
       real targetCycle,getMercRelLon
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -12880,7 +13608,7 @@ C
 C
       searchMercRelLon=searchTarget(Target,
      &     TargetCycle,getMercRelLon,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -12920,6 +13648,8 @@ C
 C
       character*20 myname
       data myname /'searchMercTransit'/
+C
+      logical bbok
       external getMercRelLon,getMercTransit
       real targetCycle,getMercRelLon,getMercTransit
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -12964,9 +13694,9 @@ C
 
          maxxrep=0
          xrep=0
-         tstartJD=searchTarget(Target, ! only get time of 
+         tstartJD=searchTarget(Target, ! only get time of event, no reports
      &        TargetCycle,getMercRelLon,
-     &        tstartJD,tendJD,dt,secdec,
+     &        tstartJD,tendJD,dt,secdec,bbok,
      &        eventId,event100,maxxrep,xrep,repJD,repid,repval,rep250,
      &        0,
      &        crc250,irc)
@@ -12978,25 +13708,22 @@ C
             return
          end if
 
-         if (xrep.gt.0) then    ! found a match, search backwards for penumbra entry
-
-            CALL JD2DATE(tstartJD,
-     &           YY1,
-     &           MM1,
-     &           DD1,
-     &           HH1,
-     &           MI1,
-     &           SEC1) 
-            WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
- 888        FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
-
-            Rp=getMercTransit(tstartJD,crc250,irc) ! distance between Merc and earth-sun cone
-
-C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
+         if (bbok) then    ! found a match, search backwards for penumbra entry
+C
+            Rp=getMercTransit(tstartJD,crc250,irc) ! distance Merc and earth-sun cone
+C
+C     !write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
             if (Rp.le.Rm) then  ! Mercury eclipses the Sun
+               if (bdeb) then
+                  CALL JD2DATE(tstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
+                  write(*,*) myname,'Conjunction at ',
+     &                 T16,rp.le.rm
+ 888              FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
+               end if
+               
                lend=length(event100,100,10)
-               xrep=nrep
-               dt=10.0D0       ! eclipse starts not more than 10 day earlier
+               dt=10.0D0        ! eclipse starts not more than 10 day earlier
                xeventId=eventId + 1
                xevent100=event100(1:lend)//' STOP'
                call chop0(xevent100,100)
@@ -13005,7 +13732,8 @@ C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -13015,6 +13743,11 @@ C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
      &                 ' > Error return from searchTarget.'
                   call chop0(crc250,250)
                   return
+               end if
+               if (bdeb) then
+                  CALL JD2DATE(xJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
+                  write(*,*) myname,'Start at ',T16,nrep
                end if
                dt=-10.0D0       ! eclipse starts not more than 10 day earlier
                xeventId=eventId + 0
@@ -13025,7 +13758,8 @@ C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -13036,13 +13770,23 @@ C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                   call chop0(crc250,250)
                   return
                end if
-               if (nrep.ne.xrep) then ! we are done...
+               if (bdeb) then
+                  CALL JD2DATE(xJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+                  WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
+                  write(*,*) myname,'Stop at ',T16,nrep
+               end if
+               if (bbok) then ! we are done...
                   searchMercTransit=xJD
                   return
                end if
                return
 
-C               write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
+C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
+            else if (bdeb) then
+               CALL JD2DATE(tstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
+               WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
+               write(*,*) myname,'Conjunction at ',
+     &              T16,rp.le.rm
             end if
          end if
          if ((dtin.gt.0.0D0.and.tstartJD+0.5*dtin
@@ -13156,7 +13900,7 @@ C
             vmin=val
             tmin=JD
          end if
-         if (bdeb) write(*,'(X,A,A,A,F10.3)')
+         if (bdeb)write(*,'(X,A,A,A,F10.3)')
      &        myname,T16,' Funk:',val
 C     need 3 points before we can check for maximum
          xJD(1)=xJD(2)
@@ -13190,8 +13934,8 @@ C     need 3 points before we can check for maximum
      &                 MI1,
      &                 SEC1) 
                   WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
-                  write(*,*)myname,'Minor loop done,',t16,minval,
-     &                 dt,JD,tstartJD,tendJD
+                  if(bdeb)write(*,*)myname,'Minor loop done,',
+     &                 t16,minval,dt,JD,tstartJD,tendJD
                end if
                if ((dt.gt.0.0.and.JD.le.tendJD.and.
      &              JD.ge.tstartJD).or.
@@ -13204,33 +13948,35 @@ C     need 3 points before we can check for maximum
      &                 HH1,
      &                 MI1,
      &                 SEC1) 
-                  nrep=nrep+1
-                  if (nrep.le.maxrep) then ! make report
-                     if (secdec.gt.0) then
-                        write(fmt100,'(A,I2.2,A,I1,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2,F",
-     &                       secdec+1,".",secdec,")"
-                        fact=10.0D0**(real(secdec))
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1),real(int((sec1-int(sec1))*fact))
-     &                       /fact
-                     else
-                        write(fmt100,'(A,I2.2,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2)"
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1)
+                  if (maxrep.ne.0) then
+                     nrep=nrep+1
+                     if (nrep.le.maxrep) then ! make report
+                        if (secdec.gt.0) then
+                           write(fmt100,'(A,I2.2,A,I1,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2,F",
+     &                          secdec+1,".",secdec,")"
+                           fact=10.0D0**(real(secdec))
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1),real(int((sec1-int(sec1))*
+     &                          fact))/fact
+                        else
+                           write(fmt100,'(A,I2.2,A)')
+     &                          "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                          "I2.2,':',I2.2)"
+                           write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                          int(sec1)
+                        end if
+                        call chop0(T30,30)
+                        lent=length(T30,30,30)
+                        write(rep250(nrep),'(A,X,A," (",F17.5,")")')
+     &                       T30(1:lent),event100(1:lend),minval
+                        repJD(nrep)=JD
+                        repid(nrep)=eventId
+                        repval(nrep)=minval
+                        if (bdeb)write(*,*)myname,'Ended minor loop.',
+     *                       JD,bdone
                      end if
-                     call chop0(T30,30)
-                     lent=length(T30,30,30)
-                     write(rep250(nrep),'(A,X,A," (",F17.5,")")')
-     &                    T30(1:lent),event100(1:lend),minval
-                     repJD(nrep)=JD
-                     repid(nrep)=eventId
-                     repval(nrep)=minval
-                     if (bdeb)write(*,*)myname,'Ended minor loop.',
-     *                    JD,bdone
                   end if
                   searchMin=JD
                   bdone=.true.
@@ -13319,7 +14065,7 @@ C     Parameters: The golden ratios.
             f1=f(x1,crc250,irc)            ! and its new function evaluation.
             if (irc.ne.0) return
          endif
-C         write(*,*) 'GoldenMin:',f1,f2,x1,x2
+C         !write(*,*) 'GoldenMin:',f1,f2,x1,x2
       end do
       if (cnt.eq.cntmax)then
          write(buff250,*)
@@ -13428,7 +14174,7 @@ C
       external getMoonElevation
       real getMoonElevation
 C
-      dtin=0.01D0
+      dtin=0.05D0
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.5D0
       else
@@ -13763,13 +14509,15 @@ C
 C
       character*20 myname
       data myname /'searchMoonAzimuth'/
+C
+      logical bbok              ! did we find target
       external getMoonAzimuth
       real targetCycle,getMoonAzimuth
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
-      dtin=0.1D0
+      dtin=0.05D0
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.5D0
       else
@@ -13781,7 +14529,7 @@ C
       searchMoonAzimuth=searchLLTarget(Target,
      &     TargetCycle,getMoonAzimuth,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -13821,6 +14569,8 @@ C
 C
       character*16 myname
       data myname /'searchMoonIllum'/
+C
+      logical bbok
       external getMoonIllum
       real targetCycle,getMoonIllum
       parameter (targetCycle=100.0D0) ! target value which correponds to 0.0D0
@@ -13838,7 +14588,7 @@ C
 C
       searchMoonIllum=searchTarget(Target,
      &     TargetCycle,getMoonIllum,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -13878,6 +14628,8 @@ C
 C     
       character*16 myname
       data myname /'searchMoonPhase'/
+C
+      logical bbok
       external getMoonPhase
       real targetCycle,getMoonPhase
       parameter (targetCycle=100.0D0) ! target value which correponds to 0.0D0
@@ -13895,7 +14647,7 @@ C
 C
       searchMoonPhase=searchTarget(Target,
      &     TargetCycle,getMoonPhase,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -13979,6 +14731,8 @@ C
 C
       character*20 myname
       data myname /'searchMoonRise'/
+C
+      logical bbok              ! did we find target
       external getMoonElevation
       real getMoonElevation
 C
@@ -14003,7 +14757,7 @@ C
       searchMoonRise=searchLLTarget(Target,
      &     TargetCycle,getMoonElevation,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dt,secdec,
+     &     tstartJD,tendJD,dt,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     direction,           ! elevation rises (decreases if you go backwards)
      &     crc250,irc)
@@ -14049,6 +14803,8 @@ C
 C
       character*20 myname
       data myname /'searchMoonSet'/
+C
+      logical bbok              ! did we find target
       external getMoonElevation
       real getMoonElevation
 C
@@ -14073,7 +14829,7 @@ C
       searchMoonSet=searchLLTarget(Target,
      &     TargetCycle,getMoonElevation,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dt,secdec,
+     &     tstartJD,tendJD,dt,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     -direction,          ! elevation sets (just think about it...)
      &     crc250,irc)
@@ -14123,6 +14879,8 @@ C
 C
       character*26 myname
       data myname /'searchMoonUpperElevation'/
+C
+      logical bbok              ! did we find target
       external getMoonUpperElevation
       real targetCycle,getMoonUpperElevation
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -14130,7 +14888,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.01D0
+      dtin=0.05D0
       if(direction.eq.1) then   ! forewards
          ipitch=pitch
          tendJD=tstartJD+1.5D0
@@ -14142,7 +14900,7 @@ CC
       searchMoonUpperElevation=searchLLTarget(Target,
      &     TargetCycle,getMoonUpperElevation,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     ipitch,
      &     crc250,irc)
@@ -14230,6 +14988,8 @@ C
 C
       character*20 myname
       data myname /'searchPolarSunAngle'/
+C
+      logical bbok              ! did we find target
       external getPolarSunAngleX
       real targetCycle,getPolarSunAngleX
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -14248,7 +15008,7 @@ C
       searchPolarSunAngle=searchLLTarget(Target,
      &     TargetCycle,getPolarSunAngleX,
      &     lat, lon, hgt, 
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,
      &     repJD,repid,repval,rep250,
      &     0,
@@ -14256,7 +15016,7 @@ C
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//' < '//myname//
-     &        ' > Error return from searchTarget.'
+     &        ' > Error return from searchLLTarget.'
          call chop0(crc250,250)
          return
       end if
@@ -14292,6 +15052,8 @@ C
 C
       character*20 myname
       data myname /'searchPolarMoonAngle'/
+C
+      logical bbok              ! did we find target
       external getPolarMoonAngleX
       real targetCycle,getPolarMoonAngleX
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -14310,14 +15072,14 @@ C
       searchPolarMoonAngle=searchLLTarget(Target,
      &     TargetCycle,getPolarMoonAngleX,
      &     lat, lon, hgt, 
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//' < '//myname//
-     &        ' > Error return from searchTarget.'
+     &        ' > Error return from searchLLTarget.'
          call chop0(crc250,250)
          return
       end if
@@ -14353,6 +15115,8 @@ C
 C
       character*18 myname
       data myname /'searchSaturnLon'/
+C
+      logical bbok
       external getSaturnLon
       real targetCycle,getSaturnLon
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -14368,7 +15132,7 @@ C
 C
       searchSaturnLon=searchTarget(Target,
      &     TargetCycle,getSaturnLon,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -14413,13 +15177,15 @@ C
 C
       character*20 myname
       data myname /'searchSolarTime'/
+C
+      logical bbok              ! did we find target
       external getSolarTime
       real targetCycle,getSolarTime
       parameter (targetCycle=24.0D0) ! target value which correponds to 0.0D0
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
-      dtin=0.1D0
+      dtin=0.05D0
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.5D0
       else
@@ -14431,7 +15197,7 @@ C
       searchSolarTime=searchLLTarget(Target,
      &     TargetCycle,getSolarTime,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -14519,13 +15285,15 @@ C
 C
       character*20 myname
       data myname /'searchSunAzimuth'/
+C
+      logical bbok              ! did we find target
       external getSunAzimuth
       real targetCycle,getSunAzimuth
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
-      dtin=0.1D0
+      dtin=0.05D0
       if (direction.eq.1) then
          tendJD = tstartJD + dtin + 1.5D0
       else
@@ -14537,7 +15305,7 @@ C
       searchSunAzimuth=searchLLTarget(Target,
      &     TargetCycle,getSunAzimuth,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -14583,6 +15351,8 @@ C
 C     
       character*18 myname
       data myname /'searchSunEclipse'/
+C
+      logical bbok              ! did we find target
       external getMoonPhase,getSunEclipse,getSunEclipseOcc
       external getSunOcc
       real getMoonPhase,targetCycle,getSunEclipse,getSunEclipseOcc
@@ -14639,7 +15409,7 @@ C
          xrep=0
          xJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getMoonPhase,
-     &        tstartJD,tendJD,dt,secdec,
+     &        tstartJD,tendJD,dt,secdec,bbok,
      &        eventId,event100,maxxrep,xrep,repJD,repid,repval,rep250,
      &        0,
      &        crc250,irc)
@@ -14650,8 +15420,8 @@ C
             call chop0(crc250,250)
             return
          end if
-C         write(*,*)myname,'Phase:',getMoonPhase(tstartJD,crc250,irc),
-C     &           tstartJD,xrep.gt.0
+C         !write(*,*)myname,'Phase:',getMoonPhase(tstartJD,crc250,irc),
+C         !&           tstartJD,xrep.gt.0
          if (xrep.gt.0) then    ! found a match, search backwards for sunEclipse entry
             tstartJD=xJD
             maxxrep=0
@@ -14706,7 +15476,7 @@ C     find out if sun is visible at maximum occultation...
                end if
             end if
             if (proceed) then   ! we have a lunar eclipse
-C     write(*,*)myname,'Match.',t16,tstartJD
+C     !write(*,*)myname,'Match.',t16,tstartJD
                searchSunEclipse=tstartJD ! returns center-time of eclipse
                bdone=.true.     ! we found a match and we are done
 C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
@@ -14721,7 +15491,8 @@ C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
                xJD=searchLLTarget(Rm, ! find start
      &              xCycle,getSunEclipse,
      &              lat,lon,hgt,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -14732,7 +15503,7 @@ C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
                   call chop0(crc250,250)
                   return
                end if               
-C     write(*,*) myname,'Ru:',rp,rm,rp.le.rm
+C     !write(*,*) myname,'Ru:',rp,rm,rp.le.rm
                if (Rp.le.-Rm) then               
 C     search backwards for Ru .eq. Rm (TOTAL ECLIPSE START)
                   dt=-0.2D0     ! eclipse starts not more than 1 day earlier
@@ -14746,7 +15517,8 @@ C     search backwards for Ru .eq. Rm (TOTAL ECLIPSE START)
                   xJD=searchLLTarget(-Rm, ! find start
      &                 xCycle,getSunEclipse,
      &                 lat,lon,hgt,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -14802,7 +15574,8 @@ C     search forwards for Ru .eq. -Rm (TOTAL ECLIPSE STOP)
                   xJD=searchLLTarget(-Rm, ! find stop
      &                 xCycle,getSunEclipse,
      &                 lat,lon,hgt,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -14826,7 +15599,8 @@ C     search forwards for Rp .eq. -Rm (PARTIAL ECLIPSE STOP)
                xJD=searchLLTarget(Rm, ! find stop
      &              xCycle,getSunEclipse,
      &              lat,lon,hgt,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -14893,6 +15667,8 @@ C
 C
       character*20 myname
       data myname /'searchSunElevation'/
+C
+      logical bbok              ! did we find target
       external getSunUpperElevation
       real targetCycle,getSunUpperElevation
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -14900,7 +15676,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.01D0
+      dtin=0.05D0
       if(direction.eq.1) then
          ipitch=pitch
          tendJD=tstartJD+1.5D0
@@ -14912,7 +15688,7 @@ C
       searchSunElevation=searchLLTarget(Target,
      &     TargetCycle,getSunUpperElevation,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     ipitch,
      &     crc250,irc)
@@ -14953,6 +15729,8 @@ C
 C
       character*16 myname
       data myname /'searchSunRA'/
+C
+      logical bbok
       external getSunRA
       real targetCycle,getSunRA
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -14970,7 +15748,7 @@ C
 C
       searchSunRA=searchTarget(Target,
      &     TargetCycle,getSunRA,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -15012,6 +15790,8 @@ C
 C
       character*16 myname
       data myname /'searchMoonRA'/
+C
+      logical bbok
       external getMoonRA
       real targetCycle,getMoonRA
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -15028,7 +15808,7 @@ C
 C
       searchMoonRA=searchTarget(Target,
      &     TargetCycle,getMoonRA,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -15072,6 +15852,8 @@ C
 C
       character*20 myname
       data myname /'searchSunRise'/
+C
+      logical bbok              ! did we find target
       external getSunElevation
       real getSunElevation
 C
@@ -15096,7 +15878,7 @@ C
       searchSunRise=searchLLTarget(Target,
      &     TargetCycle,getSunElevation,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dt,secdec,
+     &     tstartJD,tendJD,dt,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     direction,           ! elevation rises
      &     crc250,irc)
@@ -15142,6 +15924,8 @@ C
 C
       character*20 myname
       data myname /'searchSunSet'/
+C
+      logical bbok              ! did we find target
       external getSunElevation
       real getSunElevation
 C
@@ -15166,7 +15950,7 @@ C
       searchSunSet=searchLLTarget(Target,
      &     TargetCycle,getSunElevation,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dt,secdec,
+     &     tstartJD,tendJD,dt,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     -direction,          ! elevation sets
      &     crc250,irc)
@@ -15216,6 +16000,8 @@ C
 C
       character*26 myname
       data myname /'searchSunUpperElevation'/
+C
+      logical bbok              ! did we find target
       external getSunUpperElevation
       real targetCycle,getSunUpperElevation
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -15223,7 +16009,7 @@ C
 C
       call chop0(event100,100)
 C
-      dtin=0.01D0
+      dtin=0.05D0
       if(direction.eq.1) then   ! forewards
          ipitch=pitch
          tendJD=tstartJD+1.5D0
@@ -15235,7 +16021,7 @@ CC
       searchSunUpperElevation=searchLLTarget(Target,
      &     TargetCycle,getSunUpperElevation,
      &     lat,lon,hgt,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     ipitch,
      &     crc250,irc)
@@ -15294,216 +16080,6 @@ C
      &                       crc250,irc)
 
       END SUBROUTINE searchSunUpperElevationHardy
-      real function searchTarget(tval,
-     &     tValCycle,funk,
-     &     tstartJD,tendJD,dtin,secdec,
-     &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
-     &     crc250,irc)
-      implicit none
-      real tVal                 ! target value 
-      real tValCycle            ! target value cycle (360.0D0 for degrees)
-      real funk                 ! function giving the value
-      external funk
-      real tstartJD           ! start time in Julian day JD
-      real tendJD             ! end time in Julian day JD
-      real dtin                 ! time interval (absolute value)
-      integer secdec            ! number of decimals in seconds output
-      integer eventId           ! event identification
-      character*100 event100     ! search description
-      integer maxrep            ! maximum number of reports
-      integer nrep              ! number of reports so far
-      real repJD(max(1,maxrep)) ! report time in Julian day JD
-      integer repid(max(1,maxrep)) ! report time in Julian day JD
-      real repval(max(1,maxrep)) ! report time in Julian day JD
-      character*250 rep250(max(1,maxrep)) ! report strings
-      integer pitch             ! 1: rising, -1: falling, 0:any
-      character*250 crc250      ! error description
-      integer irc               ! error return code (0: ok)
-      integer lencrc
-C
-      character*14 myname
-      data myname/'searchTarget'/
-C
-      character*250 buff250
-      integer YY1,MM1,DD1,HH1,MI1
-      real sec1,idt,mindt,fact,dt
-      real JD,val,val1,jstop
-      real xJD(3),xval(3),dval(3)
-      logical major,first
-      character*100 fmt100
-      character*30 T30
-      character*16 t16
-      real ndt
-      integer length,lend,lent
-      externale length
-      real diffcycle
-      external diffcycle
-      logical bdeb,bdone
-      data bdeb/.false./
-      integer cnt,cntmax
-      parameter (cntmax=10000)
-C
-      if (bdeb)write(*,*)myname,'Entering.',irc
-      lend=length(event100,100,20)
-      JD=tstartJD
-      searchTarget=tstartJD
-      mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
-      ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
-      dt=abs(tendJD-tstartJD)/ndt
-      dt=sign(max(6.9D-3,abs(dt)),tendJD-tstartJD)
-      if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
-      if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin
-      searchTarget=tendJD
-      first=.true.
-      bdone=.false.
-      cnt=0
-      do while (cnt.lt.cntmax.and.(.not.bdone.and.(
-     &     (dt.gt.0.0D0.and.JD.le.tendJD).or.
-     &     (dt.lt.0.0D0.and.JD.ge.tendJD))))
-         cnt=cnt+1
-         CALL JD2DATE(JD,
-     &        YY1,
-     &        MM1,
-     &        DD1,
-     &        HH1,
-     &        MI1,
-     &        SEC1) 
-         WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
- 888     FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
-C
-C     get new value
-C
-         val=funk(JD,crc250,irc)
-         if (irc.ne.0) then
-            lencrc=length(crc250,250,10)
-            crc250=crc250(1:lencrc)//' < '//myname//
-     &           ' > Error return from FUNK.'
-            call chop0(crc250,250)
-            return
-         end if
-C
-         if (bdeb)write(*,'(4(X,A),2(X,F20.8))')
-     &        myname,'Step:',T16,event100(1:lend),val,tval
-C         write(*,*)myname,'JNK:',xval(1),xval(2),val,val1
-C
-C     set boundaries (max/min)
-C
-         if (first.or.major) then
-            xJD(1)=xJD(2)
-            xJD(2)=JD
-            xval(1)=xval(2)
-            xval(2)=val
-         end if
-C
-         dval(1)=diffCycle(xval(1),tval,tValCycle)
-         dval(2)=diffCycle(xval(2),tval,tValCycle)
-         dval(3)=diffCycle(val,tval,tValCycle)
-C     
-C     determine if we are in major/minor loop, and increment time
-C
-         if (first) then
-            first=.false.
-            idt=dt
-            major=.true.        ! we always start in major loop
-         else if (major) then   ! check if we must switch to minor loop
-            major= (pitch.eq.-1.and.dval(2).gt.0.0D0).or.
-     &           (pitch.eq.1.and.dval(1).gt.0.0D0) .or.
-     &           ((dval(1).gt.0.0D0 .and. dval(2).gt.0.0D0).or.
-     &           (dval(1).lt.0.0D0 .and. dval(2).lt.0.0D0)).or.
-     &           (tvalcycle.gt.0.0D0.and.
-     &           abs(dval(1)-dval(2)).gt.tValCycle*0.75D0)
-
-            if (.not.major) then ! we have just switched to minor loop
-               if (bdeb)write(*,*)myname,'Entered minor loop.',dval(1),
-     &              dval(2),dval(3),idt,xval(1),xval(2),val,tval
-               xJD(3)=xJD(2)
-               xval(3)=xval(2)
-               idt= -0.5D0 * (xJD(2)-xJD(1))
-
-
-            end if
-         else if (abs(idt).lt.mindt) then ! we have completed the minor loop
-            if (abs(dval(1)-dval(2)).lt.tValCycle*0.25D0 ! check if discontinuity-hit
-     &           .or.tValCycle.lt.0.0D0) then
-               nrep=nrep+1
-               if (maxrep.ne.0) then ! make report
-                  if (nrep.le.maxrep) then
-                     if (secdec.gt.0) then
-                        write(fmt100,'(A,I2.2,A,I1,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2,F",
-     &                       secdec+1,".",secdec,")"
-                        fact=10.0D0**(real(secdec))
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1),real(int((sec1-int(sec1))
-     &                       *fact))/fact
-                     else
-                        write(fmt100,'(A,I2.2,A)')
-     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                       "I2.2,':',I2.2)"
-                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                       int(sec1)
-                     end if
-                     call chop0(T30,30)
-                     lent=length(T30,30,30)
-                     write(rep250(nrep),'(A,X,A)')T30(1:lent),
-     &                    event100(1:lend)
-                     repJD(nrep)=JD
-                     repid(nrep)=eventId
-                     repval(nrep)=-99999.0D0
-                     if (bdeb)write(*,*)myname,'Ended minor loop.',idt
-                  end if
-               end if
-               searchTarget=JD
-               bdone=.true.
-            end if
-C     reset variables
-            major=.true.
-            xJD(2)=xJD(3)
-            xval(2)=xval(3)
-            JD=xJD(3)
-            idt=dt
-         else                   ! we are in minor loop
-C            write(*,*)myname,'Minor before:',dval(1),dval(2),dval(3),idt
-            if ((dval(3).gt.0.0D0.and.dval(1).gt.0.0D0).or.
-     &           (dval(3).lt.0.0D0.and.dval(1).lt.0.0D0)) then
-               xJD(1)=xJD(2) ! swap
-               xval(1)=xval(2)
-               dval(1)=dval(2)
-            end if
-            xJD(2)=JD
-            xval(2)=val
-            dval(2)=dval(3)
-            idt= -0.5D0 * (xJD(2)-xJD(1)) ! go back half-a-step
-C            write(*,*)myname,'Minor  after:',
-C     &         dval(1),dval(2),dval(3),idt
-         end if
-C     increment time
-         JD=JD+idt
-      end do
-      if (cnt.eq.cntmax)then
-         write(buff250,*)
-     &        ' < '//myname,' > Too many iterations.'
-         lencrc=length(crc250,250,10)
-         crc250=crc250(1:lencrc)//buff250
-         call chop0(crc250,250)
-         irc=457
-         return
-      end if
-      if (nrep.gt.maxrep.AND.MAXREP.NE.0) then
-         write(buff250,*)
-     &        ' < '//myname,' > Too many reports.',nrep,maxrep
-         lencrc=length(crc250,250,10)
-         crc250=crc250(1:lencrc)//buff250
-         call chop0(crc250,250)
-         irc=471
-         return
-      end if
-C
-      if (bdeb)write(*,*)myname,'Done.',irc
-      return
-      end function searchTarget
 C
       real function searchUmbra(
      &     tstartJDin,secdec,
@@ -15534,8 +16110,10 @@ C
 C     
       character*18 myname
       data myname /'searchUmbra'/
+C
+      logical bbok
       logical bdeb
-      data bdeb/.true./
+      data bdeb/.false./
       external getMoonPhase,getUmbra,getPenUmbra,getMoonOcc,getUmbraOcc
       real getMoonPhase,getUmbra,getPenUmbra,getMoonOcc,getUmbraOcc
       real targetCycle
@@ -15586,7 +16164,7 @@ C
          xrep=0
          tstartJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getMoonPhase,
-     &        tstartJD,tendJD,dt,secdec,
+     &        tstartJD,tendJD,dt,secdec,bbok,
      &        eventId,event100,maxxrep,xrep,repJD,repid,repval,rep250,
      &        0,
      &        crc250,irc)
@@ -15598,7 +16176,7 @@ C
             return
          end if
          if (xrep.gt.0) then    ! found a match, search backwards for umbra entry
-C            write(*,*)myname,' Time A:', tstartJD
+C            !write(*,*)myname,' Time A:', tstartJD
             maxxrep=0
             xrep=0
             tstartJD=searchMin( ! only get time of 
@@ -15615,7 +16193,7 @@ C            write(*,*)myname,' Time A:', tstartJD
                return
             end if
 
-C            write(*,*)myname,' Time B:', tstartJD
+C            !write(*,*)myname,' Time B:', tstartJD
             Rp=getPenumbra(tstartJD,crc250,irc) ! distance between Moon center and earth-penumbra
             if (irc.ne.0) then
                lencrc=length(crc250,250,10)
@@ -15635,7 +16213,7 @@ C            write(*,*)myname,' Time B:', tstartJD
             WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
  888        FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
 
-C            write(*,*)myname,'REP:  ',t16,xrep,proceed
+C            !write(*,*)myname,'REP:  ',t16,xrep,proceed
 
             if (proceed) then
                Ru=getUmbra(tstartJD,crc250,irc) ! distance between Moon center and earth-penumbra
@@ -15658,7 +16236,8 @@ C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getPenumbra,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -15670,7 +16249,7 @@ C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
                   return
                end if
                
-C     write(*,*) myname,'Ru:',rp,rm,rp.le.rm
+C     !write(*,*) myname,'Ru:',rp,rm,rp.le.rm
                if (Ru.le.Rm) then               
 C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
                   dt=-0.2D0     ! eclipse starts not more than 1 day earlier
@@ -15684,7 +16263,8 @@ C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
                   dt=dt*0.1D0
                   xJD=searchTarget(Rm, ! find start
      &                 xCycle,getUmbra,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -15709,7 +16289,8 @@ C     search backwards for Ru .eq. -Rm (UMBRA TOTAL START)
                   dt=dt*0.1D0
                   xJD=searchTarget(-Rm, ! find start
      &                 xCycle,getUmbra,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -15766,7 +16347,8 @@ C     search forwards for Ru .eq. -Rm (UMBRA TOTAL STOP)
                   dt=dt*0.1D0
                   xJD=searchTarget(-Rm, ! find stop
      &                 xCycle,getUmbra,
-     &                 tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -15791,7 +16373,8 @@ C     search forwards for Ru .eq. Rm (UMBRA PARTIAL STOP)
                   dt=dt*0.1D0
                   xJD=searchTarget(Rm, ! find stop
      &                 xCycle,getUmbra,
-     &                 tstartJD,tendJD,dt,secdec,xeventid,xevent100,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventid,xevent100,
      &                 maxrep,nrep,repJD,repid,repval,rep250,
      &                 0,
      &                 crc250,irc)
@@ -15802,7 +16385,7 @@ C     search forwards for Ru .eq. Rm (UMBRA PARTIAL STOP)
                      call chop0(crc250,250)
                      return
                   end if
-C     write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
+C     !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
                end if
 C     search forwards for Rp .eq. -Rm (PENUMBRA TOTAL STOP)
                dt=0.2D0         ! eclipse stops not more than 1 day later
@@ -15816,7 +16399,8 @@ C     search forwards for Rp .eq. -Rm (PENUMBRA TOTAL STOP)
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find stop
      &              xCycle,getPenumbra,
-     &              tstartJD,tendJD,dt,secdec,xeventid,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventid,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -15876,6 +16460,8 @@ C
 C
       character*18 myname
       data myname /'searchVenusRelLon'/
+C
+      logical bbok
       external getVenusRelLon
       real targetCycle,getVenusRelLon
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -15893,7 +16479,7 @@ C
 C
       searchVenusRelLon=searchTarget(Target,
      &     TargetCycle,getVenusRelLon,
-     &     tstartJD,tendJD,dtin,secdec,
+     &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
      &     0,
      &     crc250,irc)
@@ -15933,6 +16519,8 @@ C
 C
       character*20 myname
       data myname /'searchVenusTransit'/
+C
+      logical bbok
       external getVenusRelLon,getVenusTransit
       real targetCycle,getVenusTransit,getVenusRelLon
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
@@ -15979,7 +16567,7 @@ C
          xrep=0
          tstartJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getVenusRelLon,
-     &        tstartJD,tendJD,dt,secdec,
+     &        tstartJD,tendJD,dt,secdec,bbok,
      &        eventId,event100,maxxrep,xrep,repJD,repid,repval,rep250,
      &        0,
      &        crc250,irc)
@@ -15991,7 +16579,7 @@ C
             return
          end if
 
-         if (xrep.gt.0) then    ! found a match, search backwards for penumbra entry
+         if (bbok) then    ! found a match, search backwards for penumbra entry
 
             CALL JD2DATE(tstartJD,
      &           YY1,
@@ -16005,11 +16593,10 @@ C
 
             Rp=getVenusTransit(tstartJD,crc250,irc) ! distance between Venus and earth-sun cone
 
-C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
+C           !write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
             if (Rp.le.Rm) then  ! Venus eclipses the Sun
                lend=length(event100,100,10)
-               xrep=nrep
-               dt=10.0D0       ! eclipse starts not more than 10 day earlier
+               dt=10.0D0        ! eclipse starts not more than 10 day earlier
                xeventId=eventId + 1
                xevent100=event100(1:lend)//' STOP'
                call chop0(xevent100,100)
@@ -16018,7 +16605,8 @@ C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find stop
      &              xCycle,getVenusTransit,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -16038,7 +16626,8 @@ C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getVenusTransit,
-     &              tstartJD,tendJD,dt,secdec,xeventId,xevent100,
+     &              tstartJD,tendJD,dt,secdec,bbok,
+     &              xeventId,xevent100,
      &              maxrep,nrep,repJD,repid,repval,rep250,
      &              0,
      &              crc250,irc)
@@ -16049,13 +16638,13 @@ C           write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                   call chop0(crc250,250)
                   return
                end if
-               if (nrep.ne.xrep) then ! we are done...
+               if (bbok) then ! we are done...
                   searchVenusTransit=xJD
                   return
                end if
                return
 
-C               write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
+C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
             end if
          end if
          if ((dtin.gt.0.0D0.and.tstartJD+0.5*dtin
@@ -16219,7 +16808,7 @@ C
       ang=ang-real(nint((ang/360.00)-0.5D0))*360.0D0 ! 0 -> 360
       getJupiterLon=ang
 C
-C      write(*,*)myname,'Illum:',getJupiterLon
+C      !write(*,*)myname,'Illum:',getJupiterLon
 C
       return
       end function getJupiterLon
@@ -16480,7 +17069,7 @@ C
       ang=ang-real(nint((ang/360.00)-0.5D0))*360.0D0 ! 0 -> 360
       getMarsLon=ang
 C
-C      write(*,*)myname,'Illum:',getMarsLon
+C      !write(*,*)myname,'Illum:',getMarsLon
 C
       return
       end function getMarsLon
@@ -16600,9 +17189,9 @@ C
       mercAng=atan2deg(mercPos(2),mercPos(1))
       earthAng=atan2deg(earthPos(2),earthPos(1))
       ang=(earthAng-mercAng)
-C      write(*,*) myname,'Ang before:',ang
+C      !write(*,*) myname,'Ang before:',ang
       ang=ang-(real(nint((ang/360.00)-0.5D0))*360.0D0) ! 0 -> 360
-C      write(*,*) myname,'Ang after: ',ang
+C      !write(*,*) myname,'Ang after: ',ang
 C
 
       if (ang.lt.180.0D0) elong=-elong
@@ -16731,7 +17320,7 @@ C
       ang=ang-real(nint((ang/360.00)-0.5D0))*360.0D0 ! 0 -> 360
       getMercRelLon=ang
 C
-C      write(*,*)myname,'Illum:',getMercRelLon
+C      !write(*,*)myname,'Illum:',getMercRelLon
 C
       return
       end function getMercRelLon
@@ -16843,7 +17432,7 @@ C
 C
       getMercTransit = dam-ra  ! penumbra distance
 C
-C      write(*,*)'GETMERCPENUMBRA:',JD,dam,ra,dam-ra
+C      !write(*,*)'GETMERCPENUMBRA:',JD,dam,ra,dam-ra
 C
       return
       end function getMercTransit
@@ -16926,7 +17515,10 @@ C
      &     moonPolar,           ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 
@@ -16937,7 +17529,7 @@ C
 C
       getMoonAzimuth=azimuth
 
-C     write(*,*)myname,'Angles:',azimuth,elevation,getMoonAzimuth
+C     !write(*,*)myname,'Angles:',azimuth,elevation,getMoonAzimuth
       return
       end function getMoonAzimuth
       real function getMoonElevation(JD,loclat,loclon,lochgt,
@@ -17019,7 +17611,10 @@ C
      &     moonPolar,           ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 
@@ -17032,7 +17627,7 @@ C     Target: lat         gives moon set
 C     Target: lat+360.0D0 gives moon rise
 C
       getMoonElevation=elevation
-C      write(*,*)myname,'Angles:',azimuth,elevation,
+C      !write(*,*)myname,'Angles:',azimuth,elevation,
 C     &     getMoonElevation,moonPolar(2)*DEG
       return
       end function getMoonElevation
@@ -17119,7 +17714,7 @@ C
       ang=acosdeg(ca)
       getMoonIllum=0.5D0 * (1.0D0 + ca) * 100.0D0 ! 0->100 (max illum)
 C
-C      write(*,*)myname,'Illum:',getMoonIllum
+C      !write(*,*)myname,'Illum:',getMoonIllum
 C
       return
       end function getMoonIllum
@@ -17251,7 +17846,7 @@ C     http://mathworld.wolfram.com/Circle-CircleIntersection.html
          occ = 100.0D0* Area/(rm*rm*pi)
       end if
 C
-C      write(*,*)'GETMOONOCC:',JD,occ
+C      !write(*,*)'GETMOONOCC:',JD,occ
 C
       getMoonOcc=occ
       return
@@ -17465,7 +18060,10 @@ C
      &     moonPolar,           ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 
@@ -17482,9 +18080,9 @@ C
       else                      ! evening
          getMoonUpperElevation=elevation+360.0D0
       end if
-C      write(*,*)myname,'Angles:',azimuth,elevation,
+C      !write(*,*)myname,'Angles:',azimuth,elevation,
 C     &     getMoonUpperElevation,moonPolar(2)*DEG
-C      write(*,*)myname,'******:',azimuth,
+C      !write(*,*)myname,'******:',azimuth,
 C     &     diffCycle(azimuth,90.0D0,360.0D0),
 C     &     elevation,getMoonUpperElevation
       return
@@ -17602,7 +18200,7 @@ C
 C
       getPenumbra = dam-ra  ! penumbra distance
 C
-C      write(*,*)'GETPENUMBRA:',JD,dam,ra,dam-ra
+C      !write(*,*)'GETPENUMBRA:',JD,dam,ra,dam-ra
 C
       return
       end function getPenumbra
@@ -17890,7 +18488,10 @@ C
      &     moonPolar,            ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 
@@ -17899,7 +18500,7 @@ C
       elevation=moonPolar(2)*DEG
      &     + ((rMoon-rEarth)/moonPolar(1))*DEG
 C     
-C      write(*,*)'AngleBB:',r(1),r(2),r(3),
+C      !write(*,*)'AngleBB:',r(1),r(2),r(3),
 C     &     90.0-(elevation+(34.0/60.0))
 C     
 C     Calculate lunar celestial latitude... (Z-axis points towards north pole)
@@ -17921,7 +18522,7 @@ C
       else
          ang=ang0 + ((rMoon-rEarth)/dist)*DEG
       end if
-C      write(*,*)'Moon-north-pole (corrected):',ang
+C      !write(*,*)'Moon-north-pole (corrected):',ang
 C
 C     Target=
 C     lat:       gives polar night stop
@@ -18027,7 +18628,7 @@ C
       rEarth   =   6378.0D0 
       dist=getAbs(moonPos)
 C
-C      write(*,*)'PolarMoonAngle:',ang,moonPos
+C      !write(*,*)'PolarMoonAngle:',ang,moonPos
 C
       if (locLat.gt.0.0D0) then
          ang=ang0 - ((rMoon-rEarth)/dist)*DEG
@@ -18050,7 +18651,7 @@ C
          ang=-ang
       end if
 
-C      write(*,*)'POLARMOONANGLE:',moonAng,moonPos
+C      !write(*,*)'POLARMOONANGLE:',moonAng,moonPos
 
 C
 C     Target=
@@ -18171,7 +18772,7 @@ C
       ang=ang-real(nint((ang/360.00)-0.5D0))*360.0D0 ! 0 -> 360
       getSaturnLon=ang
 C
-C      write(*,*)myname,'Illum:',getSaturnLon
+C      !write(*,*)myname,'Illum:',getSaturnLon
 C
       return
       end function getSaturnLon
@@ -18351,7 +18952,10 @@ C
      &     sunPolar,            ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 
@@ -18362,7 +18966,7 @@ C
 C
       getSunAzimuth=azimuth
 
-C      write(*,*)myname,'Angles:',azimuth,elevation,getSunAzimuth
+C     !write(*,*)myname,'Angles:',azimuth,elevation,getSunAzimuth
       return
       end function getSunAzimuth
 C
@@ -18573,7 +19177,10 @@ C
      &     sunPolar,            ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 
@@ -18610,7 +19217,10 @@ C
      &     moonPolar,           ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 C     
@@ -18674,7 +19284,7 @@ C     http://mathworld.wolfram.com/Circle-CircleIntersection.html
      &        +(ru*ru)*acos((d*d+ru*ru-rm*rm)/(2.0*d*ru))
      &        -0.5D0*dsqrt((-d+rm+ru)*(d+rm-ru)*(d-rm+ru)*(d+rm+ru))
          occ = 100.0D0* Area/(ru*ru*pi)
-C         write(*,*)myname,'Occ:',occ
+C         !write(*,*)myname,'Occ:',occ
 
       end if
 C
@@ -18682,7 +19292,7 @@ C     get distance between SunEclipse and moon center
 C
       getSunEclipse = d-ru      ! cone distance
 C
-C     write(*,*)'GETCONE:',JD,d,ru,d-ru,desx,dx
+C     !write(*,*)'GETCONE:',JD,d,ru,d-ru,desx,dx
 C
       return
       end function getSunEclipse
@@ -18691,7 +19301,7 @@ C
       implicit none
       real occ
       common /CgetSunEclipse/occ
-C      write(*,*)myname,'Get Occ:',occ
+C      !write(*,*)myname,'Get Occ:',occ
 C     Occulation (in %)
       getSunEclipseOcc=occ
       return
@@ -18779,10 +19389,12 @@ C
      &     sunPolar,            ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
-
 C
       azimuth=sunPolar(3)*DEG
       elevation=sunPolar(2)*DEG
@@ -18796,7 +19408,7 @@ C
       else                      ! evening
          getSunElevation=elevation
       end if
-C     write(*,*)myname,'Angles:',azimuth,elevation,getSunElevation
+C     !write(*,*)myname,'Angles:',azimuth,elevation,getSunElevation
       return
       end function getSunElevation
 C
@@ -18882,7 +19494,10 @@ C
      &     sunPolar,            ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 
@@ -18919,7 +19534,10 @@ C
      &     moonPolar,           ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
          return
       end if
 C     
@@ -18982,7 +19600,7 @@ C     get distance between SunEclipse and moon center
 C
       getSunOcc = occ           ! occultation
 C
-C      write(*,*)'OCC:',JD,occ,d
+C      !write(*,*)'OCC:',JD,occ,d
 C
       return
 C
@@ -19212,7 +19830,9 @@ C
      &     sunPolar,            ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         write(*,*)myname,'Error return from JPLephEFtoTC.',irc
+         lencrc=length(crc250,10)
+         crc250=crc250(1:lencrc)//' > '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
          return
       end if
 C
@@ -19231,7 +19851,7 @@ C      if (abs(diffCycle(azimuth,90.0D0,360.0D0)).lt.90.0D0) then ! 12pm -> 12am
 C      else                      ! evening
 C         getSunUpperElevation=elevation+360.0D0
 C      end if
-C      write(*,*)myname,'******:',azimuth,
+C      !write(*,*)myname,'******:',azimuth,
 C     &     diffCycle(azimuth,90.0D0,360.0D0),
 C     &     elevation,getSunUpperElevation
       return
@@ -19380,7 +20000,7 @@ C
          getUmbra = d-ru      ! umbra distance
       end if
 C
-C       write(*,*)'GETUMBRA:',JD,d,ru,d-ru,desx,dx
+C       !write(*,*)'GETUMBRA:',JD,d,ru,d-ru,desx,dx
 C
       return
       end function getUmbra
@@ -19511,9 +20131,9 @@ C
       venusAng=atan2deg(venusPos(2),venusPos(1))
       earthAng=atan2deg(earthPos(2),earthPos(1))
       ang=(earthAng-venusAng)
-C      write(*,*) myname,'Ang before:',ang
+C      !write(*,*) myname,'Ang before:',ang
       ang=ang-(real(nint((ang/360.00)-0.5D0))*360.0D0) ! 0 -> 360
-C      write(*,*) myname,'Ang after: ',ang
+C      !write(*,*) myname,'Ang after: ',ang
 C
 
       if (ang.lt.180.0D0) elong=-elong
@@ -19642,7 +20262,7 @@ C
       ang=ang-real(nint((ang/360.00)-0.5D0))*360.0D0 ! 0 -> 360
       getVenusRelLon=ang
 C
-C      write(*,*)myname,'Illum:',getVenusRelLon
+C      !write(*,*)myname,'Illum:',getVenusRelLon
 C
       return
       end function getVenusRelLon
@@ -19755,7 +20375,7 @@ C
 C
       getVenusTransit = dam-ra  ! penumbra distance
 C
-C      write(*,*)'GETMERCPENUMBRA:',JD,dam,ra,dam-ra
+C      !write(*,*)'GETMERCPENUMBRA:',JD,dam,ra,dam-ra
 C
       return
       end function getVenusTransit
