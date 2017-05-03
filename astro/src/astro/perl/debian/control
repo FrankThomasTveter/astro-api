@@ -1,26 +1,20 @@
-Source: astroapi-perl
+Source: astro-api-perl
 Section: perl
 Priority: optional
 Build-Depends: debhelper (>= 5.0.0), perl (>= 5.8.8-12ubuntu0.5)
 Maintainer: root <frank.tveter@met.no>
 Standards-Version: 3.7.2
-Homepage: http://search.cpan.org/dist/AstroApi/
+Homepage: http://github.com/FrankThomasTveter/astro-api/
 
-Package: astroapi-perl
+Package: astro-api-perl
 Architecture: any
 Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}, 
 Description:  When does the sun rise and set for a given place?
- Given a position in longitude and latitude and date, send a simple request and
- find out when the sun and the moon rise and set.  The elevation angle of the sun at
- solar noon is also given. You can either specify a given date using the 
- date parameter or you can ask for a range, using the parameters 
- from and to (which both are inclusive). 
- Note that the algorithm estimates the timezone based on longitude, and events 
- around midnight can therefore be misplaced with respect to the local date.
+ When is the next full Moon?
+ What are the positions of the planets at a given time?
  .
- Direct requests can also be sent to the underlying astronomical event library. 
- This option is only recommended for advanced users.
+ Send a simple http-request and find out, or navigate the astronomical 
+ events on the associated webpage. 
  .
- The times are all in UTC. Coordinates are given with east and north as positive values.
- .
- This description was automagically extracted from the module by dh-make-perl.
+ See the wiki-pages at http://gitbub.com/FrankThomasTveter/astro-api 
+ for more details and examples.

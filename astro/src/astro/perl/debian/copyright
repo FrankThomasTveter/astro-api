@@ -1,4 +1,4 @@
-This is the debian package for the AstroApi module.
+This is the debian package for the astro-api module.
 It was created by root <frank.tveter@met.no> using dh-make-perl.
 
 It was downloaded from http://search.cpan.org/dist/AstroApi/
