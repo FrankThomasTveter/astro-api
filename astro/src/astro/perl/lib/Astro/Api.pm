@@ -19,9 +19,9 @@ use constant ERROR          => 30;
 
 require Exporter;
 our @ISA = ("Exporter");
-our @EXPORT = qw(state event);    
+our @EXPORT = qw(state event xs_DTGToJD xs_JDToDTG astroEvent);    
 our %EXPORT_TAGS = (
-                     all => [qw(state event)],
+                     all => [qw(state event xs_DTGToJD xs_JDToDTG astroEvent)],
                    );
 our $license_url;
 
@@ -156,7 +156,7 @@ sub event {
 	} 
 	# make times
 	my $eventStartJD="";
-	my $eventStopJD="";
+	my $eventStopJD=0;
 	if ($eventStart =~ m/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}\.?\d*)Z/) {
 	    $eventStartJD=xs_DTGToJD($1,$2,$3,$4,$5,$6);
 	    #print "EventStart: $1-$2-$3 $4:$5:$6 -> JD $eventStartJD\n"
@@ -191,12 +191,7 @@ sub event {
 #	    throw(message => "astroEvent call: $msg\n");
 	my $start_time = [gettimeofday];
 	eval {
-	    if ("$eventSearch" eq "2") {      # use $eventStop
 		($irc,$nrep,$repJD,$repId,$repVal,$rep250) = pm_astroEvent($eventStartJD,$eventSearch,$eventStopJD,$eventId,\@eventVal,0,0);
-	    } else {
-		$eventStop="";
-		($irc,$nrep,$repJD,$repId,$repVal,$rep250) = pm_astroEvent($eventStartJD,$eventSearch,$eventId,\@eventVal,0,0);
-	    }
 	};
 	my $msg=$@ ;
 	if ( $msg ) { # astroEvent croaked...
@@ -353,6 +348,41 @@ sub throw {
     }
     print STDERR "$s\n";
     die $s;
+}
+#
+# subs used to test library...
+#
+sub astroEvent {
+    ############################################
+    ###### retrieve iput
+    ############################################
+    #
+    my $tStart2000 = shift;                      # start time (in jd2000 = julianDate - 2451544.5)
+    my $searchCode = shift;                      # search code; -1:previous, +1:next, 0: both, +2:until tend2000
+    # Do not provide $tend2000 if $searchCode = -1, 0 or 1 !!!!!!
+    my $tend2000 = ($searchCode==2 ? shift : 0); # report all events end time (in jd2000)
+    my $eventId = shift;                         # requested event id (SEE TABLE BELOW)
+    my $eventValr=shift;                         # array reference
+    my @eventVal=@$eventValr;                    # event input data (SEE TABLE BELOW)
+    my $secdec =  shift;                         # number of second decimals used in output report string 
+    #
+    ############################################
+    ##### call WRAPPER subroutine
+    ############################################
+    #
+    ###    @eventVal=(@eventVal,0); ### @eventVal can not be empty
+
+    my ($irc,$nrep,$repJD,$repId,$repVal,$rep250) = pm_astroEvent($tStart2000,$searchCode,$tend2000,$eventId,\@eventVal,$secdec,0);
+    #
+    ############################################
+    #####  EXTRACT OUTPUT
+    ############################################
+    #
+
+    ############################################
+    ##### return output
+    ############################################
+    return ($irc,$nrep,$repJD,$repId,$repVal,$rep250); # this is the same layout as output from aa_astroEvent
 }
 
 1;

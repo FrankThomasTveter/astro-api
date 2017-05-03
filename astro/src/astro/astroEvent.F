@@ -6978,7 +6978,7 @@ C
             call chop0(crc250,250)
             return
          end if
-         if (xrep.gt.0) then    ! found a match, search backwards for penumbra entry
+         if (bbok) then    ! found a match, search backwards for penumbra entry
 
             CALL JD2DATE(tstartJD,
      &           YY1,
@@ -9166,7 +9166,7 @@ C
             call chop0(crc250,250)
             return
          end if
-         if (xrep.gt.0) then    ! found a match, search backwards for sunEclipse entry
+         if (bbok) then    ! found a match, search backwards for sunEclipse entry
             tstartJD=xJD
             maxxrep=0
             xrep=0
@@ -10631,7 +10631,7 @@ C
             return
          end if
 
-         if (xrep.gt.0) then    ! found a match, search backwards for penumbra entry
+         if (bbok) then    ! found a match, search backwards for penumbra entry
 
             CALL JD2DATE(tstartJD,
      &           YY1,
@@ -15421,8 +15421,8 @@ C
             return
          end if
 C         !write(*,*)myname,'Phase:',getMoonPhase(tstartJD,crc250,irc),
-C         !&           tstartJD,xrep.gt.0
-         if (xrep.gt.0) then    ! found a match, search backwards for sunEclipse entry
+C         !&           tstartJD,bbok
+         if (bbok) then    ! found a match, search backwards for sunEclipse entry
             tstartJD=xJD
             maxxrep=0
             xrep=0
@@ -16175,7 +16175,7 @@ C
             call chop0(crc250,250)
             return
          end if
-         if (xrep.gt.0) then    ! found a match, search backwards for umbra entry
+         if (bbok) then    ! found a match, search backwards for umbra entry
 C            !write(*,*)myname,' Time A:', tstartJD
             maxxrep=0
             xrep=0

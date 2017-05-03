@@ -26,6 +26,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
     pm_JDepoch
     xs_DTGToJD
     xs_JDToDTG
+    xs_astroEvent
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -54,8 +55,7 @@ END {
 sub pm_astroEvent {
     my $tStart2000 = shift;                      # start time (in jd2000 = julianDate - 2451544.5)
     my $searchCode = shift;                      # search code; -1:previous, +1:next, 0: both, +2:until tend2000
-    # Do not provide $tend2000 if $searchCode = -1, 0 or 1 !!!!!!
-    my $tend2000 = ($searchCode==2 ? shift : 0); # report all events end time (in jd2000)
+    my $tend2000 = shift;                        # report all events end time (in jd2000)
     my $eventId = shift;                         # requested event id (SEE TABLE BELOW)
     my $eventValr=shift;                         # array reference
     my @eventVal=@$eventValr;                    # event input data (SEE TABLE BELOW)
