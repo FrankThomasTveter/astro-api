@@ -85,9 +85,12 @@ c
 c
       call use_default()
 C
-      write(*,'(A)')"Content-Type:text/html;charset=iso-8859-1"
+      write(*,'(A)')"Content-Type: text/xml"
       write(*,*)
-      write(*,'(A)') '<astrodata xsi:schemaLocation='//
+      write(*,'(A)') '<?xml version="1.0" encoding="utf-8"?>'
+      write(*,'(A)') '<astrodata xmlns:xsi='//
+     &     '"http://www.w3.org/2001/XMLSchema-instance"'//
+     &     ' xmlns="http://astro.met.no"  xsi:schemaLocation='//
      &     '"http://astro.met.no/astro event.xsd">'//
      &     '<meta licenseurl="1"/>'
 C

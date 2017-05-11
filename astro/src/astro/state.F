@@ -163,10 +163,16 @@ c$$$  end if
          write(*,'("Content-type: text/html;charset=iso-8859-1")')
          write(*,'("")')
          write(*,'(A)') '<?xml version="1.0" encoding="utf-8"?>'
+         write(*,'(A)') '<solarsystem xmlns:xsi='//
+     &        '"http://www.w3.org/2001/XMLSchema-instance"'//
+     &        ' xmlns="http://astro.met.no"  xsi:schemaLocation='//
+     &        '"http://astro.met.no/astro state.xsd">'//
+     &        '<meta licenseurl="1"/>'
          call chop0(crc250,250)
          lenc=length(crc250,250,10)
          write(*,'(A,I0,A,A,A)') '<Error irc="',irc,
      &        '" msg="',crc250(1:lenc),'"/>"'
+         write(*,'(A)') '</solarsystem>'
       end if
       return
       end subroutine state
