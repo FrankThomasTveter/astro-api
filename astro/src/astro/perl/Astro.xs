@@ -43,6 +43,16 @@ xs_DTGToJD(int year, int month, int mday, int hour, int min, double secs, OUTLIS
         date2jd_(&JD, &year, &month, &mday, &hour, &min, &secs );
 
 void
+xs_event()
+  CODE:
+        event_();
+
+void
+xs_state()
+  CODE:
+        state_();
+
+void
 xs_astroEvent(double tstartJD, int searchCode, double tendJD, int eventId, int neventVal, AV* eventValin, int secdec, int irc)
   PREINIT:
       double* eventVal;

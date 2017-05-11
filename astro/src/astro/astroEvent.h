@@ -15,6 +15,8 @@ void jplephclose_();
 void jd2date_(double* JD, int* year, int* month, int* mday, int* hour, int* min, double* secs);
 void date2jd_(double* JD, int* year, int* month, int* mday, int* hour, int* min, double* secs);
   
+void event_();
+void state_();
 void astroevent_( double *tstart2000, // start time (in jd2000)
                   int *searchCode,    // search code (-1:prev,0:both,+1:next,+2:report all events in period)
 		  double *tend2000,   // report all events end time (in jd2000)

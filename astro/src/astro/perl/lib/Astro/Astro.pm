@@ -1,11 +1,7 @@
 package Astro::Astro;
 
 use 5.006;
-use strict;
-use warnings;
-use Carp qw(croak);
 use XSLoader;
-use Time::Local qw(timegm_nocheck);
 use File::Spec qw();
 
 require Exporter;
@@ -20,10 +16,8 @@ our @ISA = qw(Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
-    pm_astroState
-    pm_astroEvent
-    pm_epochJD
-    pm_JDepoch
+    pm_state
+    pm_event
     xs_DTGToJD
     xs_JDToDTG
     xs_astroEvent
@@ -51,6 +45,10 @@ BEGIN {
 END {
     xs_jplephClose();
 }
+
+sub pm_event {return xs_event();}
+
+sub pm_state {return xs_state();}
 
 sub pm_astroEvent {
     my $tStart2000 = shift;                      # start time (in jd2000 = julianDate - 2451544.5)
@@ -190,22 +188,6 @@ sub trim($)  { # removes initial and trailing whitespace
 	return $string;
 }
 
-sub pm_epochjd {
-    my ($epoch) = @_;
-    my ($sec, $min, $hour, $mday, $month, $year) = gmtime($epoch);
-    $year += 1900;
-    $month++;
-    return xs_DTGToJD($year, $month, $mday, $hour, $min, $sec);
-}
-
-
-sub pm_jdepoch {
-    my ($JD) = @_;
-    my ($year, $month, $mday, $hour, $min, $sec) = 
-        xs_JDToDTG($JD);
-    $sec = int (.5 + $sec);
-    return timegm_nocheck($sec, $min, $hour, $mday, $month -1, $year);
-}
 
 1;
 __END__

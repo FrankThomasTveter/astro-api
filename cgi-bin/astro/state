@@ -1,3 +1,6 @@
 #! /bin/csh
-./state.pl 'lat=60.0;lon=0.0;hgt=0.0;dtg=2010-10-10T10:10:10Z;dtg=2011-11-11T11:11:11Z;'
+#
+setenv QUERY_STRING 'lat=60.0;lon=0.0;hgt=0.0;dtg=2010-10-10T10:10:10Z;dtg=2011-11-11T11:11:11Z;'
+#
+./state.pl
 #

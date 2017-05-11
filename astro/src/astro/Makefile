@@ -44,7 +44,7 @@
 #	(Put a list of FORTRAN source files containing main programs
 #	 here) 
 #
- MAINS = astro.F
+ MAINS = astro.F test.F
 #
 # Full library name
 #	(All objects will be stored in a library (using the UNIX 
@@ -76,7 +76,7 @@
 #	(Put the compilation flags here (-g is recommented))
 #
 # OPTIONS =-g -fcheck=all -fbacktrace -fPIC -fdefault-real-8 -fdefault-double-8
- OPTIONS =-fPIC -fdefault-real-8 -fdefault-double-8 -fmax-errors=10
+ OPTIONS =-O3 -fPIC -fdefault-real-8 -fdefault-double-8 -fmax-errors=10
 #  -fdefault-real-8
 ### -fbounds-check -g
 ### -ffixed-form
