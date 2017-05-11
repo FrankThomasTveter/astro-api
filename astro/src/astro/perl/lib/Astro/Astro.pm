@@ -20,6 +20,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
     pm_event
     xs_DTGToJD
     xs_JDToDTG
+    xs_event
+    xs_state
     xs_astroEvent
 ) ] );
 
