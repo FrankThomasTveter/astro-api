@@ -11,6 +11,8 @@
       !
       character*1 c1
       character*30 b30
+      integer lenb
+      integer, external :: length
       real :: jd ! 	IAU, 0 Jan 2010, 0h TT
       integer, parameter :: nbodies=11
       real :: pole(6,nbodies) ! R.A., Dec, omega, domega/dt (deg/day) , orbits (index), xmu = G * Mass
@@ -94,6 +96,14 @@
             return
          end if
          CALL DATE2JD(JD2000(tt),YY,MM,DD,HH,MI,SEC) 
+! clean up
+         write(b30,'(F6.3)') sec
+         call chop0(b30,6)
+         lenb=length(b30,6,6)
+         write(jd30(tt),'(I4.4,"-",I2.2,"-",I2.2,"T",'//
+     &        'I2.2,":",I2.2,":",A,"Z")') 
+     &        YY,MM,DD,HH,MI,b30(1:lenb)
+
       end do
 !
 !     get planetary angular vectors in MJD2000

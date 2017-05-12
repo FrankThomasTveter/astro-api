@@ -99,6 +99,9 @@ C
       mode=0                    ! initial
       bdone=(ii.gt.lens)
       do while (.not. bdone)
+         if (s1000(ii:ii).eq.'%') then ! special character
+            s1000(ii:ii+2)='   '
+         end if
          if (mode.eq.0) then
             if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then
                ii=ii+1
@@ -220,7 +223,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then
                if (bdeb) write(*,*) 'Found debug value: "'//
      &              s1000(istart:istop)//'"',ii,mode
                read(s1000(istart:istop),*,iostat=irc) idebug
@@ -239,7 +242,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then ! we are done
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
                if (bdeb) write(*,*) 'Found start time: "'//
      &              s1000(istart:istop)//'"',ii,mode
                read(s1000(istart:istop),*,iostat=irc) 
@@ -275,7 +278,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then ! we are done
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
                if (bdeb) write(*,*) 'Found search code: "'//
      &              s1000(istart:istop)//'"',ii,mode
                read(s1000(istart:istop),*,iostat=irc) searchCode
@@ -295,7 +298,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then ! we are done
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
                if (bdeb) write(*,*) 'Found stop time: "'//
      &              s1000(istart:istop)//'"',ii,mode
                read(s1000(istart:istop),*,iostat=irc) 
@@ -330,7 +333,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then
                if (bdeb) write(*,*) 'Found event id: "'//
      &              s1000(istart:istop)//'"',ii,mode
                read(s1000(istart:istop),*,iostat=irc) eventId
@@ -375,7 +378,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then ! we are done
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
                if (bdeb) write(*,*) 'Found value: "'//
      &              s1000(istart:istop)//'"',ii,mode,nval
                read(s1000(istart:istop),*,iostat=irc) 

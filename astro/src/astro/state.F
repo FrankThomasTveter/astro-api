@@ -46,6 +46,9 @@ C
       mode=0                    ! initial
       bdone=(ii.gt.lens)
       do while (.not. bdone)
+         if (s1000(ii:ii).eq.'%') then ! special character
+            s1000(ii:ii+2)='   '
+         end if
          if (mode.eq.0) then
             if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then
                ii=ii+1
@@ -80,7 +83,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then ! we are done
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
                if (bdeb) write(*,*) 'Found lat: "'//
      &              s1000(istart:istop)//'"',ii,mode,nval
                read(s1000(istart:istop),*,iostat=irc) 
@@ -98,7 +101,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then ! we are done
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
                if (bdeb) write(*,*) 'Found lon: "'//
      &              s1000(istart:istop)//'"',ii,mode,nval
                read(s1000(istart:istop),*,iostat=irc) 
@@ -116,7 +119,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then ! we are done
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
                if (bdeb) write(*,*) 'Found hgt: "'//
      &              s1000(istart:istop)//'"',ii,mode,nval
                read(s1000(istart:istop),*,iostat=irc) 
@@ -134,7 +137,7 @@ C
             if (s1000(ii:ii).eq.'=') then
                ii=ii+1
                istart=ii
-            else if (s1000(ii:ii).eq.';') then ! we are done
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
                if (bdeb) write(*,*) 'Found time: "'//
      &              s1000(istart:istop)//'"',ii,mode
                njd=min(mjd,njd+1)
