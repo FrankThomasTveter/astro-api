@@ -301,8 +301,8 @@ function request() {
     this.addMercWestElong  = function(id) {this["event"+id+"Id"]=320;};
     this.addMercEastElong  = function(id) {this["event"+id+"Id"]=330;};
     this.addVenusInfConj   = function(id) {this["event"+id+"Id"]=340;};
-    this.addVenusSupConj   = function(id) {this["event"+id+"Id"]=350;};
-    this.addVenusWestElong = function(id) {this["event"+id+"Id"]=360;};
+    this.addVenusWestElong = function(id) {this["event"+id+"Id"]=350;};
+    this.addVenusSupConj   = function(id) {this["event"+id+"Id"]=360;};
     this.addVenusEastElong = function(id) {this["event"+id+"Id"]=370;};
     this.addMarsConj       = function(id) {this["event"+id+"Id"]=380;};
     this.addMarsWestQuad   = function(id) {this["event"+id+"Id"]=390;};
