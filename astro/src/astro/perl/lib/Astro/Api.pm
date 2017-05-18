@@ -10,8 +10,9 @@ use Astro::Astro qw(:all);
 
 require Exporter;
 our @ISA = ("Exporter");
-our @EXPORT = qw(state event xs_DTGToJD xs_JDToDTG astroEvent);    
-our %EXPORT_TAGS = ( all => [qw(state event xs_DTGToJD xs_JDToDTG astroEvent)]);
+our @EXPORT = qw(state event xs_state xs_event xs_DTGToJD xs_JDToDTG astroEvent);    
+our %EXPORT_TAGS = ( all => [qw(state event xs_state xs_event xs_DTGToJD xs_JDToDTG astroEvent)]);
+our $license_url;
 
 sub config_value {
     return @_;
@@ -25,9 +26,9 @@ sub event {
     # reads $ENV{QUERY_STRING} directly
     return pm_event();
 }
-#
-# subs used to test library...
-#
+
+# sub used to test library...
+
 sub astroEvent {
     ############################################
     ###### retrieve iput
@@ -49,7 +50,7 @@ sub astroEvent {
     ###    @eventVal=(@eventVal,0); ### @eventVal can not be empty
 
     my ($irc,$nrep,$repJD,$repId,$repVal,$rep250) = 
-	pm_astroEvent($tStart2000,$searchCode,$tend2000,$eventId,\@eventVal,$secdec,0);
+        pm_astroEvent($tStart2000,$searchCode,$tend2000,$eventId,\@eventVal,$secdec,0);
 
     ############################################
     ##### return output

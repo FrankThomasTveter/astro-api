@@ -1,5 +1,14 @@
-      subroutine state()
+      subroutine state(maxline, ! maximum number of output lines
+     &     nline,               ! number of output lines
+     &     lenline,             ! length of each out250
+     &     line250)
+C
       implicit none
+C
+      integer :: maxline
+      integer :: nline
+      integer :: lenline(maxline)
+      character*250 :: line250(maxline)
 C     
       integer mjd
       parameter (mjd=100)
@@ -160,22 +169,45 @@ c$$$  end if
          end if
          bdone=(ii.gt.lens)
       end do
-
-      call astroState(njd,JD30,lat,lon,hgt,crc250,irc)
+      call astroState(njd,JD30,lat,lon,hgt,
+     &     maxline,             ! maximum number of output lines
+     &     nline,               ! number of output lines
+     &     lenline,             ! length of each out250
+     &     line250,crc250,irc)
       if (irc.ne.0) then
-         write(*,'("Content-type: text/html;charset=iso-8859-1")')
-         write(*,'("")')
-         write(*,'(A)') '<?xml version="1.0" encoding="utf-8"?>'
-         write(*,'(A)') '<solarsystem xmlns:xsi='//
+         nline=0
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(A)')
+     &        "Content-type: text/html;charset=iso-8859-1"
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(A)')" "
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(A)')
+     &        '<?xml version="1.0" encoding="utf-8"?>'
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(A)')
+     &        '<solarsystem xmlns:xsi='//
      &        '"http://www.w3.org/2001/XMLSchema-instance"'//
      &        ' xmlns="http://astro.met.no"  xsi:schemaLocation='//
      &        '"http://astro.met.no/astro state.xsd">'//
      &        '<meta licenseurl="1"/>'
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(A)')" "
+         lenline(nline)=len(trim(line250(nline)))
          call chop0(crc250,250)
          lenc=length(crc250,250,10)
-         write(*,'(A,I0,A,A,A)') '<Error irc="',irc,
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(A,I0,A,A,A)') 
+     &        '<Error irc="',irc,
      &        '" msg="',crc250(1:lenc),'"/>"'
-         write(*,'(A)') '</solarsystem>'
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(A)') '</solarsystem>'
+         lenline(nline)=len(trim(line250(nline)))
       end if
       return
       end subroutine state

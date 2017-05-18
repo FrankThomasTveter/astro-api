@@ -44,13 +44,54 @@ xs_DTGToJD(int year, int month, int mday, int hour, int min, double secs, OUTLIS
 
 void
 xs_event()
-  CODE:
-        event_();
+  PREINIT:
+      int maxline = 1000;
+      int nline;
+      int *lenline;
+      char *line250;
+      int lenr=250;
+      int ii;
+  PPCODE:
+    lenline = malloc(sizeof(int)*maxline);
+    line250 = calloc(sizeof(char), lenr*maxline);
+    event_(&maxline,&nline,lenline,line250,250);
+    /* make return stack */
+    EXTEND(SP, nline);
+    for (ii=0; ii < nline ; ii++ ) {
+      /*printf("  nline= %i %i\n", ii,lenline[ii]);*/
+      if (lenline[ii]==0) {
+       PUSHs(sv_2mortal(newSVpv("",0)));
+      } else {
+       PUSHs(sv_2mortal(newSVpv(&line250[ii*250],lenline[ii])));
+      };
+    };
+    free(lenline);
+    free(line250);
 
 void
 xs_state()
-  CODE:
-        state_();
+  PREINIT:
+      int maxline = 1000;
+      int nline;
+      int *lenline;
+      char *line250;
+      int lenr=250;
+      int ii;
+  PPCODE:
+    lenline = malloc(sizeof(int)*maxline);
+    line250 = calloc(sizeof(char), lenr*maxline);
+    state_(&maxline,&nline,lenline,line250,250);
+    /* make return stack */
+    EXTEND(SP, nline);
+    for (ii=0; ii < nline ; ii++ ) {
+      if (lenline[ii]==0) {
+       PUSHs(sv_2mortal(newSVpv("",0)));
+      } else {
+       PUSHs(sv_2mortal(newSVpv(&line250[ii*250],lenline[ii])));
+      };
+    };
+    free(lenline);
+    free(line250);
 
 void
 xs_astroEvent(double tstartJD, int searchCode, double tendJD, int eventId, int neventVal, AV* eventValin, int secdec, int irc)
@@ -121,46 +162,4 @@ xs_astroEvent(double tstartJD, int searchCode, double tendJD, int eventId, int n
     free(repId);
     free(repVal);
     free(rep250);
-    free(crc250);
-
-void
-xs_astroState(double lat, double lon, double hgt,...)
-  PREINIT:
-      char *crc250;
-      int irc;
-      int njd;
-      int i;
-      char *jd;
-      char *b30;
-      char *jd30;
-      int lenc=250;
-      int lenj=30;
-      STRLEN lens;
-  PPCODE:
-    crc250 = calloc(sizeof(char), lenc);
-    njd=items-3;
-    /*printf("XXXXXXXXXXXXXXXX njd: %d items=%d\n",njd,items);*/
-    jd30 = malloc(sizeof(char)*njd*lenj);
-    b30 = malloc(sizeof(char)*lenj);
-    for (i=1; i <= njd; i++) {
-            jd= (char *)SvPV(ST(i+2),lens);
-	    memset(b30,' ',lenj);
-            strncpy(b30,jd,fmin(lens,lenj));
-            memcpy(&jd30[(i-1)*30],b30,lenj);
-	    /*printf("XXXXXXXXXXXXXXXX astroState: %d %s\n",i,b30); */
-    }
-    /* call fortran subroutine */
-    astrostate_(&njd,jd30,&lat,&lon,&hgt,crc250,&irc,lenj,lenc);
-    if (irc != 0) {
-       free(jd30);
-       croak("xs_astroState Error return from state (irc=%d '%s')", irc, crc250); 
-    }
-    /* make return stack */
-    if (irc == 0) {
-       EXTEND(SP, 2);
-       PUSHs(sv_2mortal(newSViv(irc)));
-       PUSHs(sv_2mortal(newSVpv(crc250,strlen(crc250))));
-    }; 
-    free(b30);
-    free(jd30);
     free(crc250);

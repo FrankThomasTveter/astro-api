@@ -1,7 +1,11 @@
 package Astro::Astro;
 
 use 5.006;
+use strict;
+use warnings;
+use Carp qw(croak);
 use XSLoader;
+use Time::Local qw(timegm_nocheck);
 use File::Spec qw();
 
 require Exporter;
@@ -16,13 +20,16 @@ our @ISA = qw(Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
+    pm_astroEvent
     pm_state
     pm_event
+    pm_epochJD
+    pm_JDepoch
     xs_DTGToJD
     xs_JDToDTG
+    xs_astroEvent
     xs_event
     xs_state
-    xs_astroEvent
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -85,17 +92,6 @@ sub pm_astroEvent {
     my @rep250=  get_rep250(@output);          # output report string (redundant description)
     return ($irc,$nrep,\@rep2000,\@repId,\@repVal,\@rep250); # this is the same layout as output from xs_astroEvent
 }
-
-sub pm_astroState {
-    my ($lat,$lon,$hgt,@dates)=@_;
-    #print "Calling xs_astroState: $lat $lon $hgt @dates\n";
-    my ($irc,$crc250)= xs_astroState($lat,$lon,$hgt,@dates);
-    if ($irc != 0) {
-        croak("astroEvent Error return from xs_astroState. $irc");
-    }
-    return ($irc,$crc250);
-}
-
 
 sub get_irc {
     my @copy=@_;
@@ -190,6 +186,22 @@ sub trim($)  { # removes initial and trailing whitespace
 	return $string;
 }
 
+sub pm_epochjd {
+    my ($epoch) = @_;
+    my ($sec, $min, $hour, $mday, $month, $year) = gmtime($epoch);
+    $year += 1900;
+    $month++;
+    return xs_DTGToJD($year, $month, $mday, $hour, $min, $sec);
+}
+
+
+sub pm_jdepoch {
+    my ($JD) = @_;
+    my ($year, $month, $mday, $hour, $min, $sec) = 
+        xs_JDToDTG($JD);
+    $sec = int (.5 + $sec);
+    return timegm_nocheck($sec, $min, $hour, $mday, $month -1, $year);
+}
 
 1;
 __END__

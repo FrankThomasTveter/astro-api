@@ -1,4 +1,8 @@
-      subroutine astroState(njd,JD30,lat,lon,hgt,crc250,irc)
+      subroutine astroState(njd,JD30,lat,lon,hgt,
+     &     maxline,             ! maximum number of output lines
+     &     nline,               ! number of output lines
+     &     lenline,             ! length of each out250
+     &     line250,crc250,irc)
       !
       ! The "world coordinate system" is "barycentric MJD2000"  (x->equinox, y->R.A.6 z->north-pole)
       !
@@ -6,13 +10,15 @@
       integer njd
       character*30 jd30(njd)
       real lat,lon,hgt
+      integer :: maxline
+      integer :: nline
+      integer :: lenline(maxline)
+      character*250 :: line250(maxline)
       character*250 crc250
       integer irc
       !
       character*1 c1
       character*30 b30
-      integer lenb
-      integer, external :: length
       real :: jd ! 	IAU, 0 Jan 2010, 0h TT
       integer, parameter :: nbodies=11
       real :: pole(6,nbodies) ! R.A., Dec, omega, domega/dt (deg/day) , orbits (index), xmu = G * Mass
@@ -96,14 +102,6 @@
             return
          end if
          CALL DATE2JD(JD2000(tt),YY,MM,DD,HH,MI,SEC) 
-! clean up
-         write(b30,'(F6.3)') sec
-         call chop0(b30,6)
-         lenb=length(b30,6,6)
-         write(jd30(tt),'(I4.4,"-",I2.2,"-",I2.2,"T",'//
-     &        'I2.2,":",I2.2,":",A,"Z")') 
-     &        YY,MM,DD,HH,MI,b30(1:lenb)
-
       end do
 !
 !     get planetary angular vectors in MJD2000
@@ -133,24 +131,42 @@
 !
 !     print rotation vectors in MJD2000 ( = world coordinate system)
 !    
-      write(*,'("Content-type: text/xml;")')
-      write(*,'("")')
-      write(*,'(A)') '<?xml version="1.0" encoding="utf-8"?>'
-      write(*,'("<solarsystem",A,">")')
-     & ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'//
-     & ' xmlns="http://astro.met.no"'//
-     & ' xsi:schemaLocation="http://astro.met.no/astro state.xsd"'
-      write(*,'(1X,7(A))') 
+      nline=0
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')
+     &     "Content-type: text/xml;"
+      lenline(nline)=len(trim(line250(nline)))
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')" "
+      lenline(nline)=len(trim(line250(nline)))
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')'<?xml version="1.0" '//
+     &     'encoding="utf-8"?>'
+      lenline(nline)=len(trim(line250(nline)))
+      nline=min(maxline,nline+1)
+      write(line250(nline),'("<solarsystem",A,">")')
+     &     ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'//
+     &     ' xmlns="http://astro.met.no"'//
+     &     ' xsi:schemaLocation='//
+     &     '"http://astro.met.no/astro state.xsd"'
+      lenline(nline)=len(trim(line250(nline)))
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(1X,7(A))') 
      &     '<location latitude="',ccr(lat),
      &     '" longitude="',ccr(lon),
      &     '" height="',ccr(hgt),
      &     '"/>'
+      lenline(nline)=len(trim(line250(nline)))
+!
 !     PRINT rotation vectors
 !
-      write(*,'(1X,A,A,A)') '<initial no="',
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(1X,A,A,A)') '<initial no="',
      &     cci(nbodies),'" ref="MJD2000">'
+      lenline(nline)=len(trim(line250(nline)))
       do jj=1,nbodies
-         write(*,'(2X,17(A))')
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(2X,17(A))')
      &        '<body ra="',ccr(pole(1,jj)),
      &        '" dec="',ccr(pole(2,jj)),
      &        '" w="',ccr(pole(3,jj)),
@@ -160,9 +176,12 @@
      &        '" id="',cci(jj),
      &        '" name="',trim(nam10(jj)),
      &        '"/>'
+         lenline(nline)=len(trim(line250(nline)))
       end do
-      write(*,'(1X,A)') '</initial>'
-!
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(1X,A)') '</initial>'
+      lenline(nline)=len(trim(line250(nline)))
+!     
 !     sort epochs
 !
       do tt=1,njd
@@ -172,15 +191,20 @@
 !
 !     loop over epochs
 !
-      write(*,'(1X,A,A,A)') '<times no="',cci(njd),'">'
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(1X,A,A,A)') 
+     &     '<times no="',cci(njd),'">'
+      lenline(nline)=len(trim(line250(nline)))
 ! 
       do ttx=1,njd
          tt=ind(ttx)
-         write(*,'(2X,7(A))') 
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(2X,7(A))') 
      &        '<time id="',cci(tt),
      &        '" dtg="',trim(jd30(tt)),
      &        '" jd2000="',ccr(jd2000(tt)),
      &        '">'
+         lenline(nline)=len(trim(line250(nline)))
 !
 !     read data from file for current epoch
 !
@@ -257,34 +281,49 @@ C     F = 1.D0/298.257 D0 ! flattening coefficient
             call multiply(ip,loc(1,ii)) ! earth-fixed -> MJ2000
          end do
 
-         write(*,'(3X,A)') '<observer  body="4" ref="MJD2000">'
-         write(*,'(4X,7(A))')
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(3X,A)') 
+     &        '<observer  body="4" ref="MJD2000">'
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(4X,7(A))')
      &        '<i x="',ccr(loc(1,1)),
      &        '" y="', ccr(loc(2,1)),
      &        '" z="', ccr(loc(3,1)),
      &        '"/>' 
-         write(*,'(4X,7(A))')
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(4X,7(A))')
      &        '<j x="',ccr(loc(1,2)),
      &        '" y="', ccr(loc(2,2)),
      &        '" z="', ccr(loc(3,2)),
      &        '"/>' 
-         write(*,'(4X,7(A))')
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(4X,7(A))')
      &        '<k x="',ccr(loc(1,3)),
      &        '" y="', ccr(loc(2,3)),
      &        '" z="', ccr(loc(3,3)),
      &        '"/>' 
-         write(*,'(4X,8(A))')
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(4X,8(A))')
      &        '<location x="',ccr(loc(1,4)),
      &        '" y="', ccr(loc(2,4)),
      &        '" z="', ccr(loc(3,4)),
      &        '" origo="earth"',
-     &        '/>' 
-         write(*,'(4X,8(A))')
+     &        '/>'  
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(4X,8(A))')
      &        '<zenith x="',ccr(loc(1,5)),
      &        '" y="', ccr(loc(2,5)),
      &        '" z="', ccr(loc(3,5)),
      &        '"/>' 
-         write(*,'(3X,A)')'</observer>'
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(3X,A)')'</observer>'
+         lenline(nline)=len(trim(line250(nline)))
 !
 !     get barycentric earth-fixed location vector and coordinate axis in MJD2000 
 !
@@ -365,10 +404,13 @@ C     F = 1.D0/298.257 D0 ! flattening coefficient
 !     print result to screen
 !
 !         CALL JD2DATE(JD2000(tt),YY,MM,DD,HH,MI,SEC) 
-         write(*,'(3X,A,A,A)') '<state no="',cci(nbodies),
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(3X,A,A,A)') '<state no="',cci(nbodies),
      &        '" ref="MJD2000">'
+         lenline(nline)=len(trim(line250(nline)))
          do jj=1,nbodies
-            write(*,'(4X,17(A))')
+            nline=min(maxline,nline+1)
+            write(line250(nline),'(4X,17(A))')
      &           '<body x="',ccr(pos(1,jj)),
      &           '" y="',ccr(pos(2,jj)),
      &           '" z="',ccr(pos(3,jj)),
@@ -378,12 +420,21 @@ C     F = 1.D0/298.257 D0 ! flattening coefficient
      &           '" id="',cci(jj),
      &           '" name="',trim(nam10(jj)),
      &           '"/>'
+            lenline(nline)=len(trim(line250(nline)))
          end do
-         write(*,'(3X,A)') '</state>'
-         write(*,'(2X,A)') '</time>'
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(3X,A)') '</state>'
+         lenline(nline)=len(trim(line250(nline)))
+         nline=min(maxline,nline+1)
+         write(line250(nline),'(2X,A)') '</time>'
+         lenline(nline)=len(trim(line250(nline)))
       end do
-      write(*,'(1X,A)') '</times>'
-      write(*,'("</solarsystem>")')
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(1X,A)') '</times>'
+      lenline(nline)=len(trim(line250(nline)))
+      nline=min(maxline,nline+1)
+      write(line250(nline),'("</solarsystem>",A)')" "
+      lenline(nline)=len(trim(line250(nline)))
       return
       contains
 

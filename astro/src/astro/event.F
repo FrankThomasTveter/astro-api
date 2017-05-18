@@ -1,6 +1,15 @@
-      subroutine event()
+      subroutine event(maxline, ! maximum number of output lines
+     &     nline,               ! number of output lines
+     &     lenline,             ! length of each out250
+     &     line250)             ! output string
+C
       implicit none
 C     
+      integer :: maxline
+      integer :: nline
+      integer :: lenline(maxline)
+      character*250 :: line250(maxline)
+C
       real tstartJD             ! start time (in julianDay)
       integer searchCode        ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
       real tstopJD               ! report all events end time (in julianDay)
@@ -85,14 +94,24 @@ c
 c
       call use_default()
 C
-      write(*,'(A)')"Content-Type: text/xml"
-      write(*,*)
-      write(*,'(A)') '<?xml version="1.0" encoding="utf-8"?>'
-      write(*,'(A)') '<astrodata xmlns:xsi='//
-     &     '"http://www.w3.org/2001/XMLSchema-instance"'//
-     &     ' xmlns="http://astro.met.no"  xsi:schemaLocation='//
-     &     '"http://astro.met.no/astro event.xsd">'//
-     &     '<meta licenseurl="1"/>'
+      nline=0
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')"Content-Type: text/xml;"
+      lenline(nline)=len(trim(line250(nline)))
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')" "
+      lenline(nline)=len(trim(line250(nline)))
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')
+     &     '<?xml version="1.0" encoding="utf-8"?>'
+      lenline(nline)=len(trim(line250(nline)))
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)') '<astrodata xmlns:xsi='// ! 21
+     &     '"http://www.w3.org/2001/XMLSchema-instance"'// ! 43
+     &     ' xmlns="http://astro.met.no" xsi:schemaLocation='// ! 48
+     &     '"http://astro.met.no/astro event.xsd">'// ! 38
+     &     '<meta licenseurl="1"/>' ! 23
+      lenline(nline)=len(trim(line250(nline)))
 C
       if (bdeb) write(*,*)'Query: "',s1000(1:lens)//'"'
       ii=1
@@ -404,7 +423,9 @@ C
          call execute_event()
       end if
 
-      write(*,'(A)') '</astrodata>'
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')'</astrodata>'
+      lenline(nline)=len(trim(line250(nline)))
 C
       contains
 C
@@ -476,8 +497,14 @@ C
          nrep=1
          call writeEventHdr(cost)
          lenc=length(crc250,250,10)
-         write(*,'(A,I0,A,I0,A)') '  <Report no="1" error="',irc,
+         write(s250,'(A,I0,A,I0,A)') 
+     &        '<Report no="1" error="',irc,
      &        '" hint="'//crc250(1:lenc)//'"/>'
+         call chop0(s250,250)
+         lens=length(s250,250,50)
+         nline=min(maxline,nline+1)
+         line250(nline)='  '//s250(1:lens)
+         lenline(nline)=len(trim(line250(nline)))
       else
          call writeEventHdr(cost)
          do jj=1,nrep
@@ -509,10 +536,14 @@ C
             end if
             call chop0(s250,250)
             lens=length(s250,250,30)
-            write(*,'(A)') '  '//s250(1:lens)
+            nline=min(maxline,nline+1)
+            write(line250(nline),'(A)') '  '//s250(1:lens)
+            lenline(nline)=len(trim(line250(nline)))
          end do
       end if
-      write(*,'(A)') ' </Event>'
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')' </Event>'
+      lenline(nline)=len(trim(line250(nline)))
 C
       oseq=cseq ! update sequence number
 C
@@ -662,7 +693,9 @@ C
       end do
       s250(lens+1:lens+1)=">"
       lens=lens+1
-      write(*,'(A)')' '//s250(1:lens)
+      nline=min(maxline,nline+1)
+      write(line250(nline),'(A)')' '//s250(1:lens)
+      lenline(nline)=len(trim(line250(nline)))
       return
       end subroutine writeEventHdr
 
