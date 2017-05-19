@@ -43,8 +43,9 @@ xs_DTGToJD(int year, int month, int mday, int hour, int min, double secs, OUTLIS
         date2jd_(&JD, &year, &month, &mday, &hour, &min, &secs );
 
 void
-xs_event()
+xs_event(char *s)
   PREINIT:
+      char *s1000;
       int maxline = 1000;
       int nline;
       int *lenline;
@@ -52,9 +53,11 @@ xs_event()
       int lenr=250;
       int ii;
   PPCODE:
+    s1000 = calloc(sizeof(char), 1000);
+    strcpy(s1000,s);
     lenline = malloc(sizeof(int)*maxline);
     line250 = calloc(sizeof(char), lenr*maxline);
-    event_(&maxline,&nline,lenline,line250,250);
+    event_(s1000,&maxline,&nline,lenline,line250,1000,250);
     /* make return stack */
     EXTEND(SP, nline);
     for (ii=0; ii < nline ; ii++ ) {
@@ -65,12 +68,14 @@ xs_event()
        PUSHs(sv_2mortal(newSVpv(&line250[ii*250],lenline[ii])));
       };
     };
+    free(s1000);
     free(lenline);
     free(line250);
 
 void
-xs_state()
+xs_state(char *s)
   PREINIT:
+      char *s1000;
       int maxline = 1000;
       int nline;
       int *lenline;
@@ -78,9 +83,11 @@ xs_state()
       int lenr=250;
       int ii;
   PPCODE:
+    s1000 = calloc(sizeof(char), 1000);
+    strcpy(s1000,s);
     lenline = malloc(sizeof(int)*maxline);
     line250 = calloc(sizeof(char), lenr*maxline);
-    state_(&maxline,&nline,lenline,line250,250);
+    state_(s1000,&maxline,&nline,lenline,line250,1000,250);
     /* make return stack */
     EXTEND(SP, nline);
     for (ii=0; ii < nline ; ii++ ) {
@@ -90,6 +97,7 @@ xs_state()
        PUSHs(sv_2mortal(newSVpv(&line250[ii*250],lenline[ii])));
       };
     };
+    free(s1000);
     free(lenline);
     free(line250);
 

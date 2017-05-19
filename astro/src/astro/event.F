@@ -1,10 +1,12 @@
-      subroutine event(maxline, ! maximum number of output lines
+      subroutine event(s1000,   ! query string
+     &     maxline,             ! maximum number of output lines
      &     nline,               ! number of output lines
      &     lenline,             ! length of each out250
      &     line250)             ! output string
 C
       implicit none
 C     
+      CHARACTER*1000 :: s1000
       integer :: maxline
       integer :: nline
       integer :: lenline(maxline)
@@ -38,7 +40,6 @@ C
       real deventVal(max(1,meventVal)) ! event input data (SEE TABLE ABOVE)
 C
       integer, external :: length
-      CHARACTER*1000 :: s1000
       character*1 :: ic         ! ichar of current character
       integer :: spos           ! start of segment
       integer :: ipos           ! equal position
@@ -60,7 +61,6 @@ C
       integer :: cost
 C
       bdeb=.false.
-      CALL get_environment_variable("QUERY_STRING", s1000)
       lens=len(trim(s1000))
 C
 C     make sure query_string ends with ';'
@@ -112,6 +112,11 @@ C
      &     '"http://astro.met.no/astro event.xsd">'// ! 38
      &     '<meta licenseurl="1"/>' ! 23
       lenline(nline)=len(trim(line250(nline)))
+C    Returns End of Record error: 
+C      nline=min(maxline,nline+1)
+C      write(line250(nline),'(A)') '<query string='//
+C     &     '"'// trim(s1000)//'"/>'
+C      lenline(nline)=len(trim(line250(nline)))
 C
       if (bdeb) write(*,*)'Query: "',s1000(1:lens)//'"'
       ii=1
@@ -520,7 +525,7 @@ C
      &              'I2.2,":",I2.2,":",I2.2,"Z",'//
      &              'A,I0,2(A,A),A)')
      &              ' <Report no="',jj,
-     &              '" time="',yy,mm,dd,hh,mi,nint(sec),
+     &              '" time="',yy,mm,dd,hh,mi,int(sec),
      &              '" repId="',repId(jj),
      &              '" repVal="',val50(1:lenv),
      &              '" hint="',rep250(jj)(1:lenr),'"/>'
@@ -530,7 +535,7 @@ C
      &              'I2.2,":",I2.2,":",I2.2,"Z",'//
      &              'A,I0,A,A,A)')
      &              '<Report no="',jj,
-     &              '" time="',yy,mm,dd,hh,mi,nint(sec),
+     &              '" time="',yy,mm,dd,hh,mi,int(sec),
      &              '" repId="',repId(jj),
      &              '" hint="',rep250(jj)(1:lenr),'"/>'
             end if
@@ -633,8 +638,8 @@ C
      &           'I2.2,":",I2.2,":",I2.2,"Z"),'//
      &           '3(A,I0),A,I0,A)')
      &           '   <Event Seq="',max(1,oseq),
-     &           '" Start="',yy1,mm1,dd1,hh1,mi1,nint(sec1),
-     &           '" Stop="',yy2,mm2,dd2,hh2,mi2,nint(sec2),
+     &           '" Start="',yy1,mm1,dd1,hh1,mi1,int(sec1),
+     &           '" Stop="',yy2,mm2,dd2,hh2,mi2,int(sec2),
      &           '" Search="',searchCode,
      &           '" reports="',nrep,
      &           '" Id="',eventId,
@@ -645,8 +650,8 @@ C
      &           'I2.2,":",I2.2,":",I2.2,"Z"),'//
      &           '3(A,I0),A)')
      &           '   <Event Seq="',max(1,oseq),
-     &           '" Start="',yy1,mm1,dd1,hh1,mi1,nint(sec1),
-     &           '" Stop="',yy2,mm2,dd2,hh2,mi2,nint(sec2),
+     &           '" Start="',yy1,mm1,dd1,hh1,mi1,int(sec1),
+     &           '" Stop="',yy2,mm2,dd2,hh2,mi2,int(sec2),
      &           '" Search="',searchCode,
      &           '" reports="',nrep,
      &           '" Id="',eventId,'"'
@@ -658,7 +663,7 @@ C
      &           'I2.2,":",I2.2,":",I2.2,"Z",'//
      &           '3(A,I0),A,I0,A)')
      &           '   <Event Seq="',max(1,oseq),
-     &           '" Start="',yy1,mm1,dd1,hh1,mi1,nint(sec1),
+     &           '" Start="',yy1,mm1,dd1,hh1,mi1,int(sec1),
      &           '" Search="',searchCode,
      &           '" reports="',nrep,
      &           '" Id="',eventId,
@@ -669,7 +674,7 @@ C
      &           'I2.2,":",I2.2,":",I2.2,"Z",'//
      &           '3(A,I0),A)')
      &           '   <Event Seq="',max(1,oseq),
-     &           '" Start="',yy1,mm1,dd1,hh1,mi1,nint(sec1),
+     &           '" Start="',yy1,mm1,dd1,hh1,mi1,int(sec1),
      &           '" Search="',searchCode,
      &           '" reports="',nrep,
      &           '" Id="',eventId,'"'

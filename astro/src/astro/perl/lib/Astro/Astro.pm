@@ -55,9 +55,9 @@ END {
     xs_jplephClose();
 }
 
-sub pm_event {return xs_event();}
+sub pm_event {return xs_event(shift);}
 
-sub pm_state {return xs_state();}
+sub pm_state {return xs_state(shift);}
 
 sub pm_astroEvent {
     my $tStart2000 = shift;                      # start time (in jd2000 = julianDate - 2451544.5)

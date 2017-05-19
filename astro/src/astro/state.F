@@ -1,10 +1,12 @@
-      subroutine state(maxline, ! maximum number of output lines
+      subroutine state(s1000,   ! query string
+     &     maxline,             ! maximum number of output lines
      &     nline,               ! number of output lines
      &     lenline,             ! length of each out250
      &     line250)
 C
       implicit none
 C
+      CHARACTER*1000 :: s1000
       integer :: maxline
       integer :: nline
       integer :: lenline(maxline)
@@ -19,7 +21,6 @@ C
       integer irc
 C
       integer, external :: length
-      CHARACTER*1000 :: s1000
       character*1 :: ic         ! ichar of current character
       integer :: spos           ! start of segment
       integer :: ipos           ! equal position
@@ -36,7 +37,6 @@ C
       logical :: debug, bdeb
 C
       bdeb=.false.
-      CALL get_environment_variable("QUERY_STRING", s1000)
       lens=len(trim(s1000))
 C
 C     make sure query_string ends with ';'

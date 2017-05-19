@@ -20,11 +20,11 @@ sub config_value {
 
 sub state {
     # reads $ENV{QUERY_STRING} directly
-    return pm_state();
+    return pm_state($ENV{QUERY_STRING});
 }
 sub event {
     # reads $ENV{QUERY_STRING} directly
-    return pm_event();
+    return pm_event($ENV{QUERY_STRING});
 }
 
 # sub used to test library...
