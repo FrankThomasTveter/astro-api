@@ -11130,7 +11130,8 @@ C
       character*16 t16
       integer length,lend,lent,npts
       externale length
-      logical bdeb,bdone
+      logical bdone
+      logical bdeb
       data bdeb/.false./
       integer cnt,cntmax
       parameter (cntmax=10000)
@@ -11561,6 +11562,7 @@ C      data bdeb/.true./
       integer tcnt,scnt,cntmax
       parameter (cntmax=10000)
       logical forward
+      integer ipitch            ! pitch in current direction
       real eps
       parameter (eps = 2.0d0/86400.0d0) ! 2 seconds
 C
@@ -11572,23 +11574,29 @@ C
       xsearchLLTarget=tstartJD
 C      
       forward=tendJD.gt.tstartJD
+      if (forward) then
+         ipitch = pitch
+      else
+         ipitch = - pitch
+      end if
       JD=tstartJD
       mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
       ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
       idt=(tendJD-tstartJD)/ndt
-      if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
-      if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin
+      if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,
+     &     idt,nint(ndt),pitch,ipitch
+      if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin,nint(ndt)
 C
       bdone=.false.
 C     in case we are starting/stopping at a maximum/minimum value...
       tcnt=-2 ! add 2 steps, 1 before start, 1 after stop
       JD=JD-idt
 C
-      scnt=0
+      scnt=0                    ! spinup count
       bdone=(tcnt.gt.cntmax.or.tcnt.gt.ndt)
       do while (.not.bdone)
-         tcnt=tcnt+1 ! total count
-         scnt=scnt+1 ! spinup count
+         tcnt=tcnt+1            ! total count
+         scnt=scnt+1            ! spinup count
 C
 C     get current date
 C
@@ -11635,20 +11643,11 @@ C
 C
          if (scnt.ge.3) then
             bok=.false.
-            dval(0)=diffCycle(xval(0),tval,tValCycle)
-            dval(1)=diffCycle(xval(1),tval,tValCycle)
-            dval(2)=diffCycle(xval(2),tval,tValCycle)
-            dval(3)=diffCycle(xval(3),tval,tValCycle)
-            dval(4)=diffCycle(xval(4),tval,tValCycle)
-C     
-            if (bdeb)write(*,'(4(X,A),10(X,F10.3))')
-     &           myname,'Step:',T22,event100(1:lend),val,dval
-C     !write(*,*)myname,'JNK:',xval(1),xval(2),val,val1
-C     
 C     
 C     determine if we must do a fine search
 C     
             do ii=0,4
+               dval(ii)=diffCycle(xval(ii),tval,tValCycle)
                if (dval(ii).gt.0.0D0) then
                   up(ii)=.true.
                   dn(ii)=.false.
@@ -11663,6 +11662,10 @@ C
                   zero(ii)=.true.
                end if
             end do
+C
+            if (bdeb)write(*,'(4(X,A),I2,X,F10.3"|",10(X,F10.3))')
+     &           myname,'Step:',T22,event100(1:lend),ipitch,val,dval
+C     
 C     check if local max/min and in "grayzone" (ie. crossing is possible)
             maxpoint = dval(2).ge.dval(1).and.dval(2).gt.dval(3)
             minpoint = dval(2).le.dval(1).and.dval(2).lt.dval(3)
@@ -11671,7 +11674,7 @@ C     check if local max/min and in "grayzone" (ie. crossing is possible)
      &           (up(0).or.up(1).or.zero(0).or.zero(1)).and.
      &           (dn(3).or.dn(4)))
 C     
-            if (pitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
+            if (ipitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
                if (up(2)) then
                   TJD=dsearchLLTarget(tval,
      &                 tValCycle,funk,
@@ -11679,7 +11682,7 @@ C
      &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 pitch,
+     &                 ipitch,
      &                 crc250,irc)
                else
                   TJD=dsearchLLTarget(tval,
@@ -11688,7 +11691,7 @@ C
      &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 pitch,
+     &                 ipitch,
      &                 crc250,irc)
                end if
                if (irc.ne.0) then
@@ -11699,15 +11702,15 @@ C
                   return
                end if
                scnt=1           ! only use last point in remainding search...
-            else if (pitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
-               if (dval(2).le.0.0D0) then
+            else if (ipitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
+               if (dn(2)) then
                   TJD=dsearchLLTarget(tval,
      &                 tValCycle,funk,
      &                 lat,lon,hgt,
      &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 pitch,
+     &                 ipitch,
      &                 crc250,irc)
                else
                   TJD=dsearchLLTarget(tval,
@@ -11716,7 +11719,7 @@ C
      &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 pitch,
+     &                 ipitch,
      &                 crc250,irc)
                end if
                if (irc.ne.0) then
@@ -11762,24 +11765,23 @@ C     find max-point...
                end if
 C     do fine search...
                if (up(5).or.zero(5)) then ! possible match
-                  if (pitch.ge.0) then
+                  if (ipitch.ge.0) then
                      TJD=dsearchLLTarget(tval,
      &                    tValCycle,funk,
      &                    lat,lon,hgt,
      &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    pitch,
+     &                    ipitch,
      &                    crc250,irc)
-                  end if
-                  if (pitch.le.0) then
+                  else 
                      TJD=dsearchLLTarget(tval,
      &                    tValCycle,funk,
      &                    lat,lon,hgt,
      &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    pitch,
+     &                    ipitch,
      &                    crc250,irc)
                   end if
                   if (irc.ne.0) then
@@ -11790,10 +11792,11 @@ C     do fine search...
                      return
                   end if
                else             ! no crossing possible, do noooothing...
+                  if(bdeb)write(*,*)myname,'No crossing found.'
                end if
                scnt=1           ! only use last point in remainding search...
             else if (minpoint.and.grayzone.and.(up(1).or.up(3))) then
-               !write(*,*) 'Gray zone minpoint:',up
+               if(bdeb)write(*,*) 'Gray zone minpoint:',up
 C     find min-point...
                xJD(5)=searchLLMin(
      &              funk,
@@ -11810,7 +11813,8 @@ C     find min-point...
                   return
                end if
                dval(5)=diffCycle(xval(5),tval,tValCycle)
-               if(bdeb)write(*,*)myname,'Local min:',xjd(5),dval(5)
+               if(bdeb)write(*,*)myname,'Local min:',xjd(5),
+     &              xval(5),dval(5)
                if (dval(5).gt.0.0D0) then
                   up(5)=.true.
                   dn(5)=.false.
@@ -11826,14 +11830,14 @@ C     find min-point...
                end if
 C     do fine search...
                if (dn(5).or.zero(5)) then ! possible match
-                  if (pitch-1.eq.1) then
+                  if (ipitch.le.0) then
                      TJD=dsearchLLTarget(tval,
      &                    tValCycle,funk,
      &                    lat,lon,hgt,
      &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    pitch,
+     &                    ipitch,
      &                    crc250,irc)
                   else
                      TJD=dsearchLLTarget(tval,
@@ -11842,7 +11846,7 @@ C     do fine search...
      &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    pitch,
+     &                    ipitch,
      &                    crc250,irc)
                   end if
                   if (irc.ne.0) then
@@ -11853,6 +11857,7 @@ C     do fine search...
                      return
                   end if
                else             ! no crossing possible, do noooothing...
+                  if(bdeb)write(*,*)myname,'No crossing found.'
                end if
                scnt=1           ! only use last point in remainding search...
             else if (minpoint.or.maxpoint) then
@@ -11867,7 +11872,7 @@ C     do fine search...
                   write(*,*)myname,'Found:   ',t22,tjd
                   CALL JD2DATE(TstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
                   WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
-                  write(*,*)myname,'Start   :',t22,tstartjd
+                  write(*,*)myname,'Start:   ',t22,tstartjd
                   CALL JD2DATE(TendJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
                   WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
                   write(*,*)myname,'End:     ',t22,tendjd
@@ -11984,24 +11989,29 @@ C
       external diffcycle
       logical bdone
       real tstart,tend,dt,dtmin,dstart,dend,dval,val,dd,jd,ff
-      integer cnt,maxcnt,ipitch
+      integer cnt,maxcnt
       parameter (dtmin=1.0D0/86400.0D0, maxcnt=100)
       logical forward
+      integer ipitch            ! 1: rising, -1: falling
       character*16 myname
       data myname/'dsearchLLTarget'/
 C
-      if (bdeb)write(*,*)myname,'Entering.',pitch,tstartJD,tendJD,
+      if (bdeb)write(*,*)myname,'Entering.',ipitch,tstartJD,tendJD,
      &     dvalstart,dvalend
       tstart=tstartjd
       tend=tendjd
       forward=(tend.gt.tstart) ! search direction
       dstart=dvalstart
       dend=dvalend
-      if ( (forward.and.dend.gt.0.0D0).or.
-     &     (.not.forward.and.dstart.gt.0.0D0) ) then
-         ipitch=1
-      else
-         ipitch=-1
+C
+      dd=dend-dstart
+      dt=tend-tstart
+      if (pitch.eq.0) then
+         if (dd.gt.0.0D0) then
+            ipitch=1
+         else
+            ipitch=-1
+         end if
       end if
 C     sanity check
       if (bdeb.and.ipitch*pitch .lt. 0) then
@@ -12010,11 +12020,9 @@ C     sanity check
       cnt=0
       bok=.false.
       bdone=(cnt.gt.maxcnt)
-C
-      dd=dend-dstart
-      dt=tend-tstart
       if (abs(dd).gt.1.0D-10) then
-         ff = max(0.0D0,min(1.0D0,(dstart/dd)))
+         ff = max(0.0001D0,min(0.9999D0,abs(dstart/dd)))
+         if (bdeb)write(*,*)myname,'Offset:',tstart,dt,ff,ipitch
          jd=tstart + dt * ff
       else                      ! already at target
          jd=(tstart+tend)*0.5D0
@@ -12033,9 +12041,10 @@ C
             return
          end if
          dval=diffCycle(val,tval,tValCycle)
+         if (bdeb)write(*,*)myname,'Looping:',jd,ipitch,
+     &        val,"|",dval,"|",dstart,dend
          if (dval.gt.0.0D0) then
-            if ((forward.and.ipitch.eq.1).or.
-     &           (.not.forward.and.ipitch.eq.-1)) then
+            if (ipitch.eq.1) then
                dend=dval
                tend=jd
             else
@@ -12043,8 +12052,7 @@ C
                tstart=jd
             end if
          else
-            if ((forward.and.ipitch.eq.1).or.
-     &           (.not.forward.and.ipitch.eq.-1)) then
+            if (ipitch.eq.1) then
                dstart=dval
                tstart=jd
             else
@@ -12057,14 +12065,14 @@ C
          if (abs(dd).gt.1.0D-10.and.abs(dt).gt.dtmin) then
             ff = 0.5D0!max(0.0D0,min(1.0D0,-(dstart/dd)*1.5D0))
             jd = tstart + dt * ff
-            if (bdeb)write(*,*)myname,'Looping:',cnt,ipitch,
+            if (bdeb)write(*,*)myname,'Iterating:',cnt,ipitch,
      &           dstart,dend,dd,ff
          else ! already at target
             jd = (tstart+tend)*0.5D0
             bok=(abs(dd).le.tValCycle*0.25D0).or. ! discontinuity??
      &           (tValCycle.lt.0.0D0)
             bdone=.true.
-            if (bdeb)write(*,*)myname,'Target:',jd,dt,dd,bok
+            if (bdeb)write(*,*)myname,'Target:',jd,dt,dstart,dend,bok
          end if
          cnt=cnt+1
          bdone=(bdone.or.cnt.gt.maxcnt.or.bok)
@@ -12229,6 +12237,7 @@ C      data bdeb/.true./
       integer tcnt,scnt,cntmax
       parameter (cntmax=10000)
       logical forward
+      integer ipitch            ! pitch in current direction
       real eps
       parameter (eps = 2.0d0/86400.0d0) ! 2 seconds
 C
@@ -12240,11 +12249,18 @@ C
       xsearchTarget=tstartJD
 C      
       forward=tendJD.gt.tstartJD
+      if (forward) then
+         ipitch = pitch
+      else
+         ipitch = - pitch
+      end if
       JD=tstartJD
       mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
       ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
       idt=(tendJD-tstartJD)/ndt
-      if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,ndt,pitch
+      if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,
+     &     idt,nint(ndt),pitch,ipitch
+      if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin,nint(ndt)
 C
       bdone=.false.
 C     in case we are starting/stopping at a maximum/minimum value...
@@ -12299,21 +12315,14 @@ C
             xval(3)=val
             xval(4)=2.0D0*xval(2)-xval(1)
          end if
-C
-         dval(0)=diffCycle(xval(0),tval,tValCycle)
-         dval(1)=diffCycle(xval(1),tval,tValCycle)
-         dval(2)=diffCycle(xval(2),tval,tValCycle)
-         dval(3)=diffCycle(xval(3),tval,tValCycle)
-         dval(4)=diffCycle(xval(4),tval,tValCycle)
 C     
          if (scnt.ge.3) then
             bok=.false.
-C     !write(*,*)myname,'JNK:',xval(1),xval(2),val,val1
-C     
 C     
 C     determine if we must do a fine search
 C     
             do ii=0,4
+               dval(ii)=diffCycle(xval(ii),tval,tValCycle)
                if (dval(ii).gt.0.0D0) then
                   up(ii)=.true.
                   dn(ii)=.false.
@@ -12328,6 +12337,10 @@ C
                   zero(ii)=.true.
                end if
             end do
+C
+            if (bdeb)write(*,'(4(X,A),I2,X,F10.3"|",10(X,F10.3))')
+     &           myname,'Step:',T22,event100(1:lend),ipitch,val,dval
+C
 C     check if local max/min and in "grayzone" (ie. crossing is possible)
             maxpoint = dval(2).ge.dval(1).and.dval(2).gt.dval(3)
             minpoint = dval(2).le.dval(1).and.dval(2).lt.dval(3)
@@ -12336,18 +12349,14 @@ C     check if local max/min and in "grayzone" (ie. crossing is possible)
      &           (up(0).or.up(1).or.zero(0).or.zero(1)).and.
      &           (dn(3).or.dn(4)))
 C     
-            if (bdeb)write(*,'(4(X,A),2(X,F20.3),3(X,L1))')
-     &           myname,event100(1:lend),'Step:',T22,val,dval(3),
-     &           up(1),up(2),up(3)
-C     
-            if (pitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
+            if (ipitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
                if (up(2)) then
                   TJD=dsearchTarget(tval,
      &                 tValCycle,funk,
      &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 pitch,
+     &                 ipitch,
      &                 crc250,irc)
                else
                   TJD=dsearchTarget(tval,
@@ -12355,7 +12364,7 @@ C
      &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 pitch,
+     &                 ipitch,
      &                 crc250,irc)
                end if
                if (irc.ne.0) then
@@ -12366,14 +12375,14 @@ C
                   return
                end if
                scnt=1           ! only use last point in remainding search...
-            else if (pitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
+            else if (ipitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
                if (dval(2).le.0.0D0) then
                   TJD=dsearchTarget(tval,
      &                 tValCycle,funk,
      &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 pitch,
+     &                 ipitch,
      &                 crc250,irc)
                else
                   TJD=dsearchTarget(tval,
@@ -12381,7 +12390,7 @@ C
      &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 pitch,
+     &                 ipitch,
      &                 crc250,irc)
                end if
                if (irc.ne.0) then
@@ -12426,22 +12435,22 @@ C     find max-point...
                end if
 C     do fine search...
                if (up(5).or.zero(5)) then ! possible match
-                  if (pitch.ge.0) then
+                  if (ipitch.ge.0) then
                      TJD=dsearchTarget(tval,
      &                    tValCycle,funk,
      &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    pitch,
+     &                    ipitch,
      &                    crc250,irc)
                   end if
-                  if (pitch.le.0) then
+                  if (ipitch.le.0) then
                      TJD=dsearchTarget(tval,
      &                    tValCycle,funk,
      &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    pitch,
+     &                    ipitch,
      &                    crc250,irc)
                   end if
                   if (irc.ne.0) then
@@ -12487,22 +12496,21 @@ C     find min-point...
                end if
 C     do fine search...
                if (dn(5).or.zero(5)) then ! possible match
-                  if (pitch.ge.0) then
+                  if (ipitch.le.0) then
                      TJD=dsearchTarget(tval,
      &                    tValCycle,funk,
      &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    pitch,
+     &                    ipitch,
      &                    crc250,irc)
-                  end if
-                  if (pitch.le.0) then
+                  else
                      TJD=dsearchTarget(tval,
      &                    tValCycle,funk,
      &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    pitch,
+     &                    ipitch,
      &                    crc250,irc)
                   end if
                   if (irc.ne.0) then
@@ -12656,11 +12664,15 @@ C
       forward=(tend.gt.tstart) ! search direction
       dstart=dvalstart
       dend=dvalend
-      if ( (forward.and.dend.gt.0.0D0).or.
-     &     (.not.forward.and.dstart.gt.0.0D0) ) then
-         ipitch=1
-      else
-         ipitch=-1
+C
+      dd=dend-dstart
+      dt=tend-tstart
+      if (pitch.eq.0) then
+         if (dd.gt.0.0D0) then
+            ipitch=1
+         else
+            ipitch=-1
+         end if
       end if
 C     sanity check
       if (bdeb.and.ipitch*pitch .lt. 0) then
@@ -12669,9 +12681,6 @@ C     sanity check
       cnt=0
       bok=.false.
       bdone=(cnt.gt.maxcnt)
-C
-      dd=dend-dstart
-      dt=tend-tstart
       if (abs(dd).gt.1.0D-10) then
          ff = max(0.0D0,min(1.0D0,(dstart/dd)))
          jd=tstart + dt * ff
@@ -12693,8 +12702,7 @@ C
          end if
          dval=diffCycle(val,tval,tValCycle)
          if (dval.gt.0.0D0) then
-            if ((forward.and.ipitch.eq.1).or.
-     &           (.not.forward.and.ipitch.eq.-1))then
+            if (ipitch.eq.1)then
                dend=dval
                tend=jd
             else
@@ -12702,8 +12710,7 @@ C
                tstart=jd
             end if
          else
-            if ((forward.and.ipitch.eq.1).or.
-     &           (.not.forward.and.ipitch.eq.-1)) then
+            if (ipitch.eq.1) then
                dstart=dval
                tstart=jd
             else
