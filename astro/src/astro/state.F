@@ -37,7 +37,8 @@ C
       logical :: debug, bdeb
 C
       bdeb=.false.
-      lens=len(trim(s1000))
+C     call chop0(s1000,1000) ! s1000 is already char(0)-terminated
+      lens=length(s1000,1000,50)
 C
 C     make sure query_string ends with ';'
 C

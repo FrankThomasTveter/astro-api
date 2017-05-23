@@ -11510,7 +11510,7 @@ C
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,bfirst,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
+     &     rpitch,
      &     crc250,irc)
       implicit none
       real tVal                 ! target value
@@ -11534,7 +11534,7 @@ C
       integer repid(max(1,maxrep)) ! report time in Julian day JD
       real repval(max(1,maxrep)) ! report time in Julian day JD
       character*250 rep250(max(1,maxrep)) ! report strings
-      integer pitch             ! 1: rising, -1: falling, 0:any
+      integer rpitch            ! pitch in search direction, 1: rising, -1: falling, 0:any
       character*250 crc250      ! error description
       integer irc               ! error return code (0: ok)
       integer lencrc
@@ -11562,7 +11562,6 @@ C      data bdeb/.true./
       integer tcnt,scnt,cntmax
       parameter (cntmax=10000)
       logical forward
-      integer ipitch            ! pitch in current direction
       real eps
       parameter (eps = 2.0d0/86400.0d0) ! 2 seconds
 C
@@ -11574,17 +11573,12 @@ C
       xsearchLLTarget=tstartJD
 C      
       forward=tendJD.gt.tstartJD
-      if (forward) then
-         ipitch = pitch
-      else
-         ipitch = - pitch
-      end if
       JD=tstartJD
       mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
       ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
       idt=(tendJD-tstartJD)/ndt
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,
-     &     idt,nint(ndt),pitch,ipitch
+     &     idt,nint(ndt),rpitch
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin,nint(ndt)
 C
       bdone=.false.
@@ -11663,8 +11657,9 @@ C
                end if
             end do
 C
-            if (bdeb)write(*,'(4(X,A),I2,X,F10.3"|",10(X,F10.3))')
-     &           myname,'Step:',T22,event100(1:lend),ipitch,val,dval
+            if (bdeb)write(*,
+     &           '(4(X,A),F27.9,I2,X,F10.1"|",10(X,F10.1))')
+     &           myname,'Step:',T22,event100(1:lend),JD,rpitch,val,dval
 C     
 C     check if local max/min and in "grayzone" (ie. crossing is possible)
             maxpoint = dval(2).ge.dval(1).and.dval(2).gt.dval(3)
@@ -11674,7 +11669,7 @@ C     check if local max/min and in "grayzone" (ie. crossing is possible)
      &           (up(0).or.up(1).or.zero(0).or.zero(1)).and.
      &           (dn(3).or.dn(4)))
 C     
-            if (ipitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
+            if (rpitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
                if (up(2)) then
                   TJD=dsearchLLTarget(tval,
      &                 tValCycle,funk,
@@ -11682,7 +11677,7 @@ C
      &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 ipitch,
+     &                 rpitch,
      &                 crc250,irc)
                else
                   TJD=dsearchLLTarget(tval,
@@ -11691,7 +11686,7 @@ C
      &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 ipitch,
+     &                 rpitch,
      &                 crc250,irc)
                end if
                if (irc.ne.0) then
@@ -11702,7 +11697,7 @@ C
                   return
                end if
                scnt=1           ! only use last point in remainding search...
-            else if (ipitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
+            else if (rpitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
                if (dn(2)) then
                   TJD=dsearchLLTarget(tval,
      &                 tValCycle,funk,
@@ -11710,7 +11705,7 @@ C
      &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 ipitch,
+     &                 rpitch,
      &                 crc250,irc)
                else
                   TJD=dsearchLLTarget(tval,
@@ -11719,7 +11714,7 @@ C
      &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 ipitch,
+     &                 rpitch,
      &                 crc250,irc)
                end if
                if (irc.ne.0) then
@@ -11765,14 +11760,14 @@ C     find max-point...
                end if
 C     do fine search...
                if (up(5).or.zero(5)) then ! possible match
-                  if (ipitch.ge.0) then
+                  if (rpitch.ge.0) then
                      TJD=dsearchLLTarget(tval,
      &                    tValCycle,funk,
      &                    lat,lon,hgt,
      &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    ipitch,
+     &                    rpitch,
      &                    crc250,irc)
                   else 
                      TJD=dsearchLLTarget(tval,
@@ -11781,7 +11776,7 @@ C     do fine search...
      &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    ipitch,
+     &                    rpitch,
      &                    crc250,irc)
                   end if
                   if (irc.ne.0) then
@@ -11830,14 +11825,14 @@ C     find min-point...
                end if
 C     do fine search...
                if (dn(5).or.zero(5)) then ! possible match
-                  if (ipitch.le.0) then
+                  if (rpitch.le.0) then
                      TJD=dsearchLLTarget(tval,
      &                    tValCycle,funk,
      &                    lat,lon,hgt,
      &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    ipitch,
+     &                    rpitch,
      &                    crc250,irc)
                   else
                      TJD=dsearchLLTarget(tval,
@@ -11846,7 +11841,7 @@ C     do fine search...
      &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    ipitch,
+     &                    rpitch,
      &                    crc250,irc)
                   end if
                   if (irc.ne.0) then
@@ -11957,7 +11952,7 @@ C     at this point we know that the target can be reached...
      &     bok,secdec,
      &     eventId,event100,maxrep,nrep,
      &     repJD,repid,repval,rep250,
-     &     pitch,
+     &     rpitch,
      &     crc250,irc)
       implicit none
       real tVal                 ! target value
@@ -11981,7 +11976,7 @@ C     at this point we know that the target can be reached...
       integer repid(max(1,maxrep)) ! report time in Julian day JD
       real repval(max(1,maxrep)) ! report time in Julian day JD
       character*250 rep250(max(1,maxrep)) ! report strings
-      integer pitch             ! 1: rising, -1: falling, 0:any
+      integer rpitch            ! pitch in current search direction,1:rising, -1: falling, 0:any
       character*250 crc250      ! error description
       integer irc               ! error return code (0: ok)
 C
@@ -11992,11 +11987,11 @@ C
       integer cnt,maxcnt
       parameter (dtmin=1.0D0/86400.0D0, maxcnt=100)
       logical forward
-      integer ipitch            ! 1: rising, -1: falling
+      integer brpitch           ! binary pitch in current search direction
       character*16 myname
       data myname/'dsearchLLTarget'/
 C
-      if (bdeb)write(*,*)myname,'Entering.',ipitch,tstartJD,tendJD,
+      if (bdeb)write(*,*)myname,'Entering.',rpitch,tstartJD,tendJD,
      &     dvalstart,dvalend
       tstart=tstartjd
       tend=tendjd
@@ -12006,23 +12001,25 @@ C
 C
       dd=dend-dstart
       dt=tend-tstart
-      if (pitch.eq.0) then
+      if (rpitch.eq.0) then
          if (dd.gt.0.0D0) then
-            ipitch=1
+            brpitch=1
          else
-            ipitch=-1
+            brpitch=-1
          end if
+      else
+         brpitch=rpitch
       end if
 C     sanity check
-      if (bdeb.and.ipitch*pitch .lt. 0) then
-         write(*,*)myname,'Strange pitch:',dstart,dend,pitch,ipitch
+      if (bdeb.and.rpitch*brpitch .lt. 0) then
+         write(*,*)myname,'Strange pitch:',dstart,dend,brpitch,rpitch
       end if
       cnt=0
       bok=.false.
       bdone=(cnt.gt.maxcnt)
       if (abs(dd).gt.1.0D-10) then
          ff = max(0.0001D0,min(0.9999D0,abs(dstart/dd)))
-         if (bdeb)write(*,*)myname,'Offset:',tstart,dt,ff,ipitch
+         if (bdeb)write(*,*)myname,'Offset:',tstart,dt,ff,rpitch
          jd=tstart + dt * ff
       else                      ! already at target
          jd=(tstart+tend)*0.5D0
@@ -12041,10 +12038,8 @@ C
             return
          end if
          dval=diffCycle(val,tval,tValCycle)
-         if (bdeb)write(*,*)myname,'Looping:',jd,ipitch,
-     &        val,"|",dval,"|",dstart,dend
          if (dval.gt.0.0D0) then
-            if (ipitch.eq.1) then
+            if (brpitch.eq.1) then
                dend=dval
                tend=jd
             else
@@ -12052,7 +12047,7 @@ C
                tstart=jd
             end if
          else
-            if (ipitch.eq.1) then
+            if (brpitch.eq.1) then
                dstart=dval
                tstart=jd
             else
@@ -12065,8 +12060,10 @@ C
          if (abs(dd).gt.1.0D-10.and.abs(dt).gt.dtmin) then
             ff = 0.5D0!max(0.0D0,min(1.0D0,-(dstart/dd)*1.5D0))
             jd = tstart + dt * ff
-            if (bdeb)write(*,*)myname,'Iterating:',cnt,ipitch,
-     &           dstart,dend,dd,ff
+            if (bdeb)write(*,*)myname,'Looping:',jd,brpitch,
+     &           val,"|",dval,"|",dstart,dend
+C            if (bdeb)write(*,*)myname,'Iterating:',cnt,brpitch,
+C     &           dstart,dend,dd,ff
          else ! already at target
             jd = (tstart+tend)*0.5D0
             bok=(abs(dd).le.tValCycle*0.25D0).or. ! discontinuity??
@@ -12095,7 +12092,7 @@ C
      &     tValCycle,funk,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
+     &     rpitch,
      &     crc250,irc)
       implicit none
       real tVal                 ! target value
@@ -12114,7 +12111,7 @@ C
       integer repid(max(1,maxrep)) ! report time in Julian day JD
       real repval(max(1,maxrep)) ! report time in Julian day JD
       character*250 rep250(max(1,maxrep)) ! report strings
-      integer pitch             ! 1: rising, -1: falling, 0:any
+      integer rpitch            ! 1: rising, -1: falling, 0:any
       character*250 crc250      ! error description
       integer irc               ! error return code (0: ok)
       integer lencrc
@@ -12126,7 +12123,7 @@ C
      &     tValCycle,funk,
      &     tstartJD,tendJD,dtin,secdec,.false., bbok,! report all events
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
+     &     rpitch,
      &     crc250,irc)
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -12142,7 +12139,7 @@ C
      &     tValCycle,funk,
      &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
+     &     rpitch,
      &     crc250,irc)
       implicit none
       real tVal                 ! target value
@@ -12162,17 +12159,18 @@ C
       integer repid(max(1,maxrep)) ! report time in Julian day JD
       real repval(max(1,maxrep)) ! report time in Julian day JD
       character*250 rep250(max(1,maxrep)) ! report strings
-      integer pitch             ! 1: rising, -1: falling, 0:any
+      integer rpitch             ! relative pitch,1: rising, -1: falling, 0:any
       character*250 crc250      ! error description
       integer irc               ! error return code (0: ok)
       integer lencrc
       character*16 myname
       data myname/'searchTarget'/
+      !bdeb=.true.
       searchtarget = XsearchTarget(tval,
      &     tValCycle,funk,
      &     tstartJD,tendJD,dtin,secdec,.true.,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
+     &     rpitch,
      &     crc250,irc)
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -12188,7 +12186,7 @@ C
      &     tValCycle,funk,
      &     tstartJD,tendJD,dtin,secdec,bfirst,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     pitch,
+     &     rpitch,
      &     crc250,irc)
       implicit none
       real tVal                 ! target value
@@ -12209,7 +12207,7 @@ C
       integer repid(max(1,maxrep)) ! report time in Julian day JD
       real repval(max(1,maxrep)) ! report time in Julian day JD
       character*250 rep250(max(1,maxrep)) ! report strings
-      integer pitch             ! 1: rising, -1: falling, 0:any
+      integer rpitch             ! relative pitch, 1: rising, -1: falling, 0:any
       character*250 crc250      ! error description
       integer irc               ! error return code (0: ok)
       integer lencrc
@@ -12237,7 +12235,6 @@ C      data bdeb/.true./
       integer tcnt,scnt,cntmax
       parameter (cntmax=10000)
       logical forward
-      integer ipitch            ! pitch in current direction
       real eps
       parameter (eps = 2.0d0/86400.0d0) ! 2 seconds
 C
@@ -12249,17 +12246,12 @@ C
       xsearchTarget=tstartJD
 C      
       forward=tendJD.gt.tstartJD
-      if (forward) then
-         ipitch = pitch
-      else
-         ipitch = - pitch
-      end if
       JD=tstartJD
       mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
       ndt=nint(0.50001D0+abs(tendJD-tstartJD)/max(1.0D-5,abs(dtin)))
       idt=(tendJD-tstartJD)/ndt
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,
-     &     idt,nint(ndt),pitch,ipitch
+     &     idt,nint(ndt),rpitch
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin,nint(ndt)
 C
       bdone=.false.
@@ -12338,8 +12330,8 @@ C
                end if
             end do
 C
-            if (bdeb)write(*,'(4(X,A),I2,X,F10.3"|",10(X,F10.3))')
-     &           myname,'Step:',T22,event100(1:lend),ipitch,val,dval
+            if (bdeb)write(*,'(4(X,A),I2,X,F10.1"|",10(X,F10.1))')
+     &           myname,'Step:',T22,event100(1:lend),rpitch,val,dval
 C
 C     check if local max/min and in "grayzone" (ie. crossing is possible)
             maxpoint = dval(2).ge.dval(1).and.dval(2).gt.dval(3)
@@ -12349,14 +12341,14 @@ C     check if local max/min and in "grayzone" (ie. crossing is possible)
      &           (up(0).or.up(1).or.zero(0).or.zero(1)).and.
      &           (dn(3).or.dn(4)))
 C     
-            if (ipitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
+            if (rpitch.ge.0.and.(dn(1).or.zero(1)).and.up(3)) then ! cross up
                if (up(2)) then
                   TJD=dsearchTarget(tval,
      &                 tValCycle,funk,
      &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 ipitch,
+     &                 rpitch,
      &                 crc250,irc)
                else
                   TJD=dsearchTarget(tval,
@@ -12364,7 +12356,7 @@ C
      &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 ipitch,
+     &                 rpitch,
      &                 crc250,irc)
                end if
                if (irc.ne.0) then
@@ -12375,14 +12367,14 @@ C
                   return
                end if
                scnt=1           ! only use last point in remainding search...
-            else if (ipitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
+            else if (rpitch.le.0.and.(up(1).or.zero(1)).and.dn(3)) then ! cross down
                if (dval(2).le.0.0D0) then
                   TJD=dsearchTarget(tval,
      &                 tValCycle,funk,
      &                 xJD(1),xJD(2),dval(1),dval(2),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 ipitch,
+     &                 rpitch,
      &                 crc250,irc)
                else
                   TJD=dsearchTarget(tval,
@@ -12390,7 +12382,7 @@ C
      &                 xJD(2),xJD(3),dval(2),dval(3),bok,secdec,
      &                 eventId,event100,maxrep,nrep,
      &                 repJD,repid,repval,rep250,
-     &                 ipitch,
+     &                 rpitch,
      &                 crc250,irc)
                end if
                if (irc.ne.0) then
@@ -12435,22 +12427,22 @@ C     find max-point...
                end if
 C     do fine search...
                if (up(5).or.zero(5)) then ! possible match
-                  if (ipitch.ge.0) then
+                  if (rpitch.ge.0) then
                      TJD=dsearchTarget(tval,
      &                    tValCycle,funk,
      &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    ipitch,
+     &                    rpitch,
      &                    crc250,irc)
                   end if
-                  if (ipitch.le.0) then
+                  if (rpitch.le.0) then
                      TJD=dsearchTarget(tval,
      &                    tValCycle,funk,
      &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    ipitch,
+     &                    rpitch,
      &                    crc250,irc)
                   end if
                   if (irc.ne.0) then
@@ -12462,7 +12454,7 @@ C     do fine search...
                   end if 
                else             ! no crossing possible, do noooothing...
                end if
-               scnt=1           ! only use last point in remainding search...
+               scnt=2           ! use 2 last points in remainding search...
             else if (minpoint.and.grayzone.and.(up(1).or.up(3))) then
                !write(*,*) 'Gray zone minpoint:',up
 C     find min-point...
@@ -12496,13 +12488,13 @@ C     find min-point...
                end if
 C     do fine search...
                if (dn(5).or.zero(5)) then ! possible match
-                  if (ipitch.le.0) then
+                  if (rpitch.le.0) then
                      TJD=dsearchTarget(tval,
      &                    tValCycle,funk,
      &                    xJD(1),xJD(5),dval(1),dval(5),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    ipitch,
+     &                    rpitch,
      &                    crc250,irc)
                   else
                      TJD=dsearchTarget(tval,
@@ -12510,7 +12502,7 @@ C     do fine search...
      &                    xJD(5),xJD(3),dval(5),dval(3),bok,secdec,
      &                    eventId,event100,maxrep,nrep,
      &                    repJD,repid,repval,rep250,
-     &                    ipitch,
+     &                    rpitch,
      &                    crc250,irc)
                   end if
                   if (irc.ne.0) then
@@ -12522,7 +12514,7 @@ C     do fine search...
                   end if
                else             ! no crossing possible, do noooothing...
                end if
-               scnt=1           ! only use last point in remainding search...
+               scnt=2           ! use 2 last points in remainding search...
             else if (minpoint.or.maxpoint) then
                if(bdeb)write(*,*) 'Extremal:',up,dn
             else
@@ -12535,7 +12527,7 @@ C     do fine search...
                   write(*,*)myname,'Found:   ',t22,tjd
                   CALL JD2DATE(TstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
                   WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
-                  write(*,*)myname,'Start   :',t22,tstartjd
+                  write(*,*)myname,'Start:   ',t22,tstartjd
                   CALL JD2DATE(TendJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
                   WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
                   write(*,*)myname,'End:     ',t22,tendjd
@@ -12583,12 +12575,13 @@ C     do fine search...
                   bdone=bfirst  ! should we only report first event??
                else if (bdeb) then
                   write(*,*)myname,'Ignoring out of range:',
-     &                 tjd,tstartjd,tendjd
+     &                 tjd,forward,tstartjd,tendjd
                end if
             end if
          else
-            if (bdeb)write(*,'(4(X,A),2(X,F20.3))')
-     &           myname,event100(1:lend),'Step:',T22,val,dval(3)
+            if (bdeb)write(*,
+     &           '(4(X,A),F27.9,X,I2,X,F10.1"|",10(X,F10.1))')
+     &           myname,'Init:',T22,event100(1:lend),JD,rpitch,val,dval
          end if
          JD=JD+idt
          bdone=(bdone.or.tcnt.gt.cntmax.or.tcnt.gt.ndt)
@@ -12622,7 +12615,7 @@ C     at this point we know that the target can be reached...
      &     bok,secdec,
      &     eventId,event100,maxrep,nrep,
      &     repJD,repid,repval,rep250,
-     &     pitch,
+     &     rpitch,
      &     crc250,irc)
       implicit none
       real tVal                 ! target value
@@ -12643,7 +12636,7 @@ C     at this point we know that the target can be reached...
       integer repid(max(1,maxrep)) ! report time in Julian day JD
       real repval(max(1,maxrep)) ! report time in Julian day JD
       character*250 rep250(max(1,maxrep)) ! report strings
-      integer pitch             ! 1: rising, -1: falling, 0:any
+      integer rpitch             ! 1: rising, -1: falling, 0:any
       character*250 crc250      ! error description
       integer irc               ! error return code (0: ok)
 C
@@ -12651,14 +12644,14 @@ C
       external diffcycle
       logical bdone
       real tstart,tend,dt,dtmin,dstart,dend,dval,val,dd,jd,ff
-      integer cnt,maxcnt,ipitch
+      integer cnt,maxcnt,brpitch
       parameter (dtmin=1.0D0/86400.0D0, maxcnt=100)
       logical forward
       character*16 myname
       data myname/'dsearchTarget'/
 C
-      if (bdeb)write(*,*)myname,'Entering.',pitch,tstartJD,tendJD,
-     &     dvalstart,dvalend
+      if (bdeb)write(*,*)myname,'Entering.',rpitch,tstartJD,tendJD,
+     &     "|",dvalstart,dvalend
       tstart=tstartjd
       tend=tendjd
       forward=(tend.gt.tstart) ! search direction
@@ -12667,22 +12660,24 @@ C
 C
       dd=dend-dstart
       dt=tend-tstart
-      if (pitch.eq.0) then
+      if (rpitch.eq.0) then
          if (dd.gt.0.0D0) then
-            ipitch=1
+            brpitch=1
          else
-            ipitch=-1
+            brpitch=-1
          end if
+      else
+         brpitch=rpitch
       end if
 C     sanity check
-      if (bdeb.and.ipitch*pitch .lt. 0) then
-         write(*,*)myname,'Strange pitch:',dstart,dend,pitch,ipitch
+      if (bdeb.and.rpitch*brpitch .lt. 0) then
+         write(*,*)myname,'Strange pitch:',dstart,dend,brpitch,rpitch
       end if
       cnt=0
       bok=.false.
       bdone=(cnt.gt.maxcnt)
       if (abs(dd).gt.1.0D-10) then
-         ff = max(0.0D0,min(1.0D0,(dstart/dd)))
+         ff = max(0.0001D0,min(0.9999D0,abs(dstart/dd)))
          jd=tstart + dt * ff
       else                      ! already at target
          jd=(tstart+tend)*0.5D0
@@ -12702,7 +12697,7 @@ C
          end if
          dval=diffCycle(val,tval,tValCycle)
          if (dval.gt.0.0D0) then
-            if (ipitch.eq.1)then
+            if (brpitch.eq.1)then
                dend=dval
                tend=jd
             else
@@ -12710,7 +12705,7 @@ C
                tstart=jd
             end if
          else
-            if (ipitch.eq.1) then
+            if (brpitch.eq.1) then
                dstart=dval
                tstart=jd
             else
@@ -12723,8 +12718,8 @@ C
          if (abs(dd).gt.1.0D-10.and.abs(dt).gt.dtmin) then
             ff = 0.5D0!max(0.0D0,min(1.0D0,-(dstart/dd)*1.5D0))
             jd = tstart + dt * ff
-            if (bdeb)write(*,*)myname,'Looping:',cnt,ipitch,
-     &           dstart,dend,dd,ff
+            if (bdeb)write(*,*)myname,'Looping:',jd,brpitch,
+     &           val,"|",dval,"|",dstart,dend
          else ! already at target
             jd = (tstart+tend)*0.5D0
             bok=(abs(dd).le.tValCycle*0.25D0).or. ! discontinuity??
@@ -13725,17 +13720,17 @@ C     !write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                   CALL JD2DATE(tstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
                   WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
                   write(*,*) myname,'Conjunction at ',
-     &                 T16,rp.le.rm
+     &                 T16,tstartJD,rp.le.rm,rp,rm
  888              FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2) ! 16
                end if
                
                lend=length(event100,100,10)
-               dt=10.0D0        ! eclipse starts not more than 10 day earlier
-               xeventId=eventId + 1
-               xevent100=event100(1:lend)//' STOP'
+               dt=-10.0D0       ! eclipse starts not more than 10 day earlier
+               xeventId=eventId + 0
+               xevent100=event100(1:lend)//' START'
                call chop0(xevent100,100)
                xCycle=-1.0D0    ! disable variable cycling
-               tendJD=min(max(tstartJDin,tendJDin),tstartJD+dt)
+               tendJD=max(min(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,
@@ -13756,12 +13751,12 @@ C     !write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                   WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
                   write(*,*) myname,'Start at ',T16,nrep
                end if
-               dt=-10.0D0       ! eclipse starts not more than 10 day earlier
-               xeventId=eventId + 0
-               xevent100=event100(1:lend)//' START'
+               dt=10.0D0        ! eclipse starts not more than 10 day earlier
+               xeventId=eventId + 1
+               xevent100=event100(1:lend)//' STOP'
                call chop0(xevent100,100)
                xCycle=-1.0D0    ! disable variable cycling
-               tendJD=max(min(tstartJDin,tendJDin),tstartJD+dt)
+               tendJD=min(max(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,
@@ -13793,7 +13788,7 @@ C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
                CALL JD2DATE(tstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
                WRITE(T16,FMT=888) YY1,MM1,DD1,HH1,MI1
                write(*,*) myname,'Conjunction at ',
-     &              T16,rp.le.rm
+     &              T16,tstartJD,rp.le.rm,rp,rm
             end if
          end if
          if ((dtin.gt.0.0D0.and.tstartJD+0.5*dtin
@@ -14891,16 +14886,16 @@ C
       external getMoonUpperElevation
       real targetCycle,getMoonUpperElevation
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
-      integer ipitch
+      integer rpitch            ! pitch in current search direction
 C
       call chop0(event100,100)
 C
       dtin=0.05D0
       if(direction.eq.1) then   ! forewards
-         ipitch=pitch
+         rpitch=pitch
          tendJD=tstartJD+1.5D0
       else                      ! backwards
-         ipitch=-pitch
+         rpitch=-pitch
          tendJD=tstartJD-1.5D0
       end if
 CC
@@ -14909,7 +14904,7 @@ CC
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     ipitch,
+     &     rpitch,
      &     crc250,irc)
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -15679,16 +15674,16 @@ C
       external getSunUpperElevation
       real targetCycle,getSunUpperElevation
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
-      integer ipitch
+      integer rpitch            ! pitch in current search direction
 C
       call chop0(event100,100)
 C
       dtin=0.05D0
       if(direction.eq.1) then
-         ipitch=pitch
+         rpitch=pitch
          tendJD=tstartJD+1.5D0
       else 
-         ipitch=-pitch
+         rpitch=-pitch
          tendJD=tstartJD-1.5D0
       end if
 C
@@ -15697,7 +15692,7 @@ C
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     ipitch,
+     &     rpitch,
      &     crc250,irc)
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -16012,16 +16007,16 @@ C
       external getSunUpperElevation
       real targetCycle,getSunUpperElevation
       parameter (targetCycle=360.0D0) ! target value which correponds to 0.0D0
-      integer ipitch
+      integer rpitch            ! pitch in current search direction
 C
       call chop0(event100,100)
 C
       dtin=0.05D0
       if(direction.eq.1) then   ! forewards
-         ipitch=pitch
+         rpitch=pitch
          tendJD=tstartJD+1.5D0
       else                      ! backwards
-         ipitch=-pitch
+         rpitch=-pitch
          tendJD=tstartJD-1.5D0
       end if
 CC
@@ -16030,7 +16025,7 @@ CC
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,bbok,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
-     &     ipitch,
+     &     rpitch,
      &     crc250,irc)
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)

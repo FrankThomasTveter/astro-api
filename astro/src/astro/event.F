@@ -58,15 +58,18 @@ C
       integer :: ii, jj,istart,istop,nval
       real :: sec1,sec2,dsec1,dsec2,sec,cpuStart,cpuStop
       logical :: debug, bdeb
+      data bdeb /.false./
       integer :: cost
 C
-      bdeb=.false.
-      lens=len(trim(s1000))
+C      bdeb=.true.
+C     call chop0(s1000,1000)    ! s1000 is already char(0) terminated
+      lens=length(s1000,1000,50)
 C
 C     make sure query_string ends with ';'
 C
       lens=min(1000,lens+1)
       s1000(lens:lens)=';'
+      if (bdeb) write(*,*)'Query: "',s1000(1:lens)//'"',lens
 C
 C     eventStart: start time given as "YYYY-MM-DDTHH:MI:SSZ"
 C     eventSearch: event search code; -1:previous, +1:next, 0: both, +2:until eventStop
@@ -118,7 +121,6 @@ C      write(line250(nline),'(A)') '<query string='//
 C     &     '"'// trim(s1000)//'"/>'
 C      lenline(nline)=len(trim(line250(nline)))
 C
-      if (bdeb) write(*,*)'Query: "',s1000(1:lens)//'"'
       ii=1
       mode=0                    ! initial
       bdone=(ii.gt.lens)
