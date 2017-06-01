@@ -58,7 +58,7 @@ C
       integer :: ii, jj,istart,istop,nval
       real :: sec1,sec2,dsec1,dsec2,sec,cpuStart,cpuStop
       logical :: debug, bdeb
-      data bdeb /.true./
+      data bdeb /.false./
       integer :: cost
 C
 C      bdeb=.true.
