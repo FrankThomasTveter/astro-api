@@ -58,7 +58,7 @@ C
       integer :: ii, jj,istart,istop,nval
       real :: sec1,sec2,dsec1,dsec2,sec,cpuStart,cpuStop
       logical :: debug, bdeb
-      data bdeb /.false./
+      data bdeb /.true./
       integer :: cost
 C
 C      bdeb=.true.
@@ -344,9 +344,10 @@ C
                      dsec2=sec2
                      dstop=.true.
                   end if
-                  LSTOP=.false.
+                  lstop=.true.
                end if
                ii=ii+1
+               mode=0
             else
                if (s1000(ii:ii).eq.'-'.or.s1000(ii:ii).eq.':'.or.
      &              s1000(ii:ii).eq.'T'.or.s1000(ii:ii).eq.'Z') then
