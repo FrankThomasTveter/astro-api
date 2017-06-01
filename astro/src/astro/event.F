@@ -471,8 +471,6 @@ C     set default stop time
          dmi2=mi2
          dsec2=sec2
          dtstopJD=tstopJD
-      else
-         tstopJD=0.0D0
       end if
 C
       if (debug) call cpu_time(cpuStart)

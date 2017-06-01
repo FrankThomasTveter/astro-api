@@ -6021,7 +6021,7 @@ C     need 3 points before we can check for maximum
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=480
          return
       end if
 C     
@@ -6182,7 +6182,7 @@ C     need 3 points before we can check for minimum
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=481
          return
       end if
       if (nrep.eq.inrep) then ! no local minimum, check end points
@@ -6506,7 +6506,7 @@ C     need 3 points before we can check for maximum
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=482
          return
       end if
       if (nrep.gt.maxrep.and.maxrep.ne.0) then
@@ -7059,7 +7059,7 @@ C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=483
          return
       end if
       return
@@ -7213,7 +7213,7 @@ C     need 3 points before we can check for minimum
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=484
          return
       end if
       if (nrep.gt.maxrep.and.maxrep.ne.0) then
@@ -8301,7 +8301,7 @@ C     increment time
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=485
          return
       end if
       if (nrep.gt.maxrep.and.maxrep.ne.0) then
@@ -9005,7 +9005,7 @@ C     increment time
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=486
          return
       end if
       if (nrep.gt.maxrep.and.maxrep.ne.0) then
@@ -9369,7 +9369,7 @@ C
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=487
          return
       end if
 C     
@@ -9989,7 +9989,7 @@ C     increment time
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=488
          return
       end if
       if (nrep.gt.maxrep.and.maxrep.ne.0) then
@@ -10499,7 +10499,7 @@ C
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=489
          return
       end if
 C     
@@ -10709,7 +10709,7 @@ C
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=490
          return
       end if
 C
@@ -10939,7 +10939,7 @@ C     need 3 points before we can check for maximum
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=491
          return
       end if
       if (maxrep.ne.0.and.nrep.eq.inrep) then ! no local minimum, check end points
@@ -11075,7 +11075,7 @@ C     Parameters: The golden ratios.
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=492
          return
       end if
       if(f1.lt.f2)then          ! We are done. Output the best of the two current values.
@@ -11252,7 +11252,7 @@ C     need 3 points before we can check for maximum
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=493
          return
       end if
       if (maxrep.ne.0.and.nrep.eq.inrep) then ! no local minimum, check end points
@@ -11388,7 +11388,7 @@ C     Parameters: The golden ratios.
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=494
          return
       end if
       if(f1.lt.f2)then          ! We are done. Output the best of the two current values.
@@ -11928,7 +11928,7 @@ C     do fine search...
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=495
          return
       end if
       if (nrep.gt.maxrep.AND.MAXREP.NE.0) then
@@ -12081,7 +12081,7 @@ C     &           dstart,dend,dd,ff
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=496
          return
       end if
       if (bdeb)write(*,*)myname,'Found:',bok,jd,tstart,tend,dstart,dend
@@ -12592,7 +12592,7 @@ C     do fine search...
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=497
          return
       end if
       if (nrep.gt.maxrep.AND.MAXREP.NE.0) then
@@ -12737,7 +12737,7 @@ C
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=498
          return
       end if
       if (bdeb)write(*,*)myname,'Found:',bok,jd,tstart,tend,dstart,dend
@@ -13081,7 +13081,7 @@ C     need 3 points before we can check for maximum
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=499
          return
       end if
       if (nrep.gt.maxrep.AND.MAXREP.NE.0) then
@@ -13160,7 +13160,7 @@ C     Parameters: The golden ratios.
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=500
          return
       end if
       if(f1.lt.f2)then          ! We are done. Output the best of the two current values.
@@ -13807,7 +13807,7 @@ C
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=501
          return
       end if
 C
@@ -13995,7 +13995,7 @@ C     need 3 points before we can check for maximum
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=502
          return
       end if
       if (nrep.gt.maxrep.AND.MAXREP.NE.0) then
@@ -14075,7 +14075,7 @@ C         !write(*,*) 'GoldenMin:',f1,f2,x1,x2
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=503
          return
       end if
       if(f1.lt.f2)then          ! We are done. Output the best of the two current values.
@@ -15631,7 +15631,7 @@ C
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=504
          return
       end if
 C     
@@ -16431,7 +16431,7 @@ C
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=505
          return
       end if
 C     
@@ -16665,7 +16665,7 @@ C
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//buff250
          call chop0(crc250,250)
-         irc=457
+         irc=506
          return
       end if
 C
