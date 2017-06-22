@@ -73,7 +73,7 @@
 # Compilation flags 
 #	(Put the compilation flags here (-g is recommented))
 #
- OPTIONS =  -fdefault-real-8
+ OPTIONS =  -fdefault-real-8 -fdefault-double-8 
  COMPILER = gfortran
 #
 #------------------------------------------------------------------------
