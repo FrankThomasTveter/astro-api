@@ -105,95 +105,102 @@ Request={
 	    // update data
 	    var d=new Date();
 	    var tnow=d.getTime();
+	    console.log("data",data);
 	    var ss=data.getElementsByTagName("solarsystem")[0];
-	    var loc=ss.getElementsByTagName("location")[0];
-	    // store initial data
-	    var ini=ss.getElementsByTagName("initial")[0];
-	    var inibod=ini.getElementsByTagName("body");
-	    var inino=ini.getAttribute("no");
-	    req["initial"]={};
-	    for (var ii=0; ii<inino; ii++) {
-		var bod=inibod[ii];
-		var name=bod.getAttribute("name");
-		req["initial"][name]={};
-		req["initial"][name]["rotation"]={};
-		req["initial"][name]["rotation"]["ra"]=+bod.getAttribute("ra");
-		req["initial"][name]["rotation"]["dec"]=+bod.getAttribute("dec");
-		req["initial"][name]["rotation"]["w"]=+bod.getAttribute("w")*Math.PI/180.0;
-		req["initial"][name]["rotation"]["dwdt"]=+bod.getAttribute("dwdt")*Math.PI/180.0;
-		req["initial"][name]["main"]=bod.getAttribute("main");
-		req["initial"][name]["xmu"]=+bod.getAttribute("xmu");
-	    }
-	    // store time data
-	    var tis=ss.getElementsByTagName("times")[0];
-	    var tistim=tis.getElementsByTagName("time");
-	    var tisno=tis.getAttribute("no");
-	    //console.log("Times ",tisno);
-	    for (var tt=0; tt<tisno; tt++) {
-		var tim = tistim[tt];
-		// store observer data
-		var dtg  = tim.getAttribute("dtg");
-		var dtg_ = req["events"][tt]["dtg"];
-		if (dtg != dtg_) { // check if dtg in reply matches dtg in request
-		    console.log("Date mismatch: ",dtg," != ",dtg_);
-		} else {
-		    var jd2000=tim.getAttribute("jd2000");
-		    var obs=tim.getElementsByTagName("observer")[0];
-		    var obsi=obs.getElementsByTagName("i")[0];
-		    var obsj=obs.getElementsByTagName("j")[0];
-		    var obsk=obs.getElementsByTagName("k")[0];
-		    var obsloc=obs.getElementsByTagName("location")[0];
-		    var obszen=obs.getElementsByTagName("zenith")[0];
-		    req["events"][tt]["observer"]={};
-		    req["events"][tt]["observer"]["i"]=new Vector3();
-		    req["events"][tt]["observer"]["i"]["x"]=+obsi.getAttribute("x");
-		    req["events"][tt]["observer"]["i"]["y"]=+obsi.getAttribute("y");
-		    req["events"][tt]["observer"]["i"]["z"]=+obsi.getAttribute("z");
-		    req["events"][tt]["observer"]["j"]=new Vector3();
-		    req["events"][tt]["observer"]["j"]["x"]=+obsj.getAttribute("x");
-		    req["events"][tt]["observer"]["j"]["y"]=+obsj.getAttribute("y");
-		    req["events"][tt]["observer"]["j"]["z"]=+obsj.getAttribute("z");
-		    req["events"][tt]["observer"]["k"]=new Vector3();
-		    req["events"][tt]["observer"]["k"]["x"]=+obsk.getAttribute("x");
-		    req["events"][tt]["observer"]["k"]["y"]=+obsk.getAttribute("y");
-		    req["events"][tt]["observer"]["k"]["z"]=+obsk.getAttribute("z");
-		    req["events"][tt]["observer"]["position"]=new Vector3();
-		    req["events"][tt]["observer"]["position"]["x"]=+obsloc.getAttribute("x");
-		    req["events"][tt]["observer"]["position"]["y"]=+obsloc.getAttribute("y");
-		    req["events"][tt]["observer"]["position"]["z"]=+obsloc.getAttribute("z");
-		    req["events"][tt]["observer"]["position"]["origo"]=obsloc.getAttribute("origo");
-		    req["events"][tt]["observer"]["zenith"]=new Vector3();
-		    req["events"][tt]["observer"]["zenith"]["x"]=+obszen.getAttribute("x");
-		    req["events"][tt]["observer"]["zenith"]["y"]=+obszen.getAttribute("y");
-		    req["events"][tt]["observer"]["zenith"]["z"]=+obszen.getAttribute("z");
-		    var pointAt = req["events"][tt]["pointAt"];
-		    req["events"][tt]["pointId"] = -1;
-		    var sta=tim.getElementsByTagName("state")[0];
-		    var stabod=sta.getElementsByTagName("body");
-		    var stano=sta.getAttribute("no");
-		    req["events"][tt]["state"]={};
-		    for (var ii=0; ii<stano; ii++) {
-			var bod=stabod[ii];
-			var name=bod.getAttribute("name");
-			if (name == pointAt) {req["events"][tt]["pointId"] = ii;}
-			//console.log("Added state for ",name," at ",dtg);
-			req["events"][tt]["state"][name]={"position":new Vector3(),"rotation":new Vector3()};
-			req["events"][tt]["state"][name]["position"]["x"]=+bod.getAttribute("x");
-			req["events"][tt]["state"][name]["position"]["y"]=+bod.getAttribute("y");
-			req["events"][tt]["state"][name]["position"]["z"]=+bod.getAttribute("z");
-			req["events"][tt]["state"][name]["position"]["vx"]=+bod.getAttribute("vx");
-			req["events"][tt]["state"][name]["position"]["vy"]=+bod.getAttribute("vy");
-			req["events"][tt]["state"][name]["position"]["vz"]=+bod.getAttribute("vz");
-			req["events"][tt]["state"][name]["rotation"]["ra"]=+req["initial"][name]["rotation"]["ra"]; 
-			req["events"][tt]["state"][name]["rotation"]["dec"]=+req["initial"][name]["rotation"]["dec"]; 
-			req["events"][tt]["state"][name]["rotation"]["w"]=+req["initial"][name]["rotation"]["w"]
-			    + req["initial"][name]["rotation"]["dwdt"] * jd2000;
-			req["events"][tt]["state"][name]["name"]=name;
+	    var error=ss.getElementsByTagName("Error")[0];
+	    if (error == null) {
+		// store initial data
+		var loc=ss.getElementsByTagName("location")[0];
+		// store initial data
+		var ini=ss.getElementsByTagName("initial")[0];
+		var inibod=ini.getElementsByTagName("body");
+		var inino=ini.getAttribute("no");
+		req["initial"]={};
+		for (var ii=0; ii<inino; ii++) {
+		    var bod=inibod[ii];
+		    var name=bod.getAttribute("name");
+		    req["initial"][name]={};
+		    req["initial"][name]["rotation"]={};
+		    req["initial"][name]["rotation"]["ra"]=+bod.getAttribute("ra");
+		    req["initial"][name]["rotation"]["dec"]=+bod.getAttribute("dec");
+		    req["initial"][name]["rotation"]["w"]=+bod.getAttribute("w")*Math.PI/180.0;
+		    req["initial"][name]["rotation"]["dwdt"]=+bod.getAttribute("dwdt")*Math.PI/180.0;
+		    req["initial"][name]["main"]=bod.getAttribute("main");
+		    req["initial"][name]["xmu"]=+bod.getAttribute("xmu");
+		}
+		// store time data
+		var tis=ss.getElementsByTagName("times")[0];
+		var tistim=tis.getElementsByTagName("time");
+		var tisno=tis.getAttribute("no");
+		//console.log("Times ",tisno);
+		for (var tt=0; tt<tisno; tt++) {
+		    var tim = tistim[tt];
+		    // store observer data
+		    var dtg  = tim.getAttribute("dtg");
+		    var dtg_ = req["events"][tt]["dtg"];
+		    if (dtg != dtg_) { // check if dtg in reply matches dtg in request
+			console.log("Date mismatch: ",dtg," != ",dtg_);
+		    } else {
+			var jd2000=tim.getAttribute("jd2000");
+			var obs=tim.getElementsByTagName("observer")[0];
+			var obsi=obs.getElementsByTagName("i")[0];
+			var obsj=obs.getElementsByTagName("j")[0];
+			var obsk=obs.getElementsByTagName("k")[0];
+			var obsloc=obs.getElementsByTagName("location")[0];
+			var obszen=obs.getElementsByTagName("zenith")[0];
+			req["events"][tt]["observer"]={};
+			req["events"][tt]["observer"]["i"]=new Vector3();
+			req["events"][tt]["observer"]["i"]["x"]=+obsi.getAttribute("x");
+			req["events"][tt]["observer"]["i"]["y"]=+obsi.getAttribute("y");
+			req["events"][tt]["observer"]["i"]["z"]=+obsi.getAttribute("z");
+			req["events"][tt]["observer"]["j"]=new Vector3();
+			req["events"][tt]["observer"]["j"]["x"]=+obsj.getAttribute("x");
+			req["events"][tt]["observer"]["j"]["y"]=+obsj.getAttribute("y");
+			req["events"][tt]["observer"]["j"]["z"]=+obsj.getAttribute("z");
+			req["events"][tt]["observer"]["k"]=new Vector3();
+			req["events"][tt]["observer"]["k"]["x"]=+obsk.getAttribute("x");
+			req["events"][tt]["observer"]["k"]["y"]=+obsk.getAttribute("y");
+			req["events"][tt]["observer"]["k"]["z"]=+obsk.getAttribute("z");
+			req["events"][tt]["observer"]["position"]=new Vector3();
+			req["events"][tt]["observer"]["position"]["x"]=+obsloc.getAttribute("x");
+			req["events"][tt]["observer"]["position"]["y"]=+obsloc.getAttribute("y");
+			req["events"][tt]["observer"]["position"]["z"]=+obsloc.getAttribute("z");
+			req["events"][tt]["observer"]["position"]["origo"]=obsloc.getAttribute("origo");
+			req["events"][tt]["observer"]["zenith"]=new Vector3();
+			req["events"][tt]["observer"]["zenith"]["x"]=+obszen.getAttribute("x");
+			req["events"][tt]["observer"]["zenith"]["y"]=+obszen.getAttribute("y");
+			req["events"][tt]["observer"]["zenith"]["z"]=+obszen.getAttribute("z");
+			var pointAt = req["events"][tt]["pointAt"];
+			req["events"][tt]["pointId"] = -1;
+			var sta=tim.getElementsByTagName("state")[0];
+			var stabod=sta.getElementsByTagName("body");
+			var stano=sta.getAttribute("no");
+			req["events"][tt]["state"]={};
+			for (var ii=0; ii<stano; ii++) {
+			    var bod=stabod[ii];
+			    var name=bod.getAttribute("name");
+			    if (name == pointAt) {req["events"][tt]["pointId"] = ii;}
+			    //console.log("Added state for ",name," at ",dtg);
+			    req["events"][tt]["state"][name]={"position":new Vector3(),"rotation":new Vector3()};
+			    req["events"][tt]["state"][name]["position"]["x"]=+bod.getAttribute("x");
+			    req["events"][tt]["state"][name]["position"]["y"]=+bod.getAttribute("y");
+			    req["events"][tt]["state"][name]["position"]["z"]=+bod.getAttribute("z");
+			    req["events"][tt]["state"][name]["position"]["vx"]=+bod.getAttribute("vx");
+			    req["events"][tt]["state"][name]["position"]["vy"]=+bod.getAttribute("vy");
+			    req["events"][tt]["state"][name]["position"]["vz"]=+bod.getAttribute("vz");
+			    req["events"][tt]["state"][name]["rotation"]["ra"]=+req["initial"][name]["rotation"]["ra"]; 
+			    req["events"][tt]["state"][name]["rotation"]["dec"]=+req["initial"][name]["rotation"]["dec"]; 
+			    req["events"][tt]["state"][name]["rotation"]["w"]=+req["initial"][name]["rotation"]["w"]
+				+ req["initial"][name]["rotation"]["dwdt"] * jd2000;
+			    req["events"][tt]["state"][name]["name"]=name;
+			}
 		    }
 		}
+		req.received= true;
+	    } else {
+		// we never receive data, stop processing here...
 	    }
 	    //console.log("Requests:",JSON.stringify(requests));
-	    req.received= true;
 	} else {
 	    //console.log("Request failed.");
 	}

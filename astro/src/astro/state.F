@@ -179,7 +179,7 @@ c$$$  end if
          nline=0
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)')
-     &        "Content-type: text/html;charset=iso-8859-1"
+     &        "Content-type: text/xml;" ! "charset=iso-8859-1"
          lenline(nline)=len(trim(line250(nline)))
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)')" "
@@ -193,18 +193,17 @@ c$$$  end if
      &        '<solarsystem xmlns:xsi='//
      &        '"http://www.w3.org/2001/XMLSchema-instance"'//
      &        ' xmlns="http://astro.met.no"  xsi:schemaLocation='//
-     &        '"http://astro.met.no/astro state.xsd">'//
-     &        '<meta licenseurl="1"/>'
+     &        '"http://astro.met.no/astro state.xsd">'
          lenline(nline)=len(trim(line250(nline)))
-         nline=min(maxline,nline+1)
-         write(line250(nline),'(A)')" "
-         lenline(nline)=len(trim(line250(nline)))
+         !nline=min(maxline,nline+1)
+         !write(line250(nline),'(A)')" "
+         !lenline(nline)=len(trim(line250(nline)))
          call clean0(crc250,250)
          call chop0(crc250,250)
          lenc=length(crc250,250,10)
          nline=min(maxline,nline+1)
          write(line250(nline),'(A,I0,A,A,A)') 
-     &        '<Error irc="',irc,
+     &        ' <Error irc="',irc,
      &        '" msg="',crc250(1:lenc),'"/>'
          lenline(nline)=len(trim(line250(nline)))
          nline=min(maxline,nline+1)
