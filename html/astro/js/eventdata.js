@@ -188,6 +188,7 @@ function dataToArray(data,status,id,documentLog) {
 	    rawData[id]=[];
 	}
 	var cnt=0;
+	var log="";
 	targetUpdate=new Date("3000-01-01T00:00:00.000Z").getTime();
 	var events=data.getElementsByTagName("Event");
 	var len=rawData[id].length;
@@ -209,27 +210,34 @@ function dataToArray(data,status,id,documentLog) {
 	    updateCost(cost);
 	    for (var jj = 0; jj < reports.length; jj++) {
 		var report=reports[jj];
-		var reportDtg=report.getAttribute("time");
-		var t=new Date(reportDtg);
-		var localDtg=t.getTime();
-		//console.log("Got date: "+reportDtg+" => "+localDtg);
-		if (localDtg > tnow) {
-		    if (targetUpdate < tnow || localDtg < targetUpdate ) {
-			targetUpdate=localDtg;
-		    };
-		}
-		var reportId=report.getAttribute("repId");
-		var reportVal=report.getAttribute("repVal");
-		var reportHint=report.getAttribute("hint");
-		var localSort=getSortTime(localDtg,eventId,reportId);
-		rawData[id][cnt++]=[localDtg,localSort,eventId,reportId,reportVal,reportHint];
+		var error=report.getAttribute("error");
+		console.log("Error="+jj+" "+error);
+		if (error == null) {
+		    var reportDtg=report.getAttribute("time");
+		    var t=new Date(reportDtg);
+		    var localDtg=t.getTime();
+		    //console.log("Got date: "+reportDtg+" => "+localDtg);
+		    if (localDtg > tnow) {
+			if (targetUpdate < tnow || localDtg < targetUpdate ) {
+			    targetUpdate=localDtg;
+			};
+		    }
+		    var reportId=report.getAttribute("repId");
+		    var reportVal=report.getAttribute("repVal");
+		    var reportHint=report.getAttribute("hint");
+		    var localSort=getSortTime(localDtg,eventId,reportId);
+		    rawData[id][cnt++]=[localDtg,localSort,eventId,reportId,reportVal,reportHint];
+		} else {
+		    var hint=report.getAttribute("hint");
+		    log="<em>Server-request:"+hint+"</em>";
+		};
 	    };
 	};
 	if (cnt < len) {rawData[id].splice(cnt, len-cnt);}
 	rawData[id].sort(function(a, b){return a[1]-b[1]});
 	drawAll=true;
 	//console.log("Added data to array-id="+id+" "+rawData[id].length);
-	documentLog.innerHTML = "";
+	documentLog.innerHTML = log;
     } else {
 	documentLog.innerHTML = "<em>Server-request:"+status+"</em>";
     }
