@@ -211,7 +211,6 @@ function dataToArray(data,status,id,documentLog) {
 	    for (var jj = 0; jj < reports.length; jj++) {
 		var report=reports[jj];
 		var error=report.getAttribute("error");
-		console.log("Error="+jj+" "+error);
 		if (error == null) {
 		    var reportDtg=report.getAttribute("time");
 		    var t=new Date(reportDtg);
