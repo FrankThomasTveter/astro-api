@@ -3,9 +3,9 @@
      &     nline,               ! number of output lines
      &     lenline,             ! length of each out250
      &     line250,crc250,irc)
-      !
-      ! The "world coordinate system" is "barycentric MJD2000"  (x->equinox, y->R.A.6 z->north-pole)
-      !
+!     
+!     The "world coordinate system" is "barycentric MJD2000"  (x->equinox, y->R.A.6 z->north-pole)
+!     
       implicit none
       integer njd
       character*30 jd30(njd)
@@ -16,24 +16,24 @@
       character*250 :: line250(maxline)
       character*250 crc250
       integer irc
-      !
+!     
       character*1 c1
       character*30 b30
       character*6 c6
       integer,external :: length
       integer :: lenc
-      real :: jd ! 	IAU, 0 Jan 2010, 0h TT
+      real :: jd                ! 	IAU, 0 Jan 2010, 0h TT
       integer, parameter :: nbodies=11
-      real :: pole(6,nbodies) ! R.A., Dec, omega, domega/dt (deg/day) , orbits (index), xmu = G * Mass
+      real :: pole(6,nbodies)   ! R.A., Dec, omega, domega/dt (deg/day) , orbits (index), xmu = G * Mass
       data pole / 
      &     286.15,   63.89,   0.0,   14.18, 0.0, 132712440018.0, ! Sun
      &     281.01,   61.45,   0.0,    6.14, 1.0,        22032.0, ! Mercury
      &     272.76,   67.16,   0.0,   -1.48, 1.0,       324859.0, ! Venus
-     &        0.0,   90.00,   0.0,  360.99, 1.0,       398601.3, ! Earth
-     &     270.00,   66.54,   0.0,   13.18, 4.0,         4904.9,  ! Moon
+     &     0.0,   90.00,   0.0,  360.99, 1.0,       398601.3, ! Earth
+     &     270.00,   66.54,   0.0,   13.18, 4.0,         4904.9, ! Moon
      &     317.67,   52.88,   0.0,  350.89, 1.0,        42828.0, ! Mars
      &     268.06,   64.50,   0.0,  870.54, 1.0,    126686534.0, ! Jupiter
-     &      40.59,   83.54,   0.0,  810.79, 1.0,     37931187.0, ! Saturn
+     &     40.59,   83.54,   0.0,  810.79, 1.0,     37931187.0, ! Saturn
      &     257.31,  -15.18,   0.0, -501.16, 1.0,      5793947.0, ! UranusE
      &     299.40,   42.95,   0.0,  536.31, 1.0,      6836529.0, ! Neptun
      &     312.99,    6.16,   0.0,  -56.36, 1.0,         1001.0/ ! PlutoE
@@ -58,10 +58,10 @@
       integer yy,mm,dd,hh,mi,ind(njd)
       real sec, loc(3,5), p(3,3), ip(3,3)
       real cd,sd,cr,sr,clat,slat,clon,slon
-!
+!     
       real cosdeg,sindeg,asindeg,atan2deg
       external cosdeg,sindeg,asindeg,atan2deg
-!
+!     
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       real*8 teta,x(3),dist,elev
@@ -69,7 +69,7 @@
 !     
       real*8 PI,TWOPI,PIH,DEG,RAD
       COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
-!
+!     
       integer   isun,imercury,ivenus,iearth,imoon,imars
       integer   ijupiter,isaturn,iuranus,ineptun,ipluto
       parameter (isun=1,  imercury=2,  ivenus=3,  iearth=4, imoon=5)
@@ -79,7 +79,7 @@
       data myname /'astroState'/
       real a,f
       parameter (a=6378.155 D0,f=1.D0/298.257 D0)
-!
+!     
 !     convert dates to jd2000
 !     
       do tt=1,njd
@@ -113,9 +113,9 @@
      &        '(I4.4,"-",I2.2,"-",I2.2,"T",I2.2,":",I2.2,":",A6,"Z")')
      &        yy,mm,dd,hh,mi,c6
       end do
-!
+!     
 !     get planetary angular vectors in MJD2000
-!
+!     
       yy=2010
       mm=1
       dd=0
@@ -125,7 +125,19 @@
 
       CALL DATE2JD(JD,YY,MM,DD,HH,MI,SEC) 
       call JPLephMJtoMDM(JD,P,crc250,irc)
+      if (irc.ne.0) then
+         lenc=length(crc250,250,100)
+         write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &        myname,"JPLephMJtoMDM"
+         return
+      end if
       call invert(p,ip,irc)
+      if (irc.ne.0) then
+         lenc=length(crc250,250,100)
+         write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &        myname,"invert"
+         return
+      end if
       do ii=1,nbodies
          cr=cosdeg(pole(1,ii))
          sr=sindeg(pole(1,ii))
@@ -138,9 +150,9 @@
          pole(1,ii)=atan2deg(rot(1,ii),rot(2,ii))
          pole(2,ii)=asindeg(rot(3,ii))
       end do
-!
+!     
 !     print rotation vectors in MJD2000 ( = world coordinate system)
-!    
+!     
       nline=0
       nline=min(maxline,nline+1)
       write(line250(nline),'(A)')
@@ -167,9 +179,9 @@
      &     '" height="',ccr(hgt),
      &     '"/>'
       lenline(nline)=len(trim(line250(nline)))
-!
+!     
 !     PRINT rotation vectors
-!
+!     
       nline=min(maxline,nline+1)
       write(line250(nline),'(1X,A,A,A)') '<initial no="',
      &     cci(nbodies),'" ref="MJD2000">'
@@ -193,19 +205,19 @@
       lenline(nline)=len(trim(line250(nline)))
 !     
 !     sort epochs
-!
+!     
       do tt=1,njd
          ind(tt)=tt
       end do
       call mergesort(njd,ind,jd2000)
-!
+!     
 !     loop over epochs
-!
+!     
       nline=min(maxline,nline+1)
       write(line250(nline),'(1X,A,A,A)') 
      &     '<times no="',cci(njd),'">'
       lenline(nline)=len(trim(line250(nline)))
-! 
+!     
       do ttx=1,njd
          tt=ind(ttx)
          nline=min(maxline,nline+1)
@@ -215,19 +227,37 @@
      &        '" jd2000="',ccr(jd2000(tt)),
      &        '">'
          lenline(nline)=len(trim(line250(nline)))
-!
+!     
 !     read data from file for current epoch
-!
+!     
          call JPLephRead(jd2000(tt),crc250,irc)
-!
+         if (irc.ne.0) then
+            lenc=length(crc250,250,100)
+            write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &           myname,"JPLephRead"
+            return
+         end if
+!     
 !     get transformation from EF to MJD2000
 !     
          call JPLephMJtoEFM(JD2000(tt),P,crc250,irc)
+         if (irc.ne.0) then
+            lenc=length(crc250,250,100)
+            write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &           myname,"JPLephMJtoEFM"
+            return
+         end if
          call invert(p,ip,irc)
+         if (irc.ne.0) then
+            lenc=length(crc250,250,100)
+            write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &           myname,"invert"
+            return
+         end if
 !     
 !     geographic coordinates... (no earth flattening)
 !     
-!
+!     
          clat=cosdeg(lat)
          slat=sindeg(lat)
          clon=cosdeg(lon)
@@ -253,30 +283,43 @@
 !     
 !     location vector in earth-fixed geocentric coordinates
 !     
-!         loc(1,4)=clat*clon*(re+max(10.0D0,hgt))
-!         loc(2,4)=clat*slon*(re+max(10.0D0,hgt))
-!         loc(3,4)=slat*(re+max(10.0D0,hgt))
+!     loc(1,4)=clat*clon*(re+max(10.0D0,hgt))
+!     loc(2,4)=clat*slon*(re+max(10.0D0,hgt))
+!     loc(3,4)=slat*(re+max(10.0D0,hgt))
 !     
 C     
-         phid=lat*RAD        ! GEODETIC LATITUDE
-         xle=lon*RAD         ! EAST LONGITUDE OF THE STATION
-         xh=hgt/1000.0D0     ! ALTITUDE OF THE STATION ABOVE THE SURFACE OF THE REFERENCE ELLIPSOID (KM)
+         phid=lat*RAD           ! GEODETIC LATITUDE
+         xle=lon*RAD            ! EAST LONGITUDE OF THE STATION
+         xh=hgt/1000.0D0        ! ALTITUDE OF THE STATION ABOVE THE SURFACE OF THE REFERENCE ELLIPSOID (KM)
 C     A = 6378.155 D0 ! mean radius of equator
 C     F = 1.D0/298.257 D0 ! flattening coefficient
          call iau_GD2GCE ( A, F, xle, phid, xh, r, IRC )
+         if (irc.ne.0) then
+            lenc=length(crc250,250,100)
+            write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &           myname,"iau_GD2GCE"
+            return
+         end if
 !     
          loc(1,4)=r(1)
          loc(2,4)=r(2)
          loc(3,4)=r(3)
 !     
 !     get zenith vector in earth-fixed coordinates
-!
-         xh=xh+1.0D0 ! zenith direction
+!     
+         xh=xh+1.0D0            ! zenith direction
          call iau_GD2GCE ( A, F, xle, phid, xh, r, IRC )
+         if (irc.ne.0) then
+            lenc=length(crc250,250,100)
+            write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &           myname,"iau_GD2GCE"
+            return
+         end if
          loc(1,5)=r(1)-loc(1,4)
          loc(2,5)=r(2)-loc(2,4)
          loc(3,5)=r(3)-loc(3,4)
-         xh=dsqrt(loc(1,5)*loc(1,5)+loc(2,5)*loc(2,5)+loc(3,5)*loc(3,5))
+         xh=dsqrt(loc(1,5)*loc(1,5)+loc(2,5)*
+     &        loc(2,5)+loc(3,5)*loc(3,5))
          if (xh.lt.1.0D-9) then
             loc(1,5)=0.0D0
             loc(2,5)=0.0D0
@@ -334,86 +377,224 @@ C     F = 1.D0/298.257 D0 ! flattening coefficient
          nline=min(maxline,nline+1)
          write(line250(nline),'(3X,A)')'</observer>'
          lenline(nline)=len(trim(line250(nline)))
-!
+!     
 !     get barycentric earth-fixed location vector and coordinate axis in MJD2000 
-!
+!     
          call JPLephMJtoMDM(JD2000(tt),P,crc250,irc)
+         if (irc.ne.0) then
+            lenc=length(crc250,250,100)
+            write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &           myname,"JPLephMJtoMDM"
+            return
+         end if
          call invert(p,ip,irc)
-!
+         if (irc.ne.0) then
+            lenc=length(crc250,250,100)
+            write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &           myname,"invert"
+            return
+         end if
+!     
 !     get earth barycentric position MJD2000 in "km"
-!
+!     
          call JPLephEarthMJ(pos(1,iearth),crc250,irc)
-!
+         if (irc.ne.0) then
+            lenc=length(crc250,250,100)
+            write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &           myname,"JPLephEarthMJ"
+            return
+         end if
+!     
 !     convert body positions from geocentric to barycentric MJD2000
-!
+!     
          do jj=1,nbodies
             if (jj.eq.isun) then
                call JPLephSunMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephSunMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.imercury) then
                call JPLephMercuryMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephMercuryMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.ivenus) then
                call JPLephVenusMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephVenusMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.iearth) then ! earth
             else if (jj.eq.imoon) then
                call JPLephMoonMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephMoonMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.imars) then
                call JPLephMarsMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephMarsMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.ijupiter) then
                call JPLephJupiterMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephJupiterMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.isaturn) then
                call JPLephSaturnMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephSaturnMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.iuranus) then
                call JPLephUranusMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephUranusMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.ineptun) then
                call JPLephNeptunMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephNeptunMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             else if (jj.eq.ipluto) then
                call JPLephPlutoMJ(pos(1,jj),crc250,irc)
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephPlutoMJ"
+                  return
+               end if
                call JPLephLight(pos(1,jj),crc250,irc) ! correct for light flight time...
+               if (irc.ne.0) then
+                  lenc=length(crc250,250,100)
+                  write(crc250,FMT=100)crc250(1:min(200,lenc)),
+     &                 myname,"JPLephLight"
+                  return
+               end if
                do ii=1,6
                   pos(ii,jj)=pos(ii,jj) + pos(ii,iearth)
                end do
             end if
          end do
-!
+!     
 !     print result to screen
-!
-!         CALL JD2DATE(JD2000(tt),YY,MM,DD,HH,MI,SEC) 
+!     
+!     CALL JD2DATE(JD2000(tt),YY,MM,DD,HH,MI,SEC) 
          nline=min(maxline,nline+1)
          write(line250(nline),'(3X,A,A,A)') '<state no="',cci(nbodies),
      &        '" ref="MJD2000">'
@@ -445,7 +626,11 @@ C     F = 1.D0/298.257 D0 ! flattening coefficient
       nline=min(maxline,nline+1)
       write(line250(nline),'("</solarsystem>",A)')" "
       lenline(nline)=len(trim(line250(nline)))
+
       return
+
+ 100  FORMAT(A,X,A,' Error return from ',A)
+
       contains
 
       function ccr(r) result(res)
@@ -506,7 +691,7 @@ C     Vector multiplication: ro = p*ri
       return
       end subroutine multiply
       end subroutine astroState
-!
+!     
       subroutine invert(a,t,irc)
       real a(3,3), t(3,3),d
       D = A(1,1)*A(2,2)*A(3,3)-A(1,1)*A(2,3)*A(3,2)-
