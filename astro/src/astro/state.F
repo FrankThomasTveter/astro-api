@@ -199,12 +199,13 @@ c$$$  end if
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)')" "
          lenline(nline)=len(trim(line250(nline)))
+         call clean0(crc250,250)
          call chop0(crc250,250)
          lenc=length(crc250,250,10)
          nline=min(maxline,nline+1)
          write(line250(nline),'(A,I0,A,A,A)') 
      &        '<Error irc="',irc,
-     &        '" msg="',crc250(1:lenc),'"/>"'
+     &        '" msg="',crc250(1:lenc),'"/>'
          lenline(nline)=len(trim(line250(nline)))
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)') '</solarsystem>'

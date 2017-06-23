@@ -502,10 +502,12 @@ C
       if (irc.ne.0) then
          nrep=1
          call writeEventHdr(cost)
+         call clean0(crc250,250)
+         call chop0(crc250,250)
          lenc=length(crc250,250,10)
          write(s250,'(A,I0,A,I0,A)') 
      &        '<Report no="1" error="',irc,
-     &        '" hint="'//crc250(1:lenc)//'"/>'
+     &        '" hint="'//crc250(1:min(200,lenc))//'"/>'
          call chop0(s250,250)
          lens=length(s250,250,50)
          nline=min(maxline,nline+1)
