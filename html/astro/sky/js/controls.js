@@ -204,7 +204,7 @@ Controls = function ( object, domElement ) {
 	var delta = 0;
 	if ( event.wheelDelta ) {
 	    // WebKit / Opera / Explorer 9
-	    delta = event.wheelDelta / 40;
+	    delta = event.wheelDelta / 9;
 	} else if ( event.detail ) {
 	    // Firefox
 	    delta = - event.detail / 3;
