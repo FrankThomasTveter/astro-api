@@ -92,6 +92,10 @@ Controls = function ( object, domElement ) {
 	    }
 	}
     };
+    this.offzoom = function (delta) {
+	_zoomStart.y = _zoomStart.y + delta;
+	//console.log("OffZoom:",delta,this.object.getFovX());
+    };
     this.pan = function() {
 	console.warn("pan is not implemented.");
     };

@@ -60,6 +60,7 @@ Chain.initCamera = function () {
 Chain.initControls = function () { 
     controls = new Controls( camera );
     controls.addEventListener( 'change', function () { renderer.render(scene,camera);} );
+    controls.offzoom(1.0);
 }
     
 
@@ -196,7 +197,10 @@ Chain.run = function () {
 	};
     }
     if (Request.update()) { Chain.step=0;};
-    if (Stack.processNewRequests()) { Chain.step=0;};
+    if (Stack.processNewRequests()) { 
+	controls.offzoom(0.5);
+	Chain.step=0;
+    };
     if (Chain.step == 0) {
 	Stack.update();
 	if (Stack.redraw) {
