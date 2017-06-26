@@ -181,8 +181,7 @@ c$$$  end if
          nline=0
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)')
-     &        "Content-type: text/html;" ! "charset=iso-8859-1"
-!     &        "Content-type: text/xml;" ! "charset=iso-8859-1"
+     &        "Content-type: text/xml;" ! "charset=iso-8859-1"
          lenline(nline)=len(trim(line250(nline)))
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)')" "
