@@ -128,7 +128,7 @@
       if (irc.ne.0) then
          lenc=length(crc250,250,100)
          write(crc250,FMT=100)crc250(1:min(200,lenc)),
-     &        myname,"JPLephMJtoMDM"
+     &        myname,"A:JPLephMJtoMDM"
          return
       end if
       call invert(p,ip,irc)
@@ -384,7 +384,7 @@ C     F = 1.D0/298.257 D0 ! flattening coefficient
          if (irc.ne.0) then
             lenc=length(crc250,250,100)
             write(crc250,FMT=100)crc250(1:min(200,lenc)),
-     &           myname,"JPLephMJtoMDM"
+     &           myname,"B:JPLephMJtoMDM"
             return
          end if
          call invert(p,ip,irc)

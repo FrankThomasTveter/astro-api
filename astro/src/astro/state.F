@@ -170,6 +170,8 @@ c$$$  end if
          end if
          bdone=(ii.gt.lens)
       end do
+      irc=0
+      crc250=""
       call astroState(njd,JD30,lat,lon,hgt,
      &     maxline,             ! maximum number of output lines
      &     nline,               ! number of output lines
@@ -179,7 +181,8 @@ c$$$  end if
          nline=0
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)')
-     &        "Content-type: text/xml;" ! "charset=iso-8859-1"
+     &        "Content-type: text/html;" ! "charset=iso-8859-1"
+!     &        "Content-type: text/xml;" ! "charset=iso-8859-1"
          lenline(nline)=len(trim(line250(nline)))
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)')" "
@@ -204,7 +207,7 @@ c$$$  end if
          nline=min(maxline,nline+1)
          write(line250(nline),'(A,I0,A,A,A)') 
      &        ' <Error irc="',irc,
-     &        '" msg="',crc250(1:lenc),'"/>'
+     &        '" msg="',crc250(1:min(200,lenc)),'"/>'
          lenline(nline)=len(trim(line250(nline)))
          nline=min(maxline,nline+1)
          write(line250(nline),'(A)') '</solarsystem>'
