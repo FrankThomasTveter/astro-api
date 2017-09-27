@@ -1,0 +1,9 @@
+FROM httpd:2.4
+
+# Install dependencies/setup env:
+RUN apt-get -y update && \
+    apt-get -y install tcsh && \
+    apt-get -y install make && \
+    apt-get -y install gfortran && \
+    apt-get -y install devscripts && \
+    apt-get -y install libapache2-mod-perl2

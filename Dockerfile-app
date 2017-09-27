@@ -1,0 +1,15 @@
+FROM astrobase
+
+WORKDIR /astro
+
+ADD . .
+
+# Compile Astro-api:
+RUN cd astro/src;make && \
+    cd astro/perl;perl Makefile.PL; make clean; perl Makefile.PL; make && \
+    make install
+
+# Move files to /usr/local/apache2:
+RUN mv /astro/html/astro /usr/local/apache2/htdocs && \
+    mv /astro/cgi-bin/astro /usr/local/apache2/cgi-bin && \
+    mv /astro/httpd.conf /usr/local/apache2/conf/httpd.conf
