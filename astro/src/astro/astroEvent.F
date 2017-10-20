@@ -11542,6 +11542,7 @@ C
       character*16 myname
       data myname/'xsearchLLTarget'/
 C
+      character*22, external :: jdstring22
       character*250 buff250
       integer YY1,MM1,DD1,HH1,MI1
       real sec1,idt,mindt,fact,dt
@@ -11628,11 +11629,11 @@ C
             xJD(2)=xJD(3)
             xJD(3)=JD
             xJD(4)=JD
-            xval(0)=2.0D0*xval(3)-val
+            xval(0)=2.0D0*xval(3)-val ! linear extrapolation to xval(1)
             xval(1)=xval(2)
             xval(2)=xval(3)
             xval(3)=val
-            xval(4)=2.0D0*xval(2)-xval(1)
+            xval(4)=2.0D0*xval(2)-xval(1) ! linear exptrapolation to xval(3)
          end if
 C
          if (scnt.ge.3) then
@@ -11725,8 +11726,11 @@ C
                   return
                end if
                scnt=1           ! only use last point in remainding search...
-            else if (maxpoint.and.grayzone.and.(dn(1).or.dn(3))) then
-               if(bdeb)write(*,*) 'Gray zone maxpoint:',dn
+            else if (maxpoint.and.grayzone.and.(
+     &              (dn(1).and.rpitch.ge.0).or.
+     &              (dn(3).and.rpitch.le.0))) then
+               if(bdeb)write(*,*) 'Gray zone maxpoint, Dn:',dn,
+     &              ' Up:',up,' 0:',zero
 C     find max-point...
                xJD(5)=searchLLMax(
      &              funk,
@@ -11743,8 +11747,8 @@ C     find max-point...
                   return
                end if
                dval(5)=diffCycle(xval(5),tval,tValCycle)
-               if(bdeb)write(*,*)myname,'Local max:',xjd(5),xval(5),
-     &              tval,dval(5)
+               if(bdeb)write(*,*)myname,'Local max: ',
+     &              jdstring22(xjd(5)),xjd(5),xval(5),tval,dval(5)
                if (dval(5).gt.0.0D0) then
                   up(5)=.true.
                   dn(5)=.false.
@@ -11790,7 +11794,9 @@ C     do fine search...
                   if(bdeb)write(*,*)myname,'No crossing found.'
                end if
                scnt=1           ! only use last point in remainding search...
-            else if (minpoint.and.grayzone.and.(up(1).or.up(3))) then
+            else if (minpoint.and.grayzone.and.(
+     &              (up(1).and.rpitch.le.0).or.
+     &              (up(3).and.rpitch.ge.0))) then
                if(bdeb)write(*,*) 'Gray zone minpoint:',up
 C     find min-point...
                xJD(5)=searchLLMin(
@@ -11808,8 +11814,8 @@ C     find min-point...
                   return
                end if
                dval(5)=diffCycle(xval(5),tval,tValCycle)
-               if(bdeb)write(*,*)myname,'Local min:',xjd(5),
-     &              xval(5),dval(5)
+               if(bdeb)write(*,*)myname,'Local min: ',
+     &              jdstring22(xjd(5)),xjd(5),xval(5),tval,dval(5)
                if (dval(5).gt.0.0D0) then
                   up(5)=.true.
                   dn(5)=.false.
@@ -11856,7 +11862,7 @@ C     do fine search...
                end if
                scnt=1           ! only use last point in remainding search...
             else if (minpoint.or.maxpoint) then
-               if(bdeb)write(*,*) 'Extremal:',up,dn
+               if(bdeb)write(*,*) 'Extremal Dn:',dn,' Up:',up, '0:',zero
             else
             end if
             if(bdeb.and.bok) write(*,*) '>>>>>>> Found:',tjd,nrep,maxrep
@@ -12215,6 +12221,7 @@ C
       character*16 myname
       data myname/'xsearchTarget'/
 C
+      character*22, external :: jdstring22
       character*250 buff250
       integer YY1,MM1,DD1,HH1,MI1
       real sec1,idt,mindt,fact,dt
@@ -12393,7 +12400,9 @@ C
                   return
                end if
                scnt=1           ! only use last point in remainding search...
-            else if (maxpoint.and.grayzone.and.(dn(1).or.dn(3))) then
+            else if (maxpoint.and.grayzone.and.(
+     &              (dn(1).and.rpitch.ge.0).or.
+     &              (dn(3).and.rpitch.le.0))) then
                if(bdeb)write(*,*) 'Gray zone maxpoint:',dn
 C     find max-point...
                xJD(5)=searchMax(
@@ -12410,8 +12419,8 @@ C     find max-point...
                   return
                end if
                dval(5)=diffCycle(xval(5),tval,tValCycle)
-               if(bdeb)write(*,*)myname,'Local max:',xjd(5),xval(5),
-     &              tval,dval(5)
+               if(bdeb)write(*,*)myname,'Local max: ',
+     &              jdstring22(xjd(5)),xjd(5),xval(5),tval,dval(5)
                if (dval(5).gt.0.0D0) then
                   up(5)=.true.
                   dn(5)=.false.
@@ -12455,7 +12464,9 @@ C     do fine search...
                else             ! no crossing possible, do noooothing...
                end if
                scnt=2           ! use 2 last points in remainding search...
-            else if (minpoint.and.grayzone.and.(up(1).or.up(3))) then
+            else if (minpoint.and.grayzone.and.(
+     &              (up(1).and.rpitch.le.0).or.
+     &              (up(3).and.rpitch.ge.0))) then
                !write(*,*) 'Gray zone minpoint:',up
 C     find min-point...
                xJD(5)=searchMin(
@@ -12472,7 +12483,8 @@ C     find min-point...
                   return
                end if
                dval(5)=diffCycle(xval(5),tval,tValCycle)
-               if(bdeb)write(*,*)myname,'Local min:',xjd(5),dval(5)
+               if(bdeb)write(*,*)myname,'Local min: ',
+     &              jdstring22(xjd(5)),xjd(5),xval(5),tval,dval(5)
                if (dval(5).gt.0.0D0) then
                   up(5)=.true.
                   dn(5)=.false.
@@ -12516,7 +12528,7 @@ C     do fine search...
                end if
                scnt=2           ! use 2 last points in remainding search...
             else if (minpoint.or.maxpoint) then
-               if(bdeb)write(*,*) 'Extremal:',up,dn
+               if(bdeb)write(*,*) 'Extremal Dn:',dn,' Up:',up, '0:',zero
             else
             end if
             if(bdeb.and.bok) write(*,*) '>>>>>>> Found:',tjd,nrep,maxrep
@@ -20472,3 +20484,23 @@ C
       pos(3)=pos(3)/rr
       return
       end subroutine normalise
+
+      character*22 function jdstring22(jd)
+      implicit none
+      real jd
+      integer YY1,MM1,DD1,HH1,MI1
+      real sec1
+      character*22 T22
+      CALL JD2DATE(JD,
+     &     YY1,
+     &     MM1,
+     &     DD1,
+     &     HH1,
+     &     MI1,
+     &     SEC1) 
+      WRITE(T22,FMT=888) YY1,MM1,DD1,HH1,MI1,sec1
+      jdstring22=t22
+ 888  FORMAT(I4,'/',I2.2,'/',I2.2,X,I2.2,':',I2.2,':',F5.2) ! 22
+      return
+      end function jdstring22
+
