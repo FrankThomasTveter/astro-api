@@ -489,7 +489,7 @@ C
 !     get celestial-to-terrestrial matrix (should be true-of-date)...
       xp=0.0D0 ! no polar motion
       yp=0.0D0 ! no polar motion
-      CALL iau_PNM00A ( TT(1), TT(2), RBPN )
+      CALL iau_PNM00B ( TT(1), TT(2), RBPN )
       call iau_RXP(RBPN,POS,TPOS)
       pos(1)=tpos(1)
       pos(2)=tpos(2)
@@ -525,7 +525,7 @@ C
 !     get celestial-to-terrestrial matrix (should be true-of-date)...
       xp=0.0D0 ! no polar motion
       yp=0.0D0 ! no polar motion
-      CALL iau_NUT00A ( TT(1), TT(2), DPSI, DEPS )
+      CALL iau_NUT00B ( TT(1), TT(2), DPSI, DEPS )
       call iau_C2TPE (TT(1),TT(2),UTC(1),UTC(2),DPSI,DEPS,XP,YP,IRC2T )
       return
       
