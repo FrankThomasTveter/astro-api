@@ -74,7 +74,7 @@
 #
 # OPTIONS = -g -Kieee -r8 -i4 -DLITTLE_ENDIAN -DPREC32
 # OPTIONS = -fbounds-check  -g  -fdefault-real-8
- OPTIONS =-O2 -fPIC -fdefault-real-8 -fdefault-double-8
+ OPTIONS =-O2 -fPIC -fdefault-real-8 -fdefault-double-8 -fno-align-commons
 # OPTIONS = -fdefault-real-8
 ### -ffixed-form
 

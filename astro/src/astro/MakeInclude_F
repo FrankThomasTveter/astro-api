@@ -58,11 +58,15 @@
 #
 .KEEP_STATE:
 #
-all:  $(LIST_EXE) $(LIB_NAM) $(LIST_AUX) Makefile
+all:  $(LIB_NAM) $(LIST_AUX) Makefile
 #
 # intermediate target:
 #
 lib:    $(LIB_NAM)
+#
+# Make binaries on the command "make bin"
+#
+bin : $(LIST_EXE)
 #
 # link binary (from library) and place in $(BIN)
 #

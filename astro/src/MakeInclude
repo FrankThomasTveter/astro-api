@@ -25,6 +25,10 @@ PWD       := $(shell pwd)
 $(TARGETS):
 	$(MAKE) $(LS_OTHERS) TARGET=$@
 
+bin:
+	@echo "Making binaries:" `pwd`
+	$(MAKE) $(LS_OTHERS) TARGET=$@
+
 clean:
 	@echo "Cleaning:" `pwd`
 	@$(shell rm -f *.o *~ *.bak*) 
