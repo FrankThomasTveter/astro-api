@@ -609,7 +609,7 @@ C
          write(buff,'(F30.10)') val
          j1=0
          j2=30
-         LOOP: do kk=30,1
+         LOOP: do kk=30,1,-1
             if (j1.eq.0.and.buff(kk:kk).eq.'.') then
                j1=kk
                exit LOOP
@@ -618,7 +618,7 @@ C
                j2=kk
             end if
          end do LOOP
-         if (j1.eq.j2.and.j1.ne.1) then
+         if (j1.ne.1.and.j1.eq.j2) then
             getVal50=buff(1:j1-1)
          else
             getVal50=buff(1:j2)
