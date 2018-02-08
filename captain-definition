@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "dockerfileLines": [
+    "# based on docker files at https://github.com/FrankThomasTveter/astro-api",
+    "FROM httpd:2.4",
+    "# Install dependencies",
+    "RUN apt-get -y update && \\",
+    "    apt-get -y install tcsh && \\",
+    "    apt-get -y install make && \\",
+    "    apt-get -y install gfortran && \\",
+    "    apt-get -y install devscripts && \\",
+    "    apt-get -y install libapache2-mod-perl2",
+    "# (I changed the WORKDIR)",
+    "WORKDIR /usr/src/app",
+    "# (I changed the folder names and use COPY instead of ADD)",
+    "COPY ./src /usr/src/app",
+    "# Compile Astro-api:",
+    "# (unchanged)",
+    "RUN cd astro/src;make && \\",
+    "    cd astro/perl;perl Makefile.PL; make clean; perl Makefile.PL; make && \\",
+    "    make install",
+    "# Move files to appropriate apache2 folders",
+    "# (I changed the desintation of httpd.conf the following compared to the original dockerfile to match what is expected in ubuntu)",
+    "# (see https://wiki.apache.org/httpd/DistrosDefaultLayout#Debian.2C_Ubuntu_.28Apache_httpd_2.x.29:)",
+    "RUN mkdir -p /etc/apache2 && mkdir -p /usr/local/apache2/htdocs && mkdir -p /usr/local/apache2/cgi-bin && \\",
+    "    mv /usr/src/app/httpd.conf /etc/apache2/apache2.conf && \\",
+    "    mv /usr/src/app/html/astro /usr/local/apache2/htdocs && \\",
+    "    mv /usr/src/app/cgi-bin/astro /usr/local/apache2/cgi-bin",
+    "# (I added the following to expose port 80)",
+    "EXPOSE 80"
+  ]
+}
