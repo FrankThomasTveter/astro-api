@@ -47,7 +47,7 @@
     "# enable cgi",
     "RUN a2enmod cgi",
 
-    "RUN cat /etc/apache2/apache2.conf /usr/src/app/myappache2.conf > /etc/apache2/apache2.conf",
+    "# RUN cat /etc/apache2/apache2.conf /usr/src/app/myappache2.conf > /etc/apache2/apache2.conf",
 
     "# start service in foreground as per https://stackoverflow.com/a/44377561/4070848",
     "CMD apachectl -D FOREGROUND"
