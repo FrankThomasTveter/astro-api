@@ -45,7 +45,7 @@
     "EXPOSE 80",
 
     "# enable cgi",
-    "RUN a2enmod cgi,
+    "RUN a2enmod cgi",
 
     "# start service in foreground as per https://stackoverflow.com/a/44377561/4070848",
     "CMD apachectl -D FOREGROUND"
