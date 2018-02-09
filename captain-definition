@@ -1,10 +1,48 @@
 {
   "schemaVersion": 1,
   "dockerfileLines": [
+    "# based on docker file at https://github.com/FrankThomasTveter/astro-api",
+    "# but instead of using 'httpd' as a starting point for the Docker container (with apache2 pre-installed), I am",
+    "# using 'ubuntu' and then just installing apache2 within that... seems to lead to a much more complete",
+    "# installation of apache2 with everything corresponding more closely to various help guides out there",
+    "# this approach is based on the dockerfile at: https://stackoverflow.com/a/44377561/4070848",
+
+    "# start with ubuntu and add apache2",
     "FROM ubuntu:16.04",
     "RUN apt-get update && \\",
     "    apt-get -y install apache2",
+
+    "# Install dependencies required for astro-api compilation",
+    "RUN apt-get -y update && \\",
+    "    apt-get -y install tcsh && \\",
+    "    apt-get -y install make && \\",
+    "    apt-get -y install gfortran && \\",
+    "    apt-get -y install devscripts && \\",
+    "    apt-get -y install libapache2-mod-perl2",
+
+    "# set appropriate work dir for captainduckduck",
+    "# see https://github.com/githubsaturn/captainduckduck/wiki/Captain-Definition-File",
+    "WORKDIR /usr/src/app",
+
+    "# copy files from deployment location into container filesystem",
+    "COPY ./src /usr/src/app",
+
+    "# compile astro-api",
+    "RUN cd astro/src; make && \\",
+    "    cd astro/perl; perl Makefile.PL; make clean; perl Makefile.PL; make && \\",
+    "    make install",
+
+    "# move files to appropriate apache2 folders",
+    "# (I changed the destination of httpd.conf in the following compared to the original dockerfile to match what is expected in ubuntu)",
+    "# (see https://wiki.apache.org/httpd/DistrosDefaultLayout#Debian.2C_Ubuntu_.28Apache_httpd_2.x.29:)",
+    "# (can't get it to work... have posted at https://stackoverflow.com/q/48694724/4070848)",
+    "RUN mv /usr/src/app/html/astro /var/www/html && \\",
+    "    mv /usr/src/app/cgi-bin/astro /usr/lib/cgi-bin",
+
+    "# expose port 80 to make this accessible to the outside world",
     "EXPOSE 80",
+
+    "# start service in foreground as per https://stackoverflow.com/a/44377561/4070848",
     "CMD apachectl -D FOREGROUND"
   ]
 }
