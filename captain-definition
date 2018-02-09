@@ -49,7 +49,9 @@
     "EXPOSE 80",
 
     "# enable cgi so that perl scripts in the cgi-bin folder can be accessed and executed",
-    "# this involved enabling the cgi module and appending some custom config lines to the default config",
+    "# this involves enabling the cgi module (https://askubuntu.com/a/54259/760204) and",
+    "# appending some custom config lines to the default apache2 config file (based on",
+    "# some lines in the docker file from the astro-api repo)",
     "RUN a2enmod cgi && \\",
     "    cat /usr/src/app/captain-appache2.conf >> /etc/apache2/apache2.conf",
 
