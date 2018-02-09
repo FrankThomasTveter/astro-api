@@ -5,7 +5,9 @@
     "# but instead of using 'httpd' as a starting point for the Docker container (with apache2 pre-installed), I am",
     "# using 'ubuntu' and then just installing apache2 within that... seems to lead to a much more complete",
     "# installation of apache2 with everything corresponding more closely to various help guides out there",
-    "# this approach is based on the dockerfile at: https://stackoverflow.com/a/44377561/4070848",
+    "# e.g. https://www.digitalocean.com/community/tutorials/how-to-configure-the-apache-web-server-on-an-ubuntu-or-debian-vps",
+    "# and https://help.ubuntu.com/lts/serverguide/httpd.html",
+    "# this approach (start with ubuntu and add apache2) is based on the dockerfile at: https://stackoverflow.com/a/44377561/4070848",
 
     "# start with ubuntu and add apache2",
     "FROM ubuntu:16.04",
