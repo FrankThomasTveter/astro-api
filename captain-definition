@@ -47,7 +47,7 @@
     "# enable cgi so that perl scripts in the cgi-bin folder can be accessed and executed",
     "# this involved enabling the cgi module and appending some custom config lines to the default config",
     "RUN a2enmod cgi && \\",
-    "    cat /usr/src/app/myappache2.conf >> /etc/apache2/apache2.conf",
+    "    cat /usr/src/app/my_custom_appache2.conf >> /etc/apache2/apache2.conf",
 
     "# start service in foreground as per https://stackoverflow.com/a/44377561/4070848",
     "CMD apachectl -D FOREGROUND"
