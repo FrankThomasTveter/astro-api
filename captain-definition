@@ -34,12 +34,9 @@
     "    cd astro/perl; perl Makefile.PL; make clean; perl Makefile.PL; make && \\",
     "    make install",
 
-    "# move files to appropriate apache2 folders",
-    "# (I changed the destination of httpd.conf in the following compared to the original dockerfile to match what is expected in ubuntu)",
-    "# (see https://wiki.apache.org/httpd/DistrosDefaultLayout#Debian.2C_Ubuntu_.28Apache_httpd_2.x.29:)",
-    "# (can't get it to work... have posted at https://stackoverflow.com/q/48694724/4070848)",
-    "RUN mv /usr/src/app/html/astro /var/www/html && \\",
-    "    mv /usr/src/app/cgi-bin/astro /usr/lib/cgi-bin",
+    "# move files to apache2 folders appropriate to ubuntu installation",
+    "RUN cp -a /usr/src/app/html/astro /var/www/html && \\",
+    "    cp -a /usr/src/app/cgi-bin/astro /usr/lib/cgi-bin",
 
     "# expose port 80 to make this accessible to the outside world",
     "EXPOSE 80",
