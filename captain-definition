@@ -23,10 +23,12 @@
     "# (I changed the destination of httpd.conf in the following compared to the original dockerfile to match what is expected in ubuntu)",
     "# (see https://wiki.apache.org/httpd/DistrosDefaultLayout#Debian.2C_Ubuntu_.28Apache_httpd_2.x.29:)",
     "# (can't get it to work... have posted at https://stackoverflow.com/q/48694724/4070848)",
-    "RUN mkdir -p /etc/apache2 && mkdir -p /usr/local/apache2/htdocs && mkdir -p /usr/local/apache2/cgi-bin && \\",
-    "    mv /usr/src/app/httpd.conf /etc/apache2/apache2.conf && \\",
-    "    mv /usr/src/app/html/astro /usr/local/apache2/htdocs && \\",
-    "    mv /usr/src/app/cgi-bin/astro /usr/local/apache2/cgi-bin",
+    "RUN mkdir -p /var/www/html && mkdir -p /usr/lib/cgi-bin && \\",
+    "#    mv /usr/src/app/httpd.conf /etc/apache2/apache2.conf && \\",
+    "#    mv /usr/src/app/html/astro /usr/local/apache2/htdocs && \\",
+    "#    mv /usr/src/app/cgi-bin/astro /usr/local/apache2/cgi-bin",
+    "    mv /usr/src/app/html/astro /var/www/html && \\",
+    "    mv /usr/src/app/cgi-bin/astro /usr/lib/cgi-bin",
     "# (I added the following to expose port 80)",
     "EXPOSE 80"
   ]
