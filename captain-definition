@@ -53,7 +53,7 @@
     "# appending some custom config lines to the default apache2 config file (based on",
     "# some lines in the docker file from the astro-api repo)",
     "RUN a2enmod cgi && \\",
-    "    cat /usr/src/app/captain-appache2.conf >> /etc/apache2/apache2.conf",
+    "    cat /usr/src/app/captain-apache2.conf >> /etc/apache2/apache2.conf",
 
     "# start service in foreground as per https://stackoverflow.com/a/44377561/4070848",
     "CMD apachectl -D FOREGROUND"
