@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "dockerfileLines": [
+
+    "# this is a captain-definition file for use when deploying with captainduckduck:",
+    "#    https://github.com/githubsaturn/captainduckduck/",
+    "# it is basically just a dockerfile in json format",
+    "# this is suitable for deploying to an ubuntu-based docker container running apache2",
+    "# compilation of the astro-api bits is based on the docker file at the top level of https://github.com/FrankThomasTveter/astro-api",
+    "# but instead of using 'httpd' as a starting point for the Docker container (with apache2 pre-installed), I am",
+    "# using 'ubuntu' and then just installing apache2 within that... seems to lead to a much more complete",
+    "# installation of apache2 on ubuntu with everything corresponding more closely to what is expected from various help guides out there",
+    "# e.g. https://www.digitalocean.com/community/tutorials/how-to-configure-the-apache-web-server-on-an-ubuntu-or-debian-vps",
+    "# and https://help.ubuntu.com/lts/serverguide/httpd.html",
+    "# this approach (start with ubuntu and add apache2) is based on the dockerfile at: https://stackoverflow.com/a/44377561/4070848",
+
+    "# start with ubuntu and add apache2",
+    "FROM ubuntu:16.04",
+    "RUN apt-get update && \\",
+    "    apt-get -y install apache2",
+
+    "# Install dependencies required for astro-api compilation",
+    "RUN apt-get -y update && \\",
+    "    apt-get -y install tcsh && \\",
+    "    apt-get -y install make && \\",
+    "    apt-get -y install gfortran && \\",
+    "    apt-get -y install devscripts && \\",
+    "    apt-get -y install libapache2-mod-perl2",
+
+    "# set appropriate work dir for captainduckduck",
+    "# see https://github.com/githubsaturn/captainduckduck/wiki/Captain-Definition-File",
+    "WORKDIR /usr/src/app",
+
+    "# copy files from deployment location into container filesystem",
+    "COPY ./src /usr/src/app",
+
+    "# compile astro-api",
+    "RUN cd astro/src; make && \\",
+    "    cd astro/perl; perl Makefile.PL; make clean; perl Makefile.PL; make && \\",
+    "    make install",
+
+    "# copy compiled files to apache2 folders appropriate to ubuntu installation",
+    "# note that we copy rather than move because that preserves the previous astro-api compilation layer",
+    "# so that it does not need to be re-run on the next deploy",
+    "RUN cp -a /usr/src/app/html/astro /var/www/html && \\",
+    "    cp -a /usr/src/app/cgi-bin/astro /usr/lib/cgi-bin",
+
+    "# expose port 80 to make this accessible to others",
+    "EXPOSE 80",
+
+    "# enable cgi so that perl scripts in the cgi-bin folder can be accessed and executed",
+    "# this involves enabling the cgi module (https://askubuntu.com/a/54259/760204) and",
+    "# appending some custom config lines to the default apache2 config file (based on",
+    "# some lines in the docker file from the astro-api repo)",
+    "RUN a2enmod cgi && \\",
+    "    cat /usr/src/app/captain-apache2.conf >> /etc/apache2/apache2.conf",
+
+    "# start service in foreground as per https://stackoverflow.com/a/44377561/4070848",
+    "CMD apachectl -D FOREGROUND"
+  ]
+}
