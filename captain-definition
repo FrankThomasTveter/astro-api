@@ -14,8 +14,16 @@
     "# and https://help.ubuntu.com/lts/serverguide/httpd.html",
     "# this approach (start with ubuntu and add apache2) is based on the dockerfile at: https://stackoverflow.com/a/44377561/4070848",
 
-    "# start with ubuntu and add apache2",
+    "# start with ubuntu and add apache2 below",
     "FROM ubuntu:16.04",
+
+    "# now install tini (an alternative to dumb-init)... good practice to have a dumb-init process as first process in container with PID=1",
+    "# see: https://github.com/Yelp/dumb-init",
+		"ENV TINI_VERSION v0.17.0",
+		"ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini",
+		"RUN chmod +x /tini",
+
+    "# install apache2",
     "RUN apt-get update && \\",
     "    apt-get -y install apache2",
 
@@ -55,6 +63,10 @@
     "RUN a2enmod cgi && \\",
     "    cat /usr/src/app/captain-apache2.conf >> /etc/apache2/apache2.conf",
 
+    "# set tini (like dumb-init) as the entrypoint to make it PID=1 (see note above)",
+		"ENTRYPOINT [\"/tini\", \"--\"]",
+
+    "# and finally, set the main show going...",
     "# start service in foreground as per https://stackoverflow.com/a/44377561/4070848",
     "CMD apachectl -D FOREGROUND"
   ]
