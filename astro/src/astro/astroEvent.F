@@ -18135,53 +18135,46 @@ C
 C
       call newOrigo(sunCart,moonCart) ! shift origo to moon center
 C     
-      xx(1,1)=moonCart(1)/moonPolar(1) ! moon axis
-      xx(2,1)=moonCart(2)/moonPolar(1)
-      xx(3,1)=moonCart(3)/moonPolar(1)
+      xx(1,3)=moonCart(1)/moonPolar(1) ! moon axis
+      xx(2,3)=moonCart(2)/moonPolar(1)
+      xx(3,3)=moonCart(3)/moonPolar(1)
 C
-      write(*,*)'MoonPos:',moonCart
-C
-      dot(1)=sunCart(1)*xx(1,1)+sunCart(2)*xx(2,1)+sunCart(3)*xx(3,1)
-      elevation=dasin(dot(1)/sunPolar(1))*deg
+      dot(3)=sunCart(1)*xx(1,3)+sunCart(2)*xx(2,3)+sunCart(3)*xx(3,3)
+      elevation=dasin(dot(3)/sunPolar(1))*deg
 C
 C     v=(0,1,0) ! north
 C
-      xx(1,2)=xx(3,1)                    ! pole axis
-      xx(2,2)=0.0D0
-      xx(3,2)=-xx(1,1)
+      xx(1,1)=xx(3,3)                    ! east axis
+      xx(2,1)=0.0D0
+      xx(3,1)=-xx(1,3)
+      rr=dsqrt(xx(1,1)*xx(1,1)+xx(2,1)*xx(2,1)+xx(3,1)*xx(3,1))
+      if (rr.gt.1.0D-6) then
+         xx(1,1)=xx(1,1)/rr
+         xx(2,1)=xx(2,1)/rr
+         xx(3,1)=xx(3,1)/rr
+      else
+         xx(1,1)=0.0D0
+         xx(2,1)=0.0D0
+         xx(3,1)=1.0D0
+      end if
+C
+      xx(1,2)=xx(2,3)*xx(3,1)-xx(3,3)*xx(2,1)  ! north axis
+      xx(2,2)=xx(3,3)*xx(1,1)-xx(1,3)*xx(3,1)
+      xx(3,2)=xx(1,3)*xx(2,1)-xx(2,3)*xx(1,1)
       rr=dsqrt(xx(1,2)*xx(1,2)+xx(2,2)*xx(2,2)+xx(3,2)*xx(3,2))
       if (rr.gt.1.0D-6) then
          xx(1,2)=xx(1,2)/rr
          xx(2,2)=xx(2,2)/rr
          xx(3,2)=xx(3,2)/rr
       else
-         xx(1,2)=0.0D0
-         xx(2,3)=0.0D0
-         xx(3,3)=1.0D0
-      end if
-C
-      xx(1,3)=xx(2,1)*xx(3,2)-xx(3,1)*xx(2,2)
-      xx(2,3)=xx(3,1)*xx(1,2)-xx(1,1)*xx(3,2)
-      xx(3,3)=xx(1,1)*xx(2,2)-xx(2,1)*xx(1,2)
-      rr=dsqrt(xx(1,3)*xx(1,3)+xx(2,3)*xx(2,3)+xx(3,3)*xx(3,3))
-      if (rr.gt.1.0D-6) then
-         xx(1,3)=xx(1,3)/rr
-         xx(2,3)=xx(2,3)/rr
-         xx(3,3)=xx(3,3)/rr
-      else
          azimuth=0.0D0
          return
       end if
 C
-      dot(2)=sunCart(1)*xx(1,2)+sunCart(2)*xx(2,2)+sunCart(3)*xx(3,2)
-      dot(3)=sunCart(1)*xx(1,3)+sunCart(2)*xx(2,3)+sunCart(3)*xx(3,3)
+      dot(1)=sunCart(1)*xx(1,1)+sunCart(2)*xx(2,1)+sunCart(3)*xx(3,1) ! east
+      dot(2)=sunCart(1)*xx(1,2)+sunCart(2)*xx(2,2)+sunCart(3)*xx(3,2) ! north
 C
-      azimuth=datan2(-dot(2),dot(3))*deg
-C
-      write(*,'(A,10(X,F0.1))')'Dot:',dot,
-     &     dsqrt(dot(1)*dot(1)+dot(2)*dot(2)+dot(3)*dot(3))
-      write(*,'(A,10(X,F0.1))')'Sun:',sunPolar
-      write(*,'(A,10(X,F0.1))')'Moon:',moonPolar
+      azimuth = (pi + datan2(-dot(2),-dot(1)))*deg
 C     
       return
       end subroutine getMoonShadow
