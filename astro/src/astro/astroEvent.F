@@ -18039,7 +18039,7 @@ C
       real moonCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real moonPolar(3) ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
       real earthCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
-      real sunAng,earthAng,ang
+      real sunAng,earthAng,ang,rxy,rqxy,rq
 C     
       real*8 PI,TWOPI,PIH,DEG,RAD
       COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
@@ -18087,7 +18087,7 @@ C
       end if
 C
       call JPLephEFtoTC(loclat,loclon,lochgt,sunPos,sunCart,sunPolar,
-     &     crc250,irc)          ! convert to "True of date"
+     &     crc250,irc)          ! convert to "Topocentric"
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//' < '//myname//
@@ -18123,9 +18123,7 @@ C
          return
       end if
 C
-      call newOrigo(sunPos,moonPos) ! shift origo to moon center
-C
-      call JPLephEFtoTC(loclat,loclon,lochgt,sunPos,sunCart,sunPolar,
+      call JPLephEFtoTC(loclat,loclon,lochgt,moonPos,moonCart,moonPolar,
      &     crc250,irc)          ! convert to "Topocentric"
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -18135,8 +18133,19 @@ C
          return
       end if
 C
-      elevation=sunPolar(2)*deg ! radians->degree
-      azimuth=sunPolar(3)*deg ! radians->degree
+      call newOrigo(sunCart,moonCart) ! shift origo to moon center
+C
+      RQXY = SUNCART(1)**2+SUNCART(2)**2
+      RXY = DSQRT(RQXY)
+
+C     get topocentric: range, elevation and azimuth
+      azimuth = 0.D0
+      IF(RXY.GE.1.D-3)
+     &  azimuth = PI + DATAN2(-SUNCART(1),-SUNCART(2))
+      RQ = DSQRT(DMAX1(1.D-6,RQXY+sunCart(3)**2))
+      elevation = DASIN(SUNCART(3)/RQ)
+      azimuth=azimuth*deg
+      elevation=elevation*deg
 C     
       return
       end subroutine getMoonShadow
