@@ -7721,7 +7721,7 @@ C
       real*8 PI,TWOPI,PIH,DEG,RAD
       COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
 C
-      real refraction
+      real refraction,azi,ele
       parameter (refraction= 34.0D0/60.0D0) ! refraction in degrees ( http://en.wikipedia.org/wiki/Atmospheric_refraction : 34')
       real angNight, angDay,angle
       real ang,moonAng,atan2deg,getAngle,phase
@@ -7769,6 +7769,10 @@ C
 C     get moon phase
 C
       phase=getMoonPhase(JD,crc250,irc) ! moon phase
+C
+C     get shadow angles
+C
+      call getMoonShadow(JD,loclat,loclon,lochgt,azi,ele,crc250,irc)
 C
 C     make report
 C
@@ -7848,6 +7852,26 @@ C     make reports
          repval(nrep)=phase
          repJD(nrep)=JD
          repid(nrep)=eventid + 2
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
+     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (azi=",
+     &        azi,",ele=",ele,")"
+         call chop0(rep250(nrep),250)
+         repval(nrep)=azi
+         repJD(nrep)=JD + 1.0D-9
+         repid(nrep)=eventid + 3
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
+     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (azi=",
+     &        azi,",ele=",ele,")"
+         call chop0(rep250(nrep),250)
+         repval(nrep)=ele
+         repJD(nrep)=JD + 2.0D-9
+         repid(nrep)=eventid + 4
       end if
       if (bdeb)write(*,*)myname,'Done.',irc
       return
@@ -17993,6 +18017,129 @@ C
 C
       return
       end function getMoonPhase
+      subroutine getMoonShadow(JD,
+     &     loclat,loclon,lochgt,
+     &     azimuth,elevation,crc250,irc)
+C
+C     returns shadow angle of the moon... (azi+ele of sun seen from moon in TC-EF coordinate-system)
+C
+      implicit none
+      real JD
+      real loclat
+      real loclon
+      real lochgt
+      real azimuth,elevation   ! azimuth (0->earth) and elevation of sun seen from moon in TC-EF c-s
+      character*250 crc250      ! error description
+      integer irc
+      integer lencrc
+      real sunPos(6)
+      real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
+      real sunPolar(3) ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
+      real moonPos(6)
+      real moonCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
+      real moonPolar(3) ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
+      real earthCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
+      real sunAng,earthAng,ang
+C     
+      real*8 PI,TWOPI,PIH,DEG,RAD
+      COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
+C
+      character*14 myname
+      data myname /'getMoonShadow'/
+      real pa,xa,ca,rr
+      integer length
+      external length
+C
+      call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephRead.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      call JPLephSunMJ(sunPos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephSunMJ.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      call JPLephLight(sunPos,crc250,irc) ! correct for light flight time...
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephLight.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      call JPLephMJtoEF(JD,sunPos,crc250,irc) ! convert to "True of date"
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephMJtoEF.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      call JPLephEFtoTC(loclat,loclon,lochgt,sunPos,sunCart,sunPolar,
+     &     crc250,irc)          ! convert to "True of date"
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      call JPLephMoonMJ(moonPos,crc250,irc) ! retrieve Moon geocentric mean-of-date JD position
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from moonPos.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      call JPLephLight(moonPos,crc250,irc) ! correct for light flight time...
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephLight.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      call JPLephMJtoEF(JD,moonPos,crc250,irc) ! convert to "True of date"
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephMJtoEF.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      call newOrigo(sunPos,moonPos) ! shift origo to moon center
+C
+      call JPLephEFtoTC(loclat,loclon,lochgt,sunPos,sunCart,sunPolar,
+     &     crc250,irc)          ! convert to "Topocentric"
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//' < '//myname//
+     &        ' > Error return from JPLephEFtoTC.'
+         call chop0(crc250,250)
+         return
+      end if
+C
+      elevation=sunPolar(2)*deg ! radians->degree
+      azimuth=sunPolar(3)*deg ! radians->degree
+C     
+      return
+      end subroutine getMoonShadow
       real function getMoonUpperElevation(JD,
      &     loclat,loclon,lochgt,crc250,irc)
 C
@@ -18805,7 +18952,7 @@ C
       integer irc
       integer lencrc
       real sunPos(6)
-      real sunCart(3)
+      real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3)
       real rxy
       real rSun
@@ -18903,7 +19050,7 @@ C
       integer irc
       integer lencrc
       real sunPos(6)
-      real sunCart(3)
+      real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3)
       real rxy
       real rSun
@@ -19133,7 +19280,7 @@ C
       real area,d
       common /CgetSunEclipse/occ
 C
-      real sunCart(3),moonCart(3)
+      real sunCart(3),moonCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3),moonPolar(3)
       real rxy
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
@@ -19338,7 +19485,7 @@ C
       integer lencrc
 C
       real sunPos(6)
-      real sunCart(3)
+      real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3)
       real rxy
       real rSun
@@ -19450,7 +19597,7 @@ C
 C
       real getSunOccOcc
 C
-      real sunCart(3),moonCart(3)
+      real sunCart(3),moonCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3),moonPolar(3)
       real rxy
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
@@ -19779,7 +19926,7 @@ C
       integer lencrc
 C
       real sunPos(6)
-      real sunCart(3)
+      real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3)
       real rxy
       real rSun
