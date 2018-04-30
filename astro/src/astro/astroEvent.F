@@ -18039,7 +18039,7 @@ C
       real moonCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real moonPolar(3) ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
       real earthCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
-      real sunAng,earthAng,ang,rxy,rqxy,rq
+      real sunAng,earthAng,ang,xx(3,3),dot(3)
 C     
       real*8 PI,TWOPI,PIH,DEG,RAD
       COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
@@ -18134,18 +18134,48 @@ C
       end if
 C
       call newOrigo(sunCart,moonCart) ! shift origo to moon center
+C     
+      xx(1,1)=moonCart(1)/moonPolar(1) ! moon axis
+      xx(2,1)=moonCart(2)/moonPolar(1)
+      xx(3,1)=moonCart(3)/moonPolar(1)
 C
-      RQXY = SUNCART(1)**2+SUNCART(2)**2
-      RXY = DSQRT(RQXY)
-
-C     get topocentric: range, elevation and azimuth
-      azimuth = 0.D0
-      IF(RXY.GE.1.D-3)
-     &  azimuth = PI + DATAN2(-SUNCART(1),-SUNCART(2))
-      RQ = DSQRT(DMAX1(1.D-6,RQXY+sunCart(3)**2))
-      elevation = DASIN(SUNCART(3)/RQ)
-      azimuth=azimuth*deg
-      elevation=elevation*deg
+      dot(1)=sunCart(1)*xx(1,1)+sunCart(2)*xx(2,1)+sunCart(3)*xx(3,1)
+      elevation=dasin(dot(1)/sunPolar(1))*deg
+C
+      xx(1,2)=0.0D0                    ! pole axis
+      xx(2,2)=xx(3,1)
+      xx(3,2)=-xx(2,1)
+      rr=dsqrt(xx(1,2)*xx(1,2)+xx(2,2)*xx(2,2)+xx(3,2)*xx(3,2))
+      if (rr.gt.1.0D-6) then
+         xx(1,2)=xx(1,2)/rr
+         xx(2,2)=xx(2,2)/rr
+         xx(3,2)=xx(3,2)/rr
+      else
+         xx(1,2)=0.0D0
+         xx(2,3)=0.0D0
+         xx(3,3)=1.0D0
+      end if
+C
+      xx(1,3)=xx(2,3)*xx(3,2)-xx(3,1)*xx(2,2)
+      xx(2,3)=xx(3,1)*xx(3,2)-xx(1,1)*xx(3,2)
+      xx(3,3)=xx(1,2)*xx(3,2)-xx(2,1)*xx(1,2)
+      rr=dsqrt(xx(1,3)*xx(1,3)+xx(2,3)*xx(2,3)+xx(3,3)*xx(3,3))
+      if (rr.gt.1.0D-6) then
+         xx(1,3)=xx(1,3)/rr
+         xx(2,3)=xx(2,3)/rr
+         xx(3,3)=xx(3,3)/rr
+      else
+         azimuth=0.0D0
+         return
+      end if
+C
+      dot(2)=sunCart(1)*xx(1,2)+sunCart(2)*xx(2,2)+sunCart(3)*xx(3,2)
+      dot(3)=sunCart(1)*xx(1,3)+sunCart(2)*xx(2,3)+sunCart(3)*xx(3,3)
+C
+      azimuth=datan2(dot(2),dot(3))*deg
+C
+      write(*,*)'Sun:',sunPolar
+      write(*,*)'Moon:',moonPolar
 C     
       return
       end subroutine getMoonShadow
