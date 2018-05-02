@@ -20,12 +20,16 @@ our @ISA = qw(Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
-    pm_astroState
     pm_astroEvent
+    pm_state
+    pm_event
     pm_epochJD
     pm_JDepoch
     xs_DTGToJD
     xs_JDToDTG
+    xs_astroEvent
+    xs_event
+    xs_state
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -51,11 +55,14 @@ END {
     xs_jplephClose();
 }
 
+sub pm_event {return xs_event(shift);}
+
+sub pm_state {return xs_state(shift);}
+
 sub pm_astroEvent {
     my $tStart2000 = shift;                      # start time (in jd2000 = julianDate - 2451544.5)
     my $searchCode = shift;                      # search code; -1:previous, +1:next, 0: both, +2:until tend2000
-    # Do not provide $tend2000 if $searchCode = -1, 0 or 1 !!!!!!
-    my $tend2000 = ($searchCode==2 ? shift : 0); # report all events end time (in jd2000)
+    my $tend2000 = shift;                        # report all events end time (in jd2000)
     my $eventId = shift;                         # requested event id (SEE TABLE BELOW)
     my $eventValr=shift;                         # array reference
     my @eventVal=@$eventValr;                    # event input data (SEE TABLE BELOW)
@@ -85,17 +92,6 @@ sub pm_astroEvent {
     my @rep250=  get_rep250(@output);          # output report string (redundant description)
     return ($irc,$nrep,\@rep2000,\@repId,\@repVal,\@rep250); # this is the same layout as output from xs_astroEvent
 }
-
-sub pm_astroState {
-    my ($lat,$lon,$hgt,@dates)=@_;
-    #print "Calling xs_astroState: $lat $lon $hgt @dates\n";
-    my ($irc,$crc250)= xs_astroState($lat,$lon,$hgt,@dates);
-    if ($irc != 0) {
-        croak("astroEvent Error return from xs_astroState. $irc");
-    }
-    return ($irc,$crc250);
-}
-
 
 sub get_irc {
     my @copy=@_;

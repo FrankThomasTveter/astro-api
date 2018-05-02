@@ -11,7 +11,7 @@
 
 #   MakeMaker Parameters:
 
-#     ABSTRACT_FROM => q[lib/Astro/Astro.pm]
+#     ABSTRACT => q[lib/Astro/Astro.pm]
 #     AUTHOR => [q[Heiko Klein <heikok@met.no>]]
 #     BUILD_REQUIRES => {  }
 #     CONFIGURE_REQUIRES => {  }
@@ -41,7 +41,7 @@ FULL_AR = /usr/bin/ar
 LD = x86_64-linux-gnu-gcc
 LDDLFLAGS = -shared -L/usr/local/lib -fstack-protector-strong
 LDFLAGS =  -fstack-protector-strong -L/usr/local/lib
-LIBC = libc-2.21.so
+LIBC = libc-2.23.so
 LIB_EXT = .a
 OBJ_EXT = .o
 OSNAME = linux
@@ -163,12 +163,9 @@ LINKTYPE = dynamic
 BOOTDEP = 
 
 # Handy lists of source code files:
-XS_FILES = Astro.xs \
-	AstroXs.xs
-C_FILES  = Astro.c \
-	AstroXs.c
-O_FILES  = Astro.o \
-	AstroXs.o
+XS_FILES = Astro.xs
+C_FILES  = Astro.c
+O_FILES  = Astro.o
 H_FILES  = ppport.h
 MAN1PODS = 
 MAN3PODS = lib/Astro/Astro.pm
@@ -312,8 +309,8 @@ MPOLLUTE =
 # Astro might depend on some other libraries:
 # See ExtUtils::Liblist for details
 #
-EXTRALIBS = -L/astro/ubuntu/astro/src/astro/perl/.. -L/astro/ubuntu/astro/src/astro/perl/../../libfmnuke -L/astro/ubuntu/astro/src/astro/perl/../../libsofa -lastro -lfmnuke -lsofa -lgfortran
-LDLOADLIBS = -L/astro/ubuntu/astro/src/astro/perl/.. -L/astro/ubuntu/astro/src/astro/perl/../../libfmnuke -L/astro/ubuntu/astro/src/astro/perl/../../libsofa -lastro -lfmnuke -lsofa -lgfortran
+EXTRALIBS = -L/astro/astro-api/astro/src/astro/perl/.. -L/astro/astro-api/astro/src/astro/perl/../../libfmnuke -L/astro/astro-api/astro/src/astro/perl/../../libsofa -lastro -lfmnuke -lsofa -lgfortran
+LDLOADLIBS = -L/astro/astro-api/astro/src/astro/perl/.. -L/astro/astro-api/astro/src/astro/perl/../../libfmnuke -L/astro/astro-api/astro/src/astro/perl/../../libsofa -lastro -lfmnuke -lsofa -lgfortran
 BSLOADLIBS = 
 
 
@@ -562,17 +559,16 @@ clean :: clean_subdirs
 	  $(INST_ARCHAUTODIR)/extralibs.ld $(MAKE_APERL_FILE) \
 	  *$(LIB_EXT) *$(OBJ_EXT) \
 	  *perl.core Astro.c \
-	  AstroXs.c MYMETA.json \
-	  MYMETA.yml blibdirs.ts \
-	  core core.*perl.*.? \
-	  core.[0-9] core.[0-9][0-9] \
-	  core.[0-9][0-9][0-9] core.[0-9][0-9][0-9][0-9] \
-	  core.[0-9][0-9][0-9][0-9][0-9] lib$(BASEEXT).def \
-	  mon.out perl \
-	  perl$(EXE_EXT) perl.exe \
-	  perlmain.c pm_to_blib \
-	  pm_to_blib.ts so_locations \
-	  tmon.out 
+	  MYMETA.json MYMETA.yml \
+	  blibdirs.ts core \
+	  core.*perl.*.? core.[0-9] \
+	  core.[0-9][0-9] core.[0-9][0-9][0-9] \
+	  core.[0-9][0-9][0-9][0-9] core.[0-9][0-9][0-9][0-9][0-9] \
+	  lib$(BASEEXT).def mon.out \
+	  perl perl$(EXE_EXT) \
+	  perl.exe perlmain.c \
+	  pm_to_blib pm_to_blib.ts \
+	  so_locations tmon.out 
 	- $(RM_RF) \
 	  blib 
 	  $(NOECHO) $(RM_F) $(MAKEFILE_OLD)
@@ -598,7 +594,7 @@ realclean purge ::  clean realclean_subdirs
 metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	$(NOECHO) $(ECHO) '---' > META_new.yml
-	$(NOECHO) $(ECHO) 'abstract: unknown' >> META_new.yml
+	$(NOECHO) $(ECHO) 'abstract: lib/Astro/Astro.pm' >> META_new.yml
 	$(NOECHO) $(ECHO) 'author:' >> META_new.yml
 	$(NOECHO) $(ECHO) '  - '\''Heiko Klein <heikok@met.no>'\''' >> META_new.yml
 	$(NOECHO) $(ECHO) 'build_requires:' >> META_new.yml
@@ -621,7 +617,7 @@ metafile : create_distdir
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
 	$(NOECHO) $(ECHO) Generating META.json
 	$(NOECHO) $(ECHO) '{' > META_new.json
-	$(NOECHO) $(ECHO) '   "abstract" : "unknown",' >> META_new.json
+	$(NOECHO) $(ECHO) '   "abstract" : "lib/Astro/Astro.pm",' >> META_new.json
 	$(NOECHO) $(ECHO) '   "author" : [' >> META_new.json
 	$(NOECHO) $(ECHO) '      "Heiko Klein <heikok@met.no>"' >> META_new.json
 	$(NOECHO) $(ECHO) '   ],' >> META_new.json
@@ -944,7 +940,7 @@ PERL_HDRS = \
 
 $(OBJECT) : $(PERL_HDRS)
 
-Astro.c AstroXs.c : $(XSUBPPDEPS)
+Astro.c : $(XSUBPPDEPS)
 
 
 # --- MakeMaker makefile section:
@@ -1019,7 +1015,7 @@ testdb_static :: pure_all $(MAP_TARGET)
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
 	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="$(VERSION)">' > $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '    <ABSTRACT></ABSTRACT>' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '    <ABSTRACT>lib/Astro/Astro.pm</ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>Heiko Klein &lt;heikok@met.no&gt;</AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <ARCHITECTURE NAME="x86_64-linux-gnu-thread-multi-5.22" />' >> $(DISTNAME).ppd

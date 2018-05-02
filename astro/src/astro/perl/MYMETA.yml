@@ -1,5 +1,5 @@
 ---
-abstract: unknown
+abstract: lib/Astro/Astro.pm
 author:
   - 'Heiko Klein <heikok@met.no>'
 build_requires:

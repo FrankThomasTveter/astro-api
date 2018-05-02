@@ -274,6 +274,97 @@ XS_EUPXS(XS_Astro__Astro_xs_DTGToJD)
 }
 
 
+XS_EUPXS(XS_Astro__Astro_xs_event); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Astro__Astro_xs_event)
+{
+    dVAR; dXSARGS;
+    if (items != 1)
+       croak_xs_usage(cv,  "s");
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    SP -= items;
+    {
+#line 48 "Astro.xs"
+      char *s1000;
+      int maxline = 1000;
+      int nline;
+      int *lenline;
+      char *line250;
+      int lenr=250;
+      int ii;
+#line 295 "Astro.c"
+	char *	s = (char *)SvPV_nolen(ST(0))
+;
+#line 56 "Astro.xs"
+    s1000 = calloc(sizeof(char), 1000);
+    strcpy(s1000,s);
+    lenline = malloc(sizeof(int)*maxline);
+    line250 = calloc(sizeof(char), lenr*maxline);
+    event_(s1000,&maxline,&nline,lenline,line250,1000,250);
+    /* make return stack */
+    EXTEND(SP, nline);
+    for (ii=0; ii < nline ; ii++ ) {
+      /*printf("  nline= %i %i\n", ii,lenline[ii]);*/
+      if (lenline[ii]==0) {
+       PUSHs(sv_2mortal(newSVpv("",0)));
+      } else {
+       PUSHs(sv_2mortal(newSVpv(&line250[ii*250],lenline[ii])));
+      };
+    };
+    free(s1000);
+    free(lenline);
+    free(line250);
+#line 317 "Astro.c"
+	PUTBACK;
+	return;
+    }
+}
+
+
+XS_EUPXS(XS_Astro__Astro_xs_state); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Astro__Astro_xs_state)
+{
+    dVAR; dXSARGS;
+    if (items != 1)
+       croak_xs_usage(cv,  "s");
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    SP -= items;
+    {
+#line 78 "Astro.xs"
+      char *s1000;
+      int maxline = 1000;
+      int nline;
+      int *lenline;
+      char *line250;
+      int lenr=250;
+      int ii;
+#line 341 "Astro.c"
+	char *	s = (char *)SvPV_nolen(ST(0))
+;
+#line 86 "Astro.xs"
+    s1000 = calloc(sizeof(char), 1000);
+    strcpy(s1000,s);
+    lenline = malloc(sizeof(int)*maxline);
+    line250 = calloc(sizeof(char), lenr*maxline);
+    state_(s1000,&maxline,&nline,lenline,line250,1000,250);
+    /* make return stack */
+    EXTEND(SP, nline);
+    for (ii=0; ii < nline ; ii++ ) {
+      if (lenline[ii]==0) {
+       PUSHs(sv_2mortal(newSVpv("",0)));
+      } else {
+       PUSHs(sv_2mortal(newSVpv(&line250[ii*250],lenline[ii])));
+      };
+    };
+    free(s1000);
+    free(lenline);
+    free(line250);
+#line 362 "Astro.c"
+	PUTBACK;
+	return;
+    }
+}
+
+
 XS_EUPXS(XS_Astro__Astro_xs_astroEvent); /* prototype to pass -Wmissing-prototypes */
 XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
 {
@@ -283,7 +374,7 @@ XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
-#line 48 "Astro.xs"
+#line 107 "Astro.xs"
       double* eventVal;
       int maxrep = 100;
       int nrep;
@@ -294,7 +385,7 @@ XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
       char *crc250;
       int ii;
       int lenr=250;
-#line 298 "Astro.c"
+#line 389 "Astro.c"
 	double	tstartJD = (double)SvNV(ST(0))
 ;
 	int	searchCode = (int)SvIV(ST(1))
@@ -324,7 +415,7 @@ XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
 		}
 	} STMT_END
 ;
-#line 59 "Astro.xs"
+#line 118 "Astro.xs"
     /* allocate and assign input array */
     neventVal=av_len(eventValin)+1;
     if (neventVal<=0) { /* make sure at least one element exists */
@@ -381,69 +472,7 @@ XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
     free(repVal);
     free(rep250);
     free(crc250);
-#line 385 "Astro.c"
-	PUTBACK;
-	return;
-    }
-}
-
-
-XS_EUPXS(XS_Astro__Astro_xs_astroState); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Astro__Astro_xs_astroState)
-{
-    dVAR; dXSARGS;
-    if (items < 3)
-       croak_xs_usage(cv,  "lat, lon, hgt, ...");
-    PERL_UNUSED_VAR(ax); /* -Wall */
-    SP -= items;
-    {
-#line 119 "Astro.xs"
-      char *crc250;
-      int irc;
-      int njd;
-      int i;
-      char *jd;
-      char *b30;
-      char *jd30;
-      int lenc=250;
-      int lenj=30;
-      STRLEN lens;
-#line 412 "Astro.c"
-	double	lat = (double)SvNV(ST(0))
-;
-	double	lon = (double)SvNV(ST(1))
-;
-	double	hgt = (double)SvNV(ST(2))
-;
-#line 130 "Astro.xs"
-    crc250 = calloc(sizeof(char), lenc);
-    njd=items-3;
-    /*printf("XXXXXXXXXXXXXXXX njd: %d items=%d\n",njd,items);*/
-    jd30 = malloc(sizeof(char)*njd*lenj);
-    b30 = malloc(sizeof(char)*lenj);
-    for (i=1; i <= njd; i++) {
-            jd= (char *)SvPV(ST(i+2),lens);
-	    memset(b30,' ',lenj);
-            strncpy(b30,jd,fmin(lens,lenj));
-            memcpy(&jd30[(i-1)*30],b30,lenj);
-	    /*printf("XXXXXXXXXXXXXXXX astroState: %d %s\n",i,b30); */
-    }
-    /* call fortran subroutine */
-    astrostate_(&njd,jd30,&lat,&lon,&hgt,crc250,&irc,lenj,lenc);
-    if (irc != 0) {
-       free(jd30);
-       croak("xs_astroState Error return from state (irc=%d '%s')", irc, crc250); 
-    }
-    /* make return stack */
-    if (irc == 0) {
-       EXTEND(SP, 2);
-       PUSHs(sv_2mortal(newSViv(irc)));
-       PUSHs(sv_2mortal(newSVpv(crc250,strlen(crc250))));
-    }; 
-    free(b30);
-    free(jd30);
-    free(crc250);
-#line 447 "Astro.c"
+#line 476 "Astro.c"
 	PUTBACK;
 	return;
     }
@@ -481,8 +510,9 @@ XS_EXTERNAL(boot_Astro)
         newXS_deffile("Astro::Astro::xs_jplephClose", XS_Astro__Astro_xs_jplephClose);
         newXS_deffile("Astro::Astro::xs_JDToDTG", XS_Astro__Astro_xs_JDToDTG);
         newXS_deffile("Astro::Astro::xs_DTGToJD", XS_Astro__Astro_xs_DTGToJD);
+        newXS_deffile("Astro::Astro::xs_event", XS_Astro__Astro_xs_event);
+        newXS_deffile("Astro::Astro::xs_state", XS_Astro__Astro_xs_state);
         newXS_deffile("Astro::Astro::xs_astroEvent", XS_Astro__Astro_xs_astroEvent);
-        newXS_deffile("Astro::Astro::xs_astroState", XS_Astro__Astro_xs_astroState);
 #if PERL_VERSION_LE(5, 21, 5)
 #  if PERL_VERSION_GE(5, 9, 0)
     if (PL_unitcheckav)
