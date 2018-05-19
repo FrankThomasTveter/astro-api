@@ -30,7 +30,7 @@ C
       YEAR= I
       MONTH= J
       DAY= K
-      DJ=DJ*86400.0D0 ! seconds
+      DJ=nint(DJ*86400.0D3)*1.0D-3 ! seconds
       HOUR=int(DJ/3600.0D0)
       Dj=DJ-HOUR*3600.0D0
       MINUTES=INT(DJ/60.0D0)
