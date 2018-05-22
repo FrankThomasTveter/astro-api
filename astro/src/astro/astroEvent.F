@@ -447,7 +447,7 @@ C
       character*12 myname
       data myname /'ASTROEVENT'/
       logical bdeb
-      bdeb=.true.
+      bdeb=.false.
 C
       if (irc.eq.0) crc250=''
       call chop0(crc250,250)

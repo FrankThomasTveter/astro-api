@@ -71,7 +71,7 @@ C
       data zips/2*0.d0/
 C
       logical opened,ready,bdeb
-      data opened /.false./,ready/.false./,bdeb/.true./
+      data opened /.false./,ready/.false./,bdeb/.false./
       character*10 myname
       data myname /'JPLEPH'/
 C
