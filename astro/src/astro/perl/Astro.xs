@@ -105,7 +105,7 @@ void
 xs_astroEvent(double tstartJD, int searchCode, double tendJD, int eventId, int neventVal, AV* eventValin, int secdec, int irc)
   PREINIT:
       double* eventVal;
-      int maxrep = 100;
+      int maxrep = 1000;
       int nrep;
       double* repJD;
       int* repId;
