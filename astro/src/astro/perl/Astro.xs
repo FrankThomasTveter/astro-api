@@ -46,7 +46,7 @@ void
 xs_event(char *s)
   PREINIT:
       char *s1000;
-      int maxline = 1000;
+      int maxline = 1500;
       int nline;
       int *lenline;
       char *line250;
@@ -76,7 +76,7 @@ void
 xs_state(char *s)
   PREINIT:
       char *s1000;
-      int maxline = 1000;
+      int maxline = 1500;
       int nline;
       int *lenline;
       char *line250;
