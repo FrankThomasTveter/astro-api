@@ -5843,7 +5843,7 @@ C
       logical bdeb
       data bdeb/.false./
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       real vals,vale
       integer inrep
@@ -5947,7 +5947,7 @@ C     need 3 points before we can check for maximum
          end if
          JD=JD+dt         !  increment time
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -6072,7 +6072,7 @@ C
       logical bdeb
       data bdeb/.false./
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       real vals,vale
       integer inrep
@@ -6176,7 +6176,7 @@ C     need 3 points before we can check for minimum
          end if
          JD=JD+dt         !  increment time
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -6400,7 +6400,7 @@ C
       logical bdeb
       data bdeb/.false./
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
@@ -6500,7 +6500,7 @@ C     need 3 points before we can check for maximum
          end if
          JD=JD+dt         !  increment time
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -6946,7 +6946,7 @@ C
       character*16 t16
       logical bdone
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       call chop0(event100,100)
 C
@@ -7053,7 +7053,7 @@ C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
             tstartJD=tstartJD+dtin*0.5D0 ! skip fast forward
          end if
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -7107,7 +7107,7 @@ C
       logical bdeb
       data bdeb/.false./
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
@@ -7207,7 +7207,7 @@ C     need 3 points before we can check for minimum
          end if
          JD=JD+dt         !  increment time
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -8185,7 +8185,7 @@ C
       integer mode
       parameter (mode=3)        ! only transform pos
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C     
       real*8 PI,TWOPI,PIH,DEG,RAD
       COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
@@ -8395,7 +8395,7 @@ C     make report
 C     increment time
          JD=JD+dt
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -8868,7 +8868,7 @@ C
       real ang,sunAng,atan2deg,getAngle
       external atan2deg,getAngle
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
 C
@@ -9099,7 +9099,7 @@ C     make report
 C     increment time
          JD=JD+dt
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -9230,7 +9230,7 @@ C
       real occ,fact
       logical proceed
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
       real refraction
       parameter (refraction= 34.0D0/60.0D0) ! refraction in degrees ( http://en.wikipedia.org/wiki/Atmospheric_refraction : 34')
       external getSunElevation
@@ -9463,7 +9463,7 @@ C     search forwards for Rp .eq. Rm (PARTIAL ECLIPSE STOP)
          end if
       end do
 C     
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -9944,7 +9944,7 @@ C
       real ang,sunAng,atan2deg,getAngle
       external atan2deg,getAngle
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
 C
@@ -10083,7 +10083,7 @@ C     make report
 C     increment time
          JD=JD+dt
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -10311,7 +10311,7 @@ C
       real occ,fact
       logical proceed
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C     
       call chop0(event100,100)
       lend=length(event100,100,10)
@@ -10697,7 +10697,7 @@ C
       character*16 t16
       logical bdone
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       call chop0(event100,100)
 C
@@ -10803,7 +10803,7 @@ C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
          end if
       end do
 C
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -10920,7 +10920,7 @@ C
       logical bdeb,bdone
       data bdeb/.false./
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       real vals,vale
       integer inrep
@@ -11033,7 +11033,7 @@ C     need 3 points before we can check for maximum
          end if
          JD=JD+dt         !  increment time
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -11133,7 +11133,7 @@ C     is returned as golden, the returned function value.
 C     Parameters: The golden ratios.
       REAL f1,f2,x0,x1,x2,x3
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
       character*14 myname
       data myname/'goldenmax'/
       x0=ax                     !  At any given time we will keep track of four points, x0,x1,x2,x3.
@@ -11169,7 +11169,7 @@ C     Parameters: The golden ratios.
             if (irc.ne.0) return
          endif
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -11234,7 +11234,7 @@ C
       logical bdeb
       data bdeb/.false./
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       real vals,vale
       integer inrep
@@ -11346,7 +11346,7 @@ C     need 3 points before we can check for maximum
          end if
          JD=JD+dt         !  increment time
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -11446,7 +11446,7 @@ C     is returned as golden, the returned function value.
 C     Parameters: The golden ratios.
       REAL f1,f2,x0,x1,x2,x3
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
       character*14 myname
       data myname/'goldenLLmin'/
       x0=ax                     !  At any given time we will keep track of four points, x0,x1,x2,x3.
@@ -11482,7 +11482,7 @@ C     Parameters: The golden ratios.
             if (irc.ne.0) return
          endif
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -11661,7 +11661,7 @@ C
 C      logical bdeb
 C      data bdeb/.true./
       integer tcnt,scnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
       logical forward
       real eps
       parameter (eps = 2.0d0/86400.0d0) ! 2 seconds
@@ -11688,7 +11688,7 @@ C     in case we are starting/stopping at a maximum/minimum value...
       JD=JD-idt
 C
       scnt=0                    ! spinup count
-      bdone=(tcnt.gt.cntmax.or.tcnt.gt.ndt)
+      bdone=(tcnt.ge.cntmax.or.tcnt.gt.ndt)
       do while (.not.bdone)
          tcnt=tcnt+1            ! total count
          scnt=scnt+1            ! spinup count
@@ -12026,9 +12026,9 @@ C     do fine search...
             end if
          end if
          JD=JD+idt
-         bdone=(bdone.or.tcnt.gt.cntmax.or.tcnt.gt.ndt)
+         bdone=(bdone.or.tcnt.ge.cntmax.or.tcnt.gt.ndt)
       end do
-      if (tcnt.eq.cntmax)then
+      if (tcnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -12047,7 +12047,7 @@ C     do fine search...
          return
       end if
 C
-      if (bdeb)write(*,*)myname,'Done.',irc
+      if (bdeb)write(*,*)myname,'Done.',irc,tcnt,cntmax,ndt
       return
       end function xsearchLLTarget
 C     at this point we know that the target can be reached...
@@ -12340,7 +12340,7 @@ C
 C      logical bdeb
 C      data bdeb/.true./
       integer tcnt,scnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
       logical forward
       real eps
       parameter (eps = 2.0d0/86400.0d0) ! 2 seconds
@@ -12367,7 +12367,7 @@ C     in case we are starting/stopping at a maximum/minimum value...
       JD=JD-idt
 C
       scnt=0
-      bdone=(tcnt.gt.cntmax.or.tcnt.gt.ndt)
+      bdone=(tcnt.ge.cntmax.or.tcnt.gt.ndt)
       do while (.not.bdone)
          tcnt=tcnt+1 ! total count
          scnt=scnt+1 ! spinup count
@@ -12696,9 +12696,9 @@ C     do fine search...
      &           myname,'Init:',T22,event100(1:lend),JD,rpitch,val,dval
          end if
          JD=JD+idt
-         bdone=(bdone.or.tcnt.gt.cntmax.or.tcnt.gt.ndt)
+         bdone=(bdone.or.tcnt.ge.cntmax.or.tcnt.gt.ndt)
       end do
-      if (tcnt.eq.cntmax)then
+      if (tcnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -13066,7 +13066,7 @@ C
       logical bdeb,bdone
       data bdeb/.false./
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
@@ -13187,7 +13187,7 @@ C     need 3 points before we can check for maximum
          end if
          JD=JD+dt         !  increment time
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -13230,7 +13230,7 @@ C     is returned as golden, the returned function value.
 C     Parameters: The golden ratios.
       REAL f1,f2,x0,x1,x2,x3
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
       character*14 myname
       data myname/'goldenmax'/
       x0=ax                     !  At any given time we will keep track of four points, x0,x1,x2,x3.
@@ -13266,7 +13266,7 @@ C     Parameters: The golden ratios.
             if (irc.ne.0) return
          endif
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -13781,7 +13781,7 @@ C
       real tendJDin           ! end time
       logical bdone
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       call chop0(event100,100)
 C
@@ -13913,7 +13913,7 @@ C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
          end if
       end do
 C
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -13968,7 +13968,7 @@ C
       logical bdeb,bdone
       data bdeb/.false./
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
@@ -14101,7 +14101,7 @@ C     need 3 points before we can check for maximum
          end if
          JD=JD+dt         !  increment time
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -14144,7 +14144,7 @@ C     is returned as golden, the returned function value.
 C     Parameters: The golden ratios.
       REAL f1,f2,x0,x1,x2,x3
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
       character*14 myname
       data myname/'goldenmin'/
       x0=ax                     !  At any given time we will keep track of four points, x0,x1,x2,x3.
@@ -14181,7 +14181,7 @@ C     Parameters: The golden ratios.
          endif
 C         !write(*,*) 'GoldenMin:',f1,f2,x1,x2
       end do
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -15491,7 +15491,7 @@ C
       real tendJDin           ! end time
       logical proceed
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
       real refraction
       parameter (refraction= 34.0D0/60.0D0) ! refraction in degrees ( http://en.wikipedia.org/wiki/Atmospheric_refraction : 34')
       external getSunElevation
@@ -15737,7 +15737,7 @@ C     search forwards for Rp .eq. -Rm (PARTIAL ECLIPSE STOP)
          end if
       end do
 C     
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -16250,7 +16250,7 @@ C
       real tendJDin           ! end time
       logical proceed
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C     
       searchUmbra=0.0D0
       call chop0(event100,100)
@@ -16537,7 +16537,7 @@ C     search forwards for Rp .eq. -Rm (PENUMBRA TOTAL STOP)
          end if
       end do
 C     
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
@@ -16652,7 +16652,7 @@ C
       real tendJDin           ! end time
       logical bdone
       integer cnt,cntmax
-      parameter (cntmax=10000)
+      parameter (cntmax=20000)
 C
       call chop0(event100,100)
 C
@@ -16771,7 +16771,7 @@ C               !write(*,*) 'REPORTMP:',t16,xJD,nrep,rm
          end if
       end do
 C
-      if (cnt.eq.cntmax)then
+      if (cnt.ge.cntmax)then
          write(buff250,*)
      &        ' < '//myname,' > Too many iterations.'
          lencrc=length(crc250,250,10)
