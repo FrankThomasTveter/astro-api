@@ -17,6 +17,10 @@ C
       INTEGER*8 I,J,K,L,M,N,IJ
       IJ= INT(JD+0.5D0)
       DJ=(JD+0.5D0)-real(ij)
+      if (nint(dj*86400.0D3).eq.86400000) then
+         ij=ij+1
+         dj=0.0D0
+      end if
       L= IJ+68569
       N= 4*L/146097
       L= L-(146097*N+3)/4
