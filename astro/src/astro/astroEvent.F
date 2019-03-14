@@ -8207,8 +8207,8 @@ C
       first=.true.
       cnt=0
       do while (cnt.lt.cntmax.and.
-     &     ((dt.gt.0.0D0.and.JD.le.tendJD+dt*0.9999999D0).or.
-     &     (dt.lt.0.0D0.and.JD.ge.tendJD+dt*0.9999999D0)))
+     &     ((dt.gt.0.0D0.and.JD.le.tendJD).or.
+     &     (dt.lt.0.0D0.and.JD.ge.tendJD)))
          cnt=cnt+1
          CALL JD2DATE(JD,
      &        YY1,
@@ -8912,8 +8912,8 @@ C
       first=.true.
       cnt=0
       do while (cnt.lt.cntmax.and.
-     &     ((dt.gt.0.0D0.and.JD.le.tendJD+dt*0.99999D0).or.
-     &     (dt.lt.0.0D0.and.JD.ge.tendJD+dt*0.99999D0)))
+     &     ((dt.gt.0.0D0.and.JD.le.tendJD).or.
+     &     (dt.lt.0.0D0.and.JD.ge.tendJD)))
          cnt=cnt+1
          CALL JD2DATE(JD,
      &        YY1,
@@ -9988,8 +9988,8 @@ C
       first=.true.
       cnt=0
       do while (cnt.lt.cntmax.and.
-     &     ((dt.gt.0.0D0.and.JD.lt.tendJD+dt*0.99999D0).or.
-     &     (dt.lt.0.0D0.and.JD.gt.tendJD+dt*0.99999D0)))
+     &     ((dt.gt.0.0D0.and.JD.lt.tendJD).or.
+     &     (dt.lt.0.0D0.and.JD.gt.tendJD)))
          cnt=cnt+1
          CALL JD2DATE(JD,
      &        YY1,
