@@ -12,8 +12,8 @@
                   longitude="{/*/astro:Event[1]/@Val2}"
                   height="{/*/astro:Event[1]/@Val3}">
           <xsl:apply-templates select="/*/astro:Event[@Id='100']"/>
-          <xsl:apply-templates select="/*/astro:Event[@Id='110']"/>
-          <xsl:apply-templates select="/*/astro:Event/astro:Report"><!-- this will match above once more, but since is empty will result in null string -->
+          <xsl:apply-templates select="/*/astro:Event[@Id = '110']/astro:Report[@repId='110']"/>
+          <xsl:apply-templates select="/*/astro:Event[@Id != '110']/astro:Report">
             <xsl:sort select="@time"/>
           </xsl:apply-templates>
         </location>
@@ -48,12 +48,13 @@
                 desc="{substring(astro:Report[@repId='103']/@hint,21)}"/>
   </xsl:template>
 
-  <xsl:template match="/*/astro:Event[@Id='110']">
-    <moonposition time="{child::astro:Report[@repId='110']/@time}"
-                  elevation="{child::astro:Report[@repId='110']/@repVal}"
-                  azimuth="{child::astro:Report[@repId='111']/@repVal}"
-                  range="{child::astro:Report[@repId='112']/@repVal}"
-                  desc="{substring(child::astro:Report[@repId='110']/@hint,21)}"/>
+  <xsl:template match="/*/astro:Event[@Id='110']/astro:Report">
+    <moonposition time="{@time}"
+                  elevation="{@repVal}"
+                  azimuth="{following-sibling::astro:Report[@repId='111' and @time = current()/@time]/@repVal}"
+                  range="{following-sibling::astro:Report[@repId='112' and @time = current()/@time]/@repVal}"
+                  phase="{following-sibling::astro:Report[@repId='115' and @time = current()/@time]/@repVal}"
+                  desc="{substring(@hint,21)}"/>
   </xsl:template>
 
   <xsl:template match="/*/astro:Event[@Id='800']/astro:Report">
