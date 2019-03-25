@@ -8190,8 +8190,9 @@ C
       real*8 PI,TWOPI,PIH,DEG,RAD
       COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
 C
-      real ang,moonAng,atan2deg,getAngle
-      external atan2deg,getAngle
+      real phase
+      real ang,moonAng,atan2deg,getAngle,getMoonPhase
+      external atan2deg,getAngle,getMoonPhase
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
 C
@@ -8206,8 +8207,8 @@ C
       first=.true.
       cnt=0
       do while (cnt.lt.cntmax.and.
-     &     ((dt.gt.0.0D0.and.JD.le.tendJD+dt*0.9999999D0).or.
-     &     (dt.lt.0.0D0.and.JD.ge.tendJD+dt*0.9999999D0)))
+     &     ((dt.gt.0.0D0.and.JD.le.tendJD).or.
+     &     (dt.lt.0.0D0.and.JD.ge.tendJD)))
          cnt=cnt+1
          CALL JD2DATE(JD,
      &        YY1,
@@ -8307,6 +8308,10 @@ C
             return
          end if
 C
+C     get moon phase
+C
+         phase=getMoonPhase(JD,crc250,irc) ! moon phase
+C
          call getShadow(sunCart,moonCart,sel,saz,crc250,irc)
          if(irc.ne.0) then
             lencrc=length(crc250,250,10)
@@ -8390,6 +8395,30 @@ C     make report
             repval(nrep)=sel
             repJD(nrep)=JD - 1.0D-9 + 4.0D-10
             repid(nrep)=eventid + 4
+         end if
+         nrep=nrep+1
+         if (nrep.le.maxrep) then
+            if (phase.lt.25.0) then
+               write(rep250(nrep),'(A,X,A,X,A,F5.1,X,A)')
+     &              T30(1:lent),event100(1:lend)," * MOON PHASE=",phase,
+     &              " (waxing crescent)"
+            else if (phase.lt.50.0) then
+               write(rep250(nrep),'(A,X,A,X,A,F5.1,X,A)')
+     &              T30(1:lent),event100(1:lend)," * MOON PHASE=",phase,
+     &              " (waxing gibbous)"
+            else if (phase.lt.75.0) then
+               write(rep250(nrep),'(A,X,A,X,A,F5.1,X,A)')
+     &              T30(1:lent),event100(1:lend)," * MOON PHASE=",phase,
+     &              " (waning gibbous)"
+            else
+               write(rep250(nrep),'(A,X,A,X,A,F5.1,X,A)')
+     &              T30(1:lent),event100(1:lend)," * MOON PHASE=",phase,
+     &              " (waning crescent)"
+            end if
+            call chop0(rep250(nrep),250)
+            repval(nrep)=phase
+            repJD(nrep)=JD
+            repid(nrep)=eventid + 5
          end if
          if (bdeb)write(*,*)myname,'Ended minor loop.',dt
 C     increment time
@@ -8883,8 +8912,8 @@ C
       first=.true.
       cnt=0
       do while (cnt.lt.cntmax.and.
-     &     ((dt.gt.0.0D0.and.JD.le.tendJD+dt*0.99999D0).or.
-     &     (dt.lt.0.0D0.and.JD.ge.tendJD+dt*0.99999D0)))
+     &     ((dt.gt.0.0D0.and.JD.le.tendJD).or.
+     &     (dt.lt.0.0D0.and.JD.ge.tendJD)))
          cnt=cnt+1
          CALL JD2DATE(JD,
      &        YY1,
@@ -9959,8 +9988,8 @@ C
       first=.true.
       cnt=0
       do while (cnt.lt.cntmax.and.
-     &     ((dt.gt.0.0D0.and.JD.lt.tendJD+dt*0.99999D0).or.
-     &     (dt.lt.0.0D0.and.JD.gt.tendJD+dt*0.99999D0)))
+     &     ((dt.gt.0.0D0.and.JD.lt.tendJD).or.
+     &     (dt.lt.0.0D0.and.JD.gt.tendJD)))
          cnt=cnt+1
          CALL JD2DATE(JD,
      &        YY1,
