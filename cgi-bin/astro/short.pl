@@ -45,6 +45,7 @@ $ENV{'QUERY_STRING'} = $query;
 
 # fetch XML
 
+<<<<<<< HEAD
 my @lines = &Astro::Api::short();
 
 # Print HTTP headers (should be done in this wrapper)
@@ -54,6 +55,14 @@ my @lines = &Astro::Api::short();
 
 print "Content-Type: text/xml;\n";
 print "\n";
+=======
+my @lines = &Astro::Api::event();
+
+# Print HTTP headers (should be done in this wrapper)
+
+print shift(@lines) . "\n";
+print shift(@lines) . "\n";
+>>>>>>> 2239ac80cc2cac38d2c75256c01e51cd34dd4a50
 
 # transform XML and output result
 
