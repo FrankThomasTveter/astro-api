@@ -15,6 +15,7 @@ void jplephclose_();
 void jd2date_(double* JD, int* year, int* month, int* mday, int* hour, int* min, double* secs);
 void date2jd_(double* JD, int* year, int* month, int* mday, int* hour, int* min, double* secs);
   
+void short_();
 void event_();
 void state_();
 void astroevent_( double *tstart2000, // start time (in jd2000)
