@@ -17,20 +17,34 @@ my $req = Apache2::Request->new();
 
 # calculate time params
 
-my ($offset) = $req->param('offset') =~ /^([ +-]?\d\d:\d\d)$/a
-    or die "Error in offset format: " . $req->param('offset');
-$offset =~ s/^( |)(?=\d)/+/; # + is escaped as space or missing, put it back
-my $days = $req->param('days')||1;
+my ($offset, $days, $from, $to);
 
-my $from = DateTime->new(
-    year => $1,
-    month => $2,
-    day => $3,
-    time_zone  => $offset,
-) if $req->param('date') =~ /(\d\d\d\d)-(\d\d)-(\d\d)/a; # disable unicode numbers
-die 'Illegal date format: ' . $req->param('date') unless $from;
-$from->set_time_zone('UTC');
-my $to = $from->clone->add( days => $days);
+eval {
+    die "Missing offset parameter" unless $req->param('offset');
+    ($offset) = $req->param('offset') =~ /^([ +-]?\d\d:\d\d)$/a
+        or die "Error in offset format: " . $req->param('offset');
+    $offset =~ s/^( |)(?=\d)/+/; # + is escaped as space or missing, put it back
+    $days = $req->param('days')||1;
+
+    $from = DateTime->new(
+        year => $1,
+        month => $2,
+        day => $3,
+        time_zone  => $offset,
+    ) if $req->param('date') =~ /(\d\d\d\d)-(\d\d)-(\d\d)/a; # disable unicode numbers
+    die 'Illegal date format: ' . $req->param('date') unless $from;
+    $from->set_time_zone('UTC');
+    $to = $from->clone->add( days => $days);
+};
+if ($@) {
+    print <<EOT;
+Status: 400 Bad Request
+Content-Type: text/plain
+
+$@
+EOT
+    return;
+}
 
 # generate astro query
 
@@ -45,12 +59,12 @@ $ENV{'QUERY_STRING'} = $query;
 
 # fetch XML
 
-my @lines = &Astro::Api::event();
+my @lines = &Astro::Api::short();
 
-# Print HTTP headers (should be done in this wrapper)
+# Print HTTP headers
 
-print shift(@lines) . "\n";
-print shift(@lines) . "\n";
+print "Content-Type: text/xml;\n";
+print "\n";
 
 # transform XML and output result
 
@@ -62,13 +76,6 @@ my $stylesheet = XML::LibXSLT->new->parse_stylesheet($style_doc);
 my $temp = $stylesheet->transform($source);
 my $results = postproc( $temp, $offset );
 print $stylesheet->output_as_bytes($results);
-
-#
-#my @lines = &Astro::Api::event();
-#foreach my $line (@lines) {
-#    print "$line\n";
-#}
-#
 
 sub postproc { # sort XML by date and localize times
     my ($dom, $offset) = @_;
