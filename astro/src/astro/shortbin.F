@@ -15,6 +15,8 @@ C
       character*250 :: crc250,buff250
       integer :: irc,lenc
       integer, external :: length
+      character*10 :: lat10,lon10,hgt10,day10,dat10
+      character*6 :: off6
 C
       jpl1024="../../eph/JPLEPH.405"
       call JPLephOpen(jpl1024,crc250,irc) ! open JPL ephemeride file for reading
@@ -23,17 +25,13 @@ C
          stop("JPL-error")
       end if
 C
-
-
-
-
-      s1000='?lat=74&lon=56&date=2018-06-24&offset=+03:00&days=3'
-      
-
-
-
-
-      CALL SHORT(s1000,   ! query string
+      lat10="74"
+      lon10="56"
+      hgt10="0"
+      dat10="2018-06-24"
+      day10="3"
+      off6="+03:00"
+      CALL SHORT(lat10,lon10,hgt10,day10,dat10,off6,   ! query string
      &     maxline,             ! maximum number of output lines
      &     nline,               ! number of output lines
      &     lenline,             ! length of each out250
