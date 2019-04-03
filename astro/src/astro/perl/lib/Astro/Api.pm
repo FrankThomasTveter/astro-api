@@ -24,8 +24,7 @@ sub state {
 }
 
 sub short {
-    # reads $ENV{QUERY_STRING} directly
-    return pm_short($ENV{QUERY_STRING});
+    return pm_short(@_);
 }
 
 sub event {
