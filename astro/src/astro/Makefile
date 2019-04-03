@@ -44,7 +44,7 @@
 #	(Put a list of FORTRAN source files containing main programs
 #	 here) 
 #
- MAINS = astro.F test.F
+ MAINS = astro.F test.F shortbin.F
 #
 # Full library name
 #	(All objects will be stored in a library (using the UNIX 
