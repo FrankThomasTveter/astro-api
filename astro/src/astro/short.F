@@ -17,22 +17,31 @@ C
       real :: date
       integer :: days
 C     
-      integer :: lens
+      integer :: lens,lenx
       integer, external :: length
       integer :: yy1,mm1,dd1,hh1,mi1
-      real :: sec1, t2000
+      real :: sec1, s2000, t2000
       integer :: mode,ii,irc
       integer :: istart,istop,nval
       logical :: debug, bdeb, bdone
       data bdeb /.false./
 C     
-C     
 C     bdeb=.true.
-      read(lat10,*,iostat=irc) lat; if (irc.ne.0) lat=0.0D0
-      read(lon10,*,iostat=irc) lon; if (irc.ne.0) lon=0.0D0
-      read(hgt10,*,iostat=irc) hgt; if (irc.ne.0) hgt=0.0D0
-      read(day10,*,iostat=irc) days; if (irc.ne.0) days=1
-      read(dat10,'(I4,X,I2,X,I2)',iostat=irc)yy1,mm1,dd1
+      call chop0(lat10,10)
+      lenx=length(lat10,10,3)
+      read(lat10(1:lenx),*,iostat=irc) lat; if (irc.ne.0) lat=0.0D0
+      call chop0(lon10,10)
+      lenx=length(lon10,10,3)
+      read(lon10(1:lenx),*,iostat=irc) lon; if (irc.ne.0) lon=0.0D0
+      call chop0(hgt10,10)
+      lenx=length(hgt10,10,3)
+      read(hgt10(1:lenx),*,iostat=irc) hgt; if (irc.ne.0) hgt=0.0D0
+      call chop0(day10,10)
+      lenx=length(day10,10,3)
+      read(day10(1:lenx),*,iostat=irc) days; if (irc.ne.0) days=1
+      call chop0(dat10,10)
+      lenx=length(dat10,10,3)
+      read(dat10(1:lenx),'(I4,X,I2,X,I2)',iostat=irc)yy1,mm1,dd1
       if (irc.ne.0) then
          yy1=2019
          mm1=1
@@ -152,8 +161,8 @@ C
 C
          tstartjd=date-offset+real(dd-1)
 C
-         t2000=date+real(dd-1)
-         call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+         s2000=date+real(dd-1)
+         call getDate(real(int(s2000)),s2000,yy1,mm1,dd1,hh1,mi1,sec1)
          write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
 C
          write(s250,90)dat25(1:10)
@@ -202,13 +211,10 @@ C     </xsl:template>
             if (repId(ii).eq.102) then
 C     ! write moon phase information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
-               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                x50=getVal50(repVal(ii),lenx)
                write(s250,100)dat25,x50(1:lenx),
      &              rep250(ii)(21:lens)
@@ -276,12 +282,9 @@ C     </xsl:template>
             if (repId(ii).eq.110) then ! elevation
 C     ! write moon phase information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                if (repId(ii+1).eq.111 .and. ! azimuth
      &              repId(ii+2).eq.112 .and. ! range
@@ -334,12 +337,9 @@ C     </xsl:template>
             if (repId(ii).eq.600) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                write(s250,600)dat25,rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -380,12 +380,9 @@ C     </xsl:template>
             if (repId(ii).eq.610) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                write(s250,610)dat25,rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -426,12 +423,9 @@ C     </xsl:template>
             if (repId(ii).eq.620) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
 C               write(*,*)'REP:',ii,repjd(ii),tstartJD,tstopJD,
 C     &              offset,rep250(ii)(21:lens)
@@ -476,12 +470,9 @@ C     </xsl:template>
             if (repId(ii).eq.630) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                x50=getVal50(repval(ii),lenx)
                write(s250,630)dat25,x50(1:lenx),rep250(ii)(21:lens)
@@ -524,12 +515,9 @@ C     </xsl:template>
             if (repId(ii).eq.800) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                write(s250,800)dat25,rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -570,12 +558,9 @@ C     </xsl:template>
             if (repId(ii).eq.810) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                write(s250,810)dat25,rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -616,12 +601,9 @@ C     </xsl:template>
             if (repId(ii).eq.820) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                x50=getVal50(repval(ii),lenx)
                write(s250,820)dat25,x50(1:lenx),rep250(ii)(21:lens)
@@ -664,12 +646,9 @@ C     </xsl:template>
             if (repId(ii).eq.830) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                x50=getVal50(repval(ii),lenx)
                write(s250,830)dat25,x50(1:lenx),rep250(ii)(21:lens)
@@ -714,12 +693,9 @@ C     </xsl:template>
             if (repId(ii).eq.900) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                write(s250,900)dat25,rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -760,12 +736,9 @@ C     </xsl:template>
             if (repId(ii).eq.910) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                write(s250,910)dat25,rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -806,12 +779,9 @@ C     </xsl:template>
             if (repId(ii).eq.920) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                write(s250,920)dat25,rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -852,12 +822,9 @@ C     </xsl:template>
             if (repId(ii).eq.930) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(nint(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                write(s250,930)dat25,rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -894,8 +861,8 @@ C
 C     add a final moonposition
 C
       tstartjd=date-offset+real(days)
-      t2000=date+real(days)
-      call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+      s2000=date+real(days)
+      call getDate(real(int(s2000)),s2000,yy1,mm1,dd1,hh1,mi1,sec1)
       write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
 C     
       write(s250,90)dat25(1:10)
@@ -941,12 +908,9 @@ C     </xsl:template>
          if (repId(ii).eq.110) then ! elevation
 C     ! write moon phase information
             t2000=repJD(ii)+offset
-            sec1=(t2000-int(t2000))*86400.0D0
-            sec1=real(nint(sec1))
-            t2000=real(int(t2000))+(sec1/86400.0D0)
+            call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
             call chop0(rep250(ii),250)
             lens=length(rep250(ii),250,20)
-            call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
 C            write(*,*) "times:",tstartjd, t2000,offset,dd1,hh1
             write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
             if (repId(ii+1).eq.111 .and. ! azimuth
@@ -1024,5 +988,18 @@ C
       return
       end function getVal50
 
+
+      subroutine getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+      real :: s2000,t2000
+      integer :: yy1,mm1,dd1,hh1,mi1
+      real :: sec1
+      integer :: lens
+      integer, external :: length
+      sec1=(t2000-s2000)*86400.0D0
+      sec1=min(86400.0D0-1.0D0,max(0.0D0,real(nint(sec1))))
+      t2000=s2000+(sec1/86400.0D0)
+      call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+      return
+      end subroutine getDate
  
       end subroutine short
