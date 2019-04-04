@@ -162,7 +162,7 @@ C
          tstartjd=date-offset+real(dd-1)
 C
          s2000=date+real(dd-1)
-         call jd2date(s2000,yy1,mm1,dd1,hh1,mi1,sec1)
+         call getDate(real(int(s2000)),s2000,yy1,mm1,dd1,hh1,mi1,sec1)
          write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
 C
          write(s250,90)dat25(1:10)
@@ -470,12 +470,9 @@ C     </xsl:template>
             if (repId(ii).eq.630) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
-               sec1=(t2000-int(t2000))*86400.0D0
-               sec1=real(int(sec1))
-               t2000=real(int(t2000))+(sec1/86400.0D0)
+               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                x50=getVal50(repval(ii),lenx)
                write(s250,630)dat25,x50(1:lenx),rep250(ii)(21:lens)
@@ -864,8 +861,8 @@ C
 C     add a final moonposition
 C
       tstartjd=date-offset+real(days)
-      t2000=date+real(days)
-      call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+      s2000=date+real(days)
+      call getDate(real(int(s2000)),s2000,yy1,mm1,dd1,hh1,mi1,sec1)
       write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
 C     
       write(s250,90)dat25(1:10)
@@ -911,12 +908,9 @@ C     </xsl:template>
          if (repId(ii).eq.110) then ! elevation
 C     ! write moon phase information
             t2000=repJD(ii)+offset
-            sec1=(t2000-int(t2000))*86400.0D0
-            sec1=real(nint(sec1))
-            t2000=real(int(t2000))+(sec1/86400.0D0)
+            call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
             call chop0(rep250(ii),250)
             lens=length(rep250(ii),250,20)
-            call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
 C            write(*,*) "times:",tstartjd, t2000,offset,dd1,hh1
             write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
             if (repId(ii+1).eq.111 .and. ! azimuth
