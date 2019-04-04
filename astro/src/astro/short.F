@@ -17,7 +17,7 @@ C
       real :: date
       integer :: days
 C     
-      integer :: lens
+      integer :: lens,lenx
       integer, external :: length
       integer :: yy1,mm1,dd1,hh1,mi1
       real :: sec1, t2000
@@ -26,13 +26,22 @@ C
       logical :: debug, bdeb, bdone
       data bdeb /.false./
 C     
-C     
 C     bdeb=.true.
-      read(lat10,*,iostat=irc) lat; if (irc.ne.0) lat=0.0D0
-      read(lon10,*,iostat=irc) lon; if (irc.ne.0) lon=0.0D0
-      read(hgt10,*,iostat=irc) hgt; if (irc.ne.0) hgt=0.0D0
-      read(day10,*,iostat=irc) days; if (irc.ne.0) days=1
-      read(dat10,'(I4,X,I2,X,I2)',iostat=irc)yy1,mm1,dd1
+      call chop0(lat10,10)
+      lenx=length(lat10,10,3)
+      read(lat10(1:lenx),*,iostat=irc) lat; if (irc.ne.0) lat=0.0D0
+      call chop0(lon10,10)
+      lenx=length(lon10,10,3)
+      read(lon10(1:lenx),*,iostat=irc) lon; if (irc.ne.0) lon=0.0D0
+      call chop0(hgt10,10)
+      lenx=length(hgt10,10,3)
+      read(hgt10(1:lenx),*,iostat=irc) hgt; if (irc.ne.0) hgt=0.0D0
+      call chop0(day10,10)
+      lenx=length(day10,10,3)
+      read(day10(1:lenx),*,iostat=irc) days; if (irc.ne.0) days=1
+      call chop0(dat10,10)
+      lenx=length(dat10,10,3)
+      read(dat10(1:lenx),'(I4,X,I2,X,I2)',iostat=irc)yy1,mm1,dd1
       if (irc.ne.0) then
          yy1=2019
          mm1=1

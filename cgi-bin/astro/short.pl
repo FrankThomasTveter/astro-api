@@ -10,7 +10,10 @@ my $lon = $req->param('lon');
 my $height = $req->param('height');
 my $days = $req->param('days');
 my $date = $req->param('date');
-my $offset = $req->param('offset');
+# my $offset = $req->param('offset');
+my ($offset) = $req->param('offset') =~ /^([ +-]?\d\d:\d\d)$/a
+    or die "Error in offset: " . $req->param('offset');
+$offset =~ s/^( |)(?=\d)/+/; # + is escaped as space or missing, put it back
 
 my @lines = &Astro::Api::short($lat,$lon,$height,$days,$date,$offset);
 
