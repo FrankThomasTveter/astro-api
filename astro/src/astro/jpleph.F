@@ -82,7 +82,7 @@ C
       real a,b,c,d,f,phi,elong,height,sphi,cphi,teta,ct,st,s1,s2,s3
       real cart(3),polar(3),xyz(3),syz,rqxy,rxy,rq,slon,clon,slat,clat
       integer newcmb
-      integer length,lens
+      integer length,lens,kode
       external length
 C     
       real*8 PI,TWOPI,PIH,DEG,RAD
@@ -101,11 +101,12 @@ C  FOR CONVERTING ANGLES FROM RADIANS TO DEGREES AND BACK
       DEG = 18.D1/PI
       RAD = PI/18.D1
 C
-      call const(NAMS, VALS, SS, NVS, JPL1024)
+C      call const(NAMS, VALS, SS, NVS, JPL1024)
 C     set up target array (request all)
       list(:)=2
-
-      CALL JPLSTATE(zips,list,pv,pnut,jpl1024,crc250,irc)
+      kode=1 ! open file
+C
+      CALL JPLSTATE(kode,zips,list,pv,pnut,jpl1024,crc250,irc)
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//
@@ -114,6 +115,53 @@ C     set up target array (request all)
          return
       end if
       opened=.true.
+      return
+C
+C-------------------------------------
+C     CLOSE ROUTINE
+C-------------------------------------
+
+      entry jplephCache(day,crc250,irc)
+      if (.not.opened) then
+         crc250=myname//' Open before reading.'
+         call chop0(crc250,250)
+         irc=145
+         return
+      end if
+      
+      ! get gregorian calendar from UTC
+      call split(day,utc)
+!      utc(1)=utc(1)+2451544.5D0 ! convert to true Julian date 
+!
+      CALL iau_JD2CAL ( utc(1), utc(2), IY1, IM1, ID1, FD, JS )
+!      IF ( JS.NE.0 ) GO TO 9
+      CALL iau_DAT ( IY1, IM1, ID1, FD, DAT, JS )
+!      IF ( JS.LT.0 ) 
+
+!     Atomic time (utc + leap seconds)
+
+      tai(1)=utc(1)
+      tai(2)=utc(2)+dat/86400.0D0
+
+!     Terrestrial time
+
+      TT(1) = TAI(1)
+      TT(2) = TAI(2) + 32.184D0/86400.0D0
+
+!     ephemeride time (approximately equal to TT on the geoid)
+      
+      ET(1)=TT(1)
+      ET(2)=TT(2)
+
+      kode=2 ! cache data
+      call jplstate(kode,et,list,pv,pnut,jpl1024,crc250,irc)
+      if (irc.ne.0) then
+         lencrc=length(crc250,250,10)
+         crc250=crc250(1:lencrc)//
+     &        ' < '//myname//' > Error return from JPLSTATE.'
+         call chop0(crc250,250)
+         return
+      end if
       return
 C
 C-------------------------------------
@@ -171,7 +219,8 @@ c     force km and barycentric output by 'jplstate'
       bary=.true.
       
 C     read ephemerides...
-      call jplstate(et,list,pv,pnut,jpl1024,crc250,irc)
+      kode=3 ! read data
+      call jplstate(kode,et,list,pv,pnut,jpl1024,crc250,irc)
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//
@@ -843,7 +892,7 @@ C       MAKE ADJUSTMENTS FOR NEGATIVE INPUT NUMBER
 
 C++++++++++++++++++++++++++++++++
 C
-      SUBROUTINE JPLSTATE(ET2,LIST,PV,PNUT,JPL1024,CRC250,IRC)
+      SUBROUTINE JPLSTATE(kode,ET2,LIST,PV,PNUT,JPL1024,CRC250,IRC)
 C
 C++++++++++++++++++++++++++++++++
 C
@@ -852,6 +901,12 @@ C
 C     CALLING SEQUENCE PARAMETERS:
 C
 C     INPUT:
+C
+C        KODE  +1 : OPEN EPHEMERIDE FILE AND READ CONSTANTS
+C              +2 : CACHE PART OF EPHEMERIDE FILE
+C              +3 : READ DATA
+C              +4 : CLOSE EPHEMERIDE FILE
+C
 C
 C         ET2   DP 2-WORD JULIAN EPHEMERIS EPOCH AT WHICH INTERPOLATION
 C               IS WANTED.  ANY COMBINATION OF ET2(1)+ET2(2) WHICH FALLS
@@ -947,16 +1002,21 @@ C
 C
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 
-      integer mcore,ncore,lcore,ccore
-      parameter (mcore=5)
-
+      integer kode
+      integer mcore
+      parameter (mcore=2500)      ! must always cache at least 1
+C     double precision BUF(1018,mcore)
+      double precision BUF(1500,mcore),buff(1500)
+      integer nrl(mcore),nrfile,nrecl,score,ecore,ncoeffs,lpos
+      logical lcore,lcache
+      common/CSTATE/buf,nrl,nrfile,NRECL,score,ecore,ncoeffs,lpos,lcore
+C
       double precision ET2(2),PV(6,12),PNUT(4),T(2),PJD(4)
-      double precision BUF(1500,mcore)
       character*250 crc250
-      integer lencrc
+      integer lencrc,icore
       integer irc
 
-      INTEGER LIST(12),i,j,k,nrl(mcore)
+      INTEGER LIST(12),i,j,k
 
       LOGICAL FIRST
       DATA FIRST/.TRUE./
@@ -970,24 +1030,26 @@ C
       LOGICAL KM,BARY
       double precision PVSUN(6)
 C
-      integer irecsz,nrecl,mrecl,ksize,nd,khi,ncoeffs,kmx,nrfile,nr
+      integer irecsz,mrecl,ksize,nd,khi,kmx,nr
 
       COMMON/EPHHDR/CVAL,SS,AU,EMRAT,NUMDE,NCON,IPT
       COMMON/CHRHDR/CNAM,TTL
       COMMON/STCOMX/KM,BARY,PVSUN
-      common/CSTATE/buf,nrl,nrfile,NRECL,ncore,lcore,ccore,ncoeffs
 C
-      integer length,lens
+      integer length,lens,nn,ii,jj
       external length
 C
 C       ENTRY POINT - 1ST TIME IN, GET POINTER DATA, ETC., FROM EPH FILE
 C
-      IF(FIRST) THEN
-         FIRST=.FALSE.
-         ncore=0                ! number of records in core
-         lcore=0                ! last record read into core
-         ccore=0                ! current record
-         
+      IF(kode.eq.1) THEN        ! open to read
+C     write(*,*) myname,'Kode:',kode,first
+C     if (first) then
+C     FIRST=.FALSE.
+         lcore=.true. ! use un-safe local cache
+         lpos=0
+         score=0
+         ecore=0
+C     
 C     ************************************************************************
 C     NRECL=1 IF "RECL" IN THE OPEN STATEMENT IS THE RECORD LENGTH IN S.P. WORDS
 C     NRECL=4 IF "RECL" IN THE OPEN STATEMENT IS THE RECORD LENGTH IN BYTES
@@ -1056,116 +1118,201 @@ C     ************************************************************************
          
          NRL(:)=0
          
-      ENDIF
+C     nn=idint(ss(2)-ss(1)/ss(3)) -1
+C     write(*,*)myname,'Records:',nn,' in ',jpl1024(1:lens),mcore
+C     write(*,*)myname,'Range:',ss(1),ss(2),ss(3)," dt=",ss(2)-ss(1)
 
-
-C       ********** MAIN ENTRY POINT **********
-
-
-      IF(ET2(1) .EQ. 0.D0) RETURN
-
-      S=ET2(1)-.5D0
-      CALL SPLIT(S,PJD(1))
-      CALL SPLIT(ET2(2),PJD(3))
-      PJD(1)=PJD(1)+PJD(3)+.5D0
-      PJD(2)=PJD(2)+PJD(4)
-      CALL SPLIT(PJD(2),PJD(3))
-      PJD(1)=PJD(1)+PJD(3)
-
-C       ERROR RETURN FOR EPOCH OUT OF RANGE
-
-      IF(PJD(1)+PJD(4).LT.SS(1) .OR. PJD(1)+PJD(4).GT.SS(2)) GO TO 98
-
-C       CALCULATE RECORD # AND RELATIVE TIME IN INTERVAL
-
-      NR=IDINT((PJD(1)-SS(1))/SS(3))+3
-      IF(PJD(1).EQ.SS(2)) NR=NR-1
-
-      tmp1 = DBLE(NR-3)*SS(3) + SS(1)
-      tmp2 = PJD(1) - tmp1
-      T(1) = (tmp2 + PJD(4))/SS(3)
-      
-C       READ CORRECT RECORD IF NOT IN CORE
-
-      ccore=0
-      do ii=1,ncore
-         if (nr.eq.nrl(ii)) then
-            ccore=ii
+C     end if
+      else if (kode.eq.2) then  ! make cache
+         IF(ET2(1) .EQ. 0.D0) then
+            score=3
+            ecore=min(score+mcore-2,IDINT((ss(2)-ss(1))/ss(3)) + 2)
+         else
+            S=ET2(1)-.5D0
+            CALL SPLIT(S,PJD(1))
+            CALL SPLIT(ET2(2),PJD(3))
+            PJD(1)=PJD(1)+PJD(3)+.5D0
+            PJD(2)=PJD(2)+PJD(4)
+            CALL SPLIT(PJD(2),PJD(3))
+            PJD(1)=PJD(1)+PJD(3)
+            
+C     ERROR RETURN FOR EPOCH OUT OF RANGE
+            
+            IF(PJD(1)+PJD(4).LT.SS(1) .OR. PJD(1)+PJD(4).GT.SS(2)) 
+     &           GO TO 98
+            
+C     CALCULATE RECORD # AND RELATIVE TIME IN INTERVAL
+            
+            nn=IDINT((ss(2)-ss(1))/ss(3))    + 2
+            nr=IDINT((PJD(1)-SS(1))/SS(3)) + 3
+            IF(PJD(1).EQ.SS(2)) NR=NR-1
+C     
+            score=nr            ! start core
+            ecore=min(nr+mcore-2,nn) ! end core
          end if
-      end do
-      IF(ccore.eq.0) THEN
-C        write(*,*)'STATE:',nr
-        lcore=lcore+1
-        if (lcore.gt.mcore) lcore=1
-        READ(NRFILE,REC=NR,ERR=99)(BUF(K,lcore),K=1,NCOEFFS)
-        ncore=max(lcore,ncore)
-        ccore=lcore
-        nrl(lcore)=nr
-      ENDIF
+C     
+C     write(*,*)'JPLEPH:',score,ecore,nr,mcore,nn,ss(3)
+         do ii=score,ecore
+            jj=ii-score+1
+C     write(*,*) 'JPLLOOP:',jj,ii
+            READ(NRFILE,REC=ii,ERR=99)(BUF(K,jj),K=1,NCOEFFS)
+         end do
+         lcore=.false. ! only use thread-safe cache
+C     
+      else if (kode.eq.3) then  ! read data
+         
+C     ********** MAIN ENTRY POINT **********
+         
+         IF(ET2(1) .EQ. 0.D0) RETURN
+         
+         S=ET2(1)-.5D0
+         CALL SPLIT(S,PJD(1))
+         CALL SPLIT(ET2(2),PJD(3))
+         PJD(1)=PJD(1)+PJD(3)+.5D0
+         PJD(2)=PJD(2)+PJD(4)
+         CALL SPLIT(PJD(2),PJD(3))
+         PJD(1)=PJD(1)+PJD(3)
 
-      IF(KM) THEN
-      T(2)=SS(3)*86400.D0
-      AUFAC=1.D0
-      ELSE
-      T(2)=SS(3)
-      AUFAC=1.D0/AU
-      ENDIF
+C     ERROR RETURN FOR EPOCH OUT OF RANGE
 
-C   INTERPOLATE SSBARY SUN
+         IF(PJD(1)+PJD(4).LT.SS(1) .OR. PJD(1)+PJD(4).GT.SS(2)) 
+     &        GO TO 98
 
-      CALL INTERP(BUF(IPT(1,11),ccore),T,IPT(2,11),3,IPT(3,11),2,PVSUN)
+C     CALCULATE RECORD # AND RELATIVE TIME IN INTERVAL
+
+         NR=IDINT((PJD(1)-SS(1))/SS(3))+3
+         IF(PJD(1).EQ.SS(2)) NR=NR-1
+
+         tmp1 = DBLE(NR-3)*SS(3) + SS(1)
+         tmp2 = PJD(1) - tmp1
+         T(1) = (tmp2 + PJD(4))/SS(3)
+
+C     write(*,*)'JPLSTATE:',nr,icore,score,ecore
+
+         IF(KM) THEN
+            T(2)=SS(3)*86400.D0
+            AUFAC=1.D0
+         ELSE
+            T(2)=SS(3)
+            AUFAC=1.D0/AU
+         ENDIF
+         
+C     READ CORRECT RECORD IF NOT IN CORE
+
+         lcache=(nr.ge.score .and. nr.le.ecore) ! use thread-safe cache
+         if (lcore .or. lcache) then ! use un-safe local cache or thread-safe cache...
+            if (lcache) then ! use thread-safe cache
+               icore=nr-score+1
+            else             ! use un-safe local cache
+               icore=mcore   ! local cache is always last position
+               if (nr.eq.lpos) then  ! local cache is already correct record
+               else                  ! read correct record into cache
+                  lpos=nr
+                  READ(NRFILE,REC=NR,ERR=99)(BUF(K,icore),K=1,NCOEFFS)
+               end if
+            end if
+               
+C     INTERPOLATE SSBARY SUN
+
+            CALL INTERP(BUF(IPT(1,11),ICORE),T,IPT(2,11),3,
+     &           IPT(3,11),2,PVSUN)
 
 
-      DO I=1,6
-      PVSUN(I)=PVSUN(I)*AUFAC
-      ENDDO
+            DO I=1,6
+               PVSUN(I)=PVSUN(I)*AUFAC
+            ENDDO
 
-C   CHECK AND INTERPOLATE WHICHEVER BODIES ARE REQUESTED
+C     CHECK AND INTERPOLATE WHICHEVER BODIES ARE REQUESTED
 
-      DO 4 I=1,10
-      IF(LIST(I).EQ.0) GO TO 4
+            DO 4 I=1,10
+               IF(LIST(I).EQ.0) GO TO 4
 
-      CALL INTERP(BUF(IPT(1,I),ccore),T,IPT(2,I),3,IPT(3,I),
-     & LIST(I),PV(1,I))
+               CALL INTERP(BUF(IPT(1,I),ICORE),T,IPT(2,I),3,IPT(3,I),
+     &              LIST(I),PV(1,I))
 
-      DO J=1,6
-       IF(I.LE.9 .AND. .NOT.BARY) THEN
-       PV(J,I)=PV(J,I)*AUFAC-PVSUN(J)
-       ELSE
-       PV(J,I)=PV(J,I)*AUFAC
-       ENDIF
-      ENDDO
+               DO J=1,6
+                  IF(I.LE.9 .AND. .NOT.BARY) THEN
+                     PV(J,I)=PV(J,I)*AUFAC-PVSUN(J)
+                  ELSE
+                     PV(J,I)=PV(J,I)*AUFAC
+                  ENDIF
+               ENDDO
+               
+ 4          CONTINUE
+C     DO NUTATIONS IF REQUESTED (AND IF ON FILE)
+            
+            IF(LIST(11).GT.0 .AND. IPT(2,12).GT.0)
+     *           CALL INTERP(BUF(IPT(1,12),ICORE),
+     *           T,IPT(2,12),2,IPT(3,12),LIST(11),PNUT)
+            
+C     GET LIBRATIONS IF REQUESTED (AND IF ON FILE)
+            
+            IF(LIST(12).GT.0 .AND. IPT(2,13).GT.0)
+     *           CALL INTERP(BUF(IPT(1,13),ICORE),
+     *           T,IPT(2,13),3,IPT(3,13),LIST(12),PV(1,11))
+         else                   ! core position has changed..
+C     
+            READ(NRFILE,REC=NR,ERR=99)(BUFF(K),K=1,NCOEFFS)
+            
+C     INTERPOLATE SSBARY SUN
+            
+            CALL INTERP(BUFF(IPT(1,11)),T,IPT(2,11),3,
+     &           IPT(3,11),2,PVSUN)
+            
+            
+            DO I=1,6
+               PVSUN(I)=PVSUN(I)*AUFAC
+            ENDDO
+            
+C     CHECK AND INTERPOLATE WHICHEVER BODIES ARE REQUESTED
+            
+            DO 5 I=1,10
+               IF(LIST(I).EQ.0) GO TO 5
+               
+               CALL INTERP(BUFF(IPT(1,I)),T,IPT(2,I),3,IPT(3,I),
+     &              LIST(I),PV(1,I))
+               
+               DO J=1,6
+                  IF(I.LE.9 .AND. .NOT.BARY) THEN
+                     PV(J,I)=PV(J,I)*AUFAC-PVSUN(J)
+                  ELSE
+                     PV(J,I)=PV(J,I)*AUFAC
+                  ENDIF
+               ENDDO
+               
+ 5          CONTINUE
 
-   4  CONTINUE
+C     DO NUTATIONS IF REQUESTED (AND IF ON FILE)
 
-C       DO NUTATIONS IF REQUESTED (AND IF ON FILE)
-
-      IF(LIST(11).GT.0 .AND. IPT(2,12).GT.0)
-     * CALL INTERP(BUF(IPT(1,12),ccore),T,IPT(2,12),2,IPT(3,12),
-     * LIST(11),PNUT)
-
-C       GET LIBRATIONS IF REQUESTED (AND IF ON FILE)
-
-      IF(LIST(12).GT.0 .AND. IPT(2,13).GT.0)
-     * CALL INTERP(BUF(IPT(1,13),ccore),T,IPT(2,13),3,IPT(3,13),
-     * LIST(12),PV(1,11))
-
+            IF(LIST(11).GT.0 .AND. IPT(2,12).GT.0)
+     *           CALL INTERP(BUFF(IPT(1,12)),T,IPT(2,12),2,IPT(3,12),
+     *           LIST(11),PNUT)
+            
+C     GET LIBRATIONS IF REQUESTED (AND IF ON FILE)
+            
+            IF(LIST(12).GT.0 .AND. IPT(2,13).GT.0)
+     *           CALL INTERP(BUFF(IPT(1,13)),T,IPT(2,13),3,IPT(3,13),
+     *           LIST(12),PV(1,11))
+            
+         end if
+      end if
+      
       RETURN
-
-  98  WRITE(crc250,198)ET2(1)+ET2(2),SS(1),SS(2)
+      
+ 98   WRITE(crc250,198)ET2(1)+ET2(2),SS(1),SS(2)
  198  format('< STATE > ***  Requested JED,',f12.2,
-     * ' not within ephemeris limits,',2f12.2,'  ***')
+     *     ' not within ephemeris limits,',2f12.2,'  ***')
       call chop0(crc250,250)
       irc=457
       return
-C      stop
-
-   99 WRITE(crc250,'(2F12.2,A80)')ET2,'ERROR RETURN IN STATE'
+C     stop
+      
+ 99   WRITE(crc250,'(2F12.2,A80)')ET2,'ERROR RETURN IN STATE'
       call chop0(crc250,250)
-
+      
       irc=458
       return
-C      STOP
+C     STOP
 
       END subroutine JPLSTATE
 C+++++++++++++++++++++++++++++
@@ -1212,7 +1359,8 @@ C
 C  CALL STATE TO INITIALIZE THE EPHEMERIS AND READ IN THE CONSTANTS
 
       if(first) then
-         call jplstate(zips,list,xx,xx,jpl1024,crc250,irc)
+         kode=1 ! open file
+         call jplstate(kode,zips,list,xx,xx,jpl1024,crc250,irc)
          if (irc.ne.0) then
             lencrc=length(crc250,250,10)
             crc250=crc250(1:lencrc)//
@@ -1220,6 +1368,15 @@ C  CALL STATE TO INITIALIZE THE EPHEMERIS AND READ IN THE CONSTANTS
             call chop0(crc250,250)
             return
          end if
+C         kode=3 ! open file
+C         call jplstate(kode,zips,list,xx,xx,jpl1024,crc250,irc)
+C         if (irc.ne.0) then
+C            lencrc=length(crc250,250,10)
+C            crc250=crc250(1:lencrc)//
+C     &           ' < '//myname//' > Error return from JPLSTATE.'
+C            call chop0(crc250,250)
+C            return
+C         end if
       end if 
       first=.false.
 
