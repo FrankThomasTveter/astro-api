@@ -21,7 +21,7 @@ C
       integer neventVal         ! number of event input data (SEE TABLE ABOVE)
       real eventVal(max(1,meventVal)) ! event input data (SEE TABLE ABOVE)
       integer maxrep            ! maximum number of output reports
-      parameter (maxrep=1000)
+      parameter (maxrep=5000)
       integer nrep              ! number of output reports
       real  repJD(maxrep)       ! time of output report (in julianDay)
       integer repId(maxrep)     ! output report identification (SEE TABLE ABOVE)
