@@ -42,13 +42,13 @@ C     i  eventVal(3) = height of observer (deg)
 C     o  repId = 100 -> if (repval >= 1) "moon is above horison" (repval <=-1) "moon is below"
 C     o  repId = 101 -> if (repval >= 1) "lunar polar day" (repval =0) "no lunar polar effect" (repval<=-1) "lunar polar night"
 C     o  repId = 102 -> moon phase (0<=repval<25 = "waxing crescent", 25<=repval<50="waxing gibbous",50<=repval<75="waning gibbous",75<=repval<100="waning crescent")
-C     EVENTID  = 105 : 'REPORT LOCAL VISIBLE MOON IN PERIOD'
+C     EVENTID  = 90 : 'REPORT LOCAL VISIBLE MOON IN PERIOD'
 C     i  eventVal(1) = latitude of observer (deg)
 C     i  eventVal(2) = longtitude of observer (deg)
 C     i  eventVal(3) = height of observer (deg)
-C     o  repId = 105 -> repVal = hours visible moon in period
-C     o  repId = 106 -> Moon rise.
-C     o  repId = 107 -> Moon set.
+C     o  repId = 90 -> repVal = hours visible moon in period
+C     o  repId = 91 -> Moon rise.
+C     o  repId = 95 -> Moon set.
 C     
 C     EVENTID  = 110 : 'REPORT LOCAL TC EF MOON POSITION AT TIME INCREMENT'
 C     i  eventVal(1) = latitude of observer (deg)
@@ -505,36 +505,7 @@ C
          write(*,*)myname,"secdec:",secdec ! number of second decimals used in output report string 
       end if
 C
-      IF (eventId.eq.100) THEN  !  'REPORT INITIAL MOON STATE'
-         event100='LOCAL MOON STATE'
-         if (bdeb)write(*,*)myname,event100
-         if (neventVal.lt.3) then
-            write(buff250,'(" < ",A," > EventId: ",I4,'//
-     &           '" Expected 3 event values, got: ",I4)')
-     &           myname,eventId,neventVal
-            lencrc=length(crc250,250,10)
-            crc250=crc250(1:lencrc)//buff250
-            call chop0(crc250,250)
-            irc=842
-            return
-         end if
-         lat=eventVal(1)
-         lon=eventVal(2)
-         hgt=eventVal(3)
-         call reportMoonInit(
-     &        lat,lon,hgt,
-     &        tstartJD,secdec,
-     &        eventId,event100,maxrep,nrep,repJD,
-     &        repid,repval,rep250,
-     &        crc250,irc)
-         if (irc.ne.0) then
-            lencrc=length(crc250,250,10)
-            crc250=crc250(1:lencrc)//' < '//myname//
-     &           '> Error return from reportMoonInit.'
-            call chop0(crc250,250)
-            return
-         end if
-      ELSE IF (eventId.eq.105) THEN !  'REPORT VISIBLE MOON IN PERIOD'
+      IF (eventId.eq.80) THEN   !  'REPORT VISIBLE MOON IN PERIOD'
          event100='VISIBLE MOON'
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
@@ -597,6 +568,35 @@ C
                   return
                end if
             end if
+         end if
+      ELSE IF (eventId.eq.100) THEN !  'REPORT INITIAL MOON STATE'
+         event100='LOCAL MOON STATE'
+         if (bdeb)write(*,*)myname,event100
+         if (neventVal.lt.3) then
+            write(buff250,'(" < ",A," > EventId: ",I4,'//
+     &           '" Expected 3 event values, got: ",I4)')
+     &           myname,eventId,neventVal
+            lencrc=length(crc250,250,10)
+            crc250=crc250(1:lencrc)//buff250
+            call chop0(crc250,250)
+            irc=842
+            return
+         end if
+         lat=eventVal(1)
+         lon=eventVal(2)
+         hgt=eventVal(3)
+         call reportMoonInit(
+     &        lat,lon,hgt,
+     &        tstartJD,secdec,
+     &        eventId,event100,maxrep,nrep,repJD,
+     &        repid,repval,rep250,
+     &        crc250,irc)
+         if (irc.ne.0) then
+            lencrc=length(crc250,250,10)
+            crc250=crc250(1:lencrc)//' < '//myname//
+     &           '> Error return from reportMoonInit.'
+            call chop0(crc250,250)
+            return
          end if
       ELSE IF (eventId.eq.110) THEN !  'REPORT MOON POSITION AT TIME INCREMENT'
          event100='LOCAL MOON POSITION'
@@ -7792,7 +7792,7 @@ C
       integer ieventId,rnrep,snrep
       real sum,fact
       logical abovee, aboves
-      integer ii
+      integer ii, rid,sid
       character*100 ievent100
 C
       call chop0(event100,100)
@@ -7811,11 +7811,13 @@ C
 C     get list of moon-rise
 C
       rnrep=nrep
+      rid=eventId+1
+      ieventId=rid
 C      if (aboves) then
 C         nrep=nrep+1
 C         repJD(nrep)=tstartJD
+C         repid(nrep)=rid
 C      end if
-      ieventId=eventId+1
       ievent100=event100(1:lend)//" * RISE"
       call reportMoonRise(lat,lon,hgt,
      &     tstartJD,tendJD,secdec,
@@ -7832,16 +7834,19 @@ C      end if
 C      if (.not.abovee) then
 C         nrep=nrep+1
 C         repJD(nrep)=tendJD
+C         repid(nrep)=rid
 C      end if
 C
 C     get list of moon-set
 C
       snrep=nrep
-      ieventId=eventId+2
+      sid=eventId+7
+      ieventId=sid
       ievent100=event100(1:lend)//" * SET"
 C      if (.not.aboves) then
 C         nrep=nrep+1
 C         repJD(nrep)=tstartJD
+C         repid(nrep)=sid
 C      end if
       call reportMoonSet(lat,lon,hgt,
      &     tstartJD,tendJD,secdec,
@@ -7867,6 +7872,7 @@ C      end if
             return
          end if
          repJD(nrep)=tendJD
+         repid(nrep)=sid
       end if
 C
 C     do the math....
@@ -7874,23 +7880,27 @@ C
       sum=0.0D0
       if (tstartJD.lt.tendJD) then
          do ii=snrep+1,nrep
-            if (repJD(ii).le.tendJD+1.0D-10) then
+            if (repId(ii).eq.sid.and.
+     &           repJD(ii).le.tendJD+1.0D-10) then
                sum=sum + (repJD(ii)-tstartJD)
             end if
          end do
          do ii=rnrep+1,snrep
-            if (repJD(ii).le.tendJD+1.0D-10) then
+            if (repId(ii).eq.rid.and.
+     &           repJD(ii).le.tendJD+1.0D-10) then
                sum=sum - (repJD(ii)-tstartJD)
             end if
          end do
       else
          do ii=snrep+1,nrep
-            if (repJD(ii).ge.tendJD-1.0D-10) then
+            if (repId(ii).eq.sid.and.
+     &           repJD(ii).ge.tendJD-1.0D-10) then
                sum=sum + (tstartJD-repJD(ii))
             end if
          end do
          do ii=rnrep+1,snrep
-            if (repJD(ii).ge.tendJD-1.0D-10) then
+            if (repId(ii).eq.rid.and.
+     &           repJD(ii).ge.tendJD-1.0D-10) then
                sum=sum - (tstartJD-repJD(ii))
             end if
          end do
@@ -9648,7 +9658,7 @@ C
       integer ieventId,rnrep,snrep
       real sum,fact
       logical abovee, aboves
-      integer ii
+      integer ii, rid,sid
       character*100 ievent100
 C
       call chop0(event100,100)
@@ -9668,11 +9678,13 @@ C
 C     get list of sun-rise
 C
       rnrep=nrep
+      rid=eventId+1
+      ieventId=rid
 C      if (aboves) then
 C         nrep=nrep+1
 C         repJD(nrep)=tstartJD
+C         repid(nrep)=rid
 C      end if
-      ieventId=eventId+1
       ievent100=event100(1:lend)//" * RISE"      
       call reportSunUpperElevation(-refraction,
      &     lat,lon,hgt,
@@ -9691,6 +9703,7 @@ C      end if
 C      if (.not.abovee) then
 C         nrep=nrep+1
 C         repJD(nrep)=tendJD
+C         repid(nrep)=rid
 C      end if
 C      do ii=1,rnrep
 C         !write(*,*)ii,rep250(ii)(1:60)
@@ -9699,11 +9712,13 @@ C
 C     get list of sun-set
 C
       snrep=nrep
+      sid=eventId+5
+      ieventId=sid
 C      if (.not.aboves) then
-C         nrep=nrep+1
-C         repJD(nrep)=tstartJD
+C        nrep=nrep+1
+C        repJD(nrep)=tstartJD
+C         repid(nrep)=sid
 C      end if
-      ieventId=eventId+5
       ievent100=event100(1:lend)//" * SET"      
       call reportSunUpperElevation(-refraction,
      &     lat,lon,hgt,
@@ -9722,6 +9737,7 @@ C      end if
       if (abovee) then
          nrep=nrep+1
          repJD(nrep)=tendJD
+         repid(nrep)=sid
       end if
 C      do ii=1,rnrep
 C         !write(*,*)ii,irep250(ii)(1:60)
@@ -9730,25 +9746,34 @@ C
 C     do the math....
 C
       sum=0.0D0
+C      do ii=rnrep+1,nrep
+C         write(*,*)'JD:',ii,repjd(ii)-tstartjd
+C      end do
       if (tstartJD.lt.tendJD) then
          do ii=snrep+1,nrep
-            if (repJD(ii).le.tendJD+1.0D-10) then
+            if (repId(ii).eq.sid.and.
+     &           repJD(ii).le.tendJD+1.0D-10) then
+C               write(*,*)'SID:',ii,repid(ii),repjd(ii)-tstartjd
                sum=sum + (repJD(ii)-tstartJD)
             end if
          end do
          do ii=rnrep+1,snrep
-            if (repJD(ii).le.tendJD+1.0D-10) then
+            if (repId(ii).eq.rid.and.
+     &           repJD(ii).le.tendJD+1.0D-10) then
+C               write(*,*)'RID:',ii,repid(ii),repjd(ii)-tstartjd
                sum=sum - (repJD(ii)-tstartJD)
             end if
          end do
       else
          do ii=snrep+1,nrep
-            if (repJD(ii).ge.tendJD-1.0D-10) then
+            if (repId(ii).eq.sid.and.
+     &           repJD(ii).ge.tendJD-1.0D-10) then
                sum=sum + (tstartJD-repJD(ii))
             end if
          end do
          do ii=rnrep+1,snrep
-            if (repJD(ii).ge.tendJD-1.0D-10) then
+            if (repId(ii).eq.rid.and.
+     &           repJD(ii).ge.tendJD-1.0D-10) then
                sum=sum - (tstartJD-repJD(ii))
             end if
          end do
