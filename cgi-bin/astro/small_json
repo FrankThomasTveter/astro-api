@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+#
+use Astro::Api qw(:all);
+#use strict;
+my $lat = "40";
+my $lon = "74";
+my $height = "0";
+my $days = "2";
+my $date = "2019-03-28";
+my $offset = "-05:00";
+
+my @lines = &Astro::Api::small($lat,$lon,$height,$days,$date,$offset);
+
+# Print HTTP headers
+my $dataXML="";
+foreach my $line (@lines) {
+    $dataXML=$dataXML . "$line\n";
+}
+local $SIG{__WARN__} = sub { };
+require XML::XML2JSON;
+my $XML2JSON = XML::XML2JSON->new();
+my $jsonString = $XML2JSON->convert($dataXML);
+
+# finally print json
+print $jsonString . "\n";
+#

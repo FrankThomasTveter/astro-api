@@ -21,7 +21,7 @@ C
       integer neventVal         ! number of event input data (SEE TABLE ABOVE)
       real eventVal(max(1,meventVal)) ! event input data (SEE TABLE ABOVE)
       integer maxrep            ! maximum number of output reports
-      parameter (maxrep=1000)
+      parameter (maxrep=5000)
       integer nrep              ! number of output reports
       real  repJD(maxrep)       ! time of output report (in julianDay)
       integer repId(maxrep)     ! output report identification (SEE TABLE ABOVE)
@@ -57,7 +57,7 @@ C
       integer :: values(8)
       integer :: ii, jj,istart,istop,nval
       real :: sec1,sec2,dsec1,dsec2,sec,cpuStart,cpuStop
-      logical :: debug, bdeb
+      logical :: debug, silent, bdeb
       data bdeb /.false./
       integer :: cost
 C
@@ -89,6 +89,7 @@ c
       oseq = -1                 ! current sequence number
       idebug=-1
       debug=.false.
+      silent=.false.
       dneventVal=0
       nval=0
       do jj=1,meventVal
@@ -258,6 +259,7 @@ C
                   irc=0
                end if
                debug=(idebug.eq.1)
+               silent=(idebug.eq.-1)
                ii=ii+1
                mode=0
             else
@@ -477,6 +479,9 @@ C
 C
       nrep=0
       irc=0
+
+C      write(*,*) 'Calling with eventId:',eventId,nrep
+
       call astroEvent(
      &     tstartJD,            ! start time (in julianDay)
      &     searchCode,          ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
@@ -493,6 +498,10 @@ C
      &     secdec,              ! number of second decimals used in output report string 
      &     crc250,              ! error description
      &     irc)                 ! error return code (0=ok)
+
+
+C      write(*,*) 'Returning with eventId:',eventId,nrep
+
 C
       if (debug) call cpu_time(cpuStop)
       if (debug) then
@@ -523,24 +532,45 @@ C
                val50=getVal50(repVal(jj))
                call chop0(val50,50)
                lenv=length(val50,50,10)
-               write(s250,'(A,I0,'//
-     &              'A,I4.4,"-",I2.2,"-",I2.2,"T",'//
-     &              'I2.2,":",I2.2,":",I2.2,"Z",'//
-     &              'A,I0,2(A,A),A)')
-     &              ' <Report no="',jj,
-     &              '" time="',yy,mm,dd,hh,mi,int(sec),
-     &              '" repId="',repId(jj),
-     &              '" repVal="',val50(1:lenv),
-     &              '" hint="',rep250(jj)(1:lenr),'"/>'
+               if (silent) then
+                  write(s250,'(A,I0,'//
+     &                 'A,I4.4,"-",I2.2,"-",I2.2,"T",'//
+     &                 'I2.2,":",I2.2,":",I2.2,"Z",'//
+     &                 'A,I0,A,A,A)')
+     &                 ' <Report no="',jj,
+     &                 '" time="',yy,mm,dd,hh,mi,int(sec),
+     &                 '" repId="',repId(jj),
+     &                 '" repVal="',val50(1:lenv),'"/>'
+               else
+                  write(s250,'(A,I0,'//
+     &                 'A,I4.4,"-",I2.2,"-",I2.2,"T",'//
+     &                 'I2.2,":",I2.2,":",I2.2,"Z",'//
+     &                 'A,I0,2(A,A),A)')
+     &                 ' <Report no="',jj,
+     &                 '" time="',yy,mm,dd,hh,mi,int(sec),
+     &                 '" repId="',repId(jj),
+     &                 '" repVal="',val50(1:lenv),
+     &                 '" hint="',rep250(jj)(1:lenr),'"/>'
+               end if
             else
-               write(s250,'(A,I0,'//
-     &              'A,I4.4,"-",I2.2,"-",I2.2,"T",'//
-     &              'I2.2,":",I2.2,":",I2.2,"Z",'//
-     &              'A,I0,A,A,A)')
-     &              '<Report no="',jj,
-     &              '" time="',yy,mm,dd,hh,mi,int(sec),
-     &              '" repId="',repId(jj),
-     &              '" hint="',rep250(jj)(1:lenr),'"/>'
+               if (silent) then
+                  write(s250,'(A,I0,'//
+     &                 'A,I4.4,"-",I2.2,"-",I2.2,"T",'//
+     &                 'I2.2,":",I2.2,":",I2.2,"Z",'//
+     &                 'A,I0,A)')
+     &                 '<Report no="',jj,
+     &                 '" time="',yy,mm,dd,hh,mi,int(sec),
+     &                 '" repId="',repId(jj),'"/>'
+               else
+                  write(s250,'(A,I0,'//
+     &                 'A,I4.4,"-",I2.2,"-",I2.2,"T",'//
+     &                 'I2.2,":",I2.2,":",I2.2,"Z",'//
+     &                 'A,I0,A,A,A)')
+     &                 '<Report no="',jj,
+     &                 '" time="',yy,mm,dd,hh,mi,int(sec),
+     &                 '" repId="',repId(jj),
+     &                 '" hint="',rep250(jj)(1:lenr),'"/>'
+               end if
             end if
             call chop0(s250,250)
             lens=length(s250,250,30)
