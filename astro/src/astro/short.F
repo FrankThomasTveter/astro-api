@@ -130,6 +130,7 @@ C
       integer :: ii,jj,dd,lens
       character*25 :: dat25
 C     
+      secdec=1
       read(off6(2:6),'(I2,X,I2)',iostat=irc) hh1,mi1
       if (irc.ne.0) then
          irc=0

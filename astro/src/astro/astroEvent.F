@@ -8761,9 +8761,9 @@ C
 C
       character*250 buff250
       real pos(6)
-      real cart(3)
+      real cart(3),sunCart(3),bodyCart(3),sunRel(3),sunDist
       real polar(3)
-      real rxy
+      real rxy,dot,mill
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real elevation,azimuth,range
@@ -8817,7 +8817,7 @@ C
          end if
 C     
          do ii=1,10
-            if (ii.eq.1.or.ii.eq.4) then
+            if (ii.eq.1.or.ii.eq.4) then ! sun or moon
                iplanet=0
             else if (ii.lt.4) then
                iplanet=ii-1
@@ -8837,7 +8837,7 @@ C
                end if
             else if (ii.eq.2) then
                body10='Mercury   '
-               call JPLephMercuryMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephMercuryMJ(pos,crc250,irc) ! retrieve Mercury geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -8847,7 +8847,7 @@ C
                end if
             else if (ii.eq.3) then
                body10='Venus     '
-               call JPLephVenusMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephVenusMJ(pos,crc250,irc) ! retrieve Venus geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -8857,7 +8857,7 @@ C
                end if
             else if (ii.eq.4) then
                body10='Moon      '
-               call JPLephMoonMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephMoonMJ(pos,crc250,irc) ! retrieve Moon geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -8867,7 +8867,7 @@ C
                end if
             else if (ii.eq.5) then
                body10='Mars      '
-               call JPLephMarsMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephMarsMJ(pos,crc250,irc) ! retrieve Mars geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -8877,7 +8877,7 @@ C
                end if
             else if (ii.eq.6) then
                body10='Jupiter   '
-               call JPLephJupiterMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephJupiterMJ(pos,crc250,irc) ! retrieve Jupiter geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -8887,7 +8887,7 @@ C
                end if
             else if (ii.eq.7) then
                body10='Saturn   '
-               call JPLephSaturnMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephSaturnMJ(pos,crc250,irc) ! retrieve Saturn geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -8897,7 +8897,7 @@ C
                end if
             else if (ii.eq.8) then
                body10='Uranus    '
-               call JPLephUranusMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephUranusMJ(pos,crc250,irc) ! retrieve Uranus geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -8907,7 +8907,7 @@ C
                end if
             else if (ii.eq.9) then
                body10='Neptun    '
-               call JPLephNeptunMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephNeptunMJ(pos,crc250,irc) ! retrieve Neptun geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -8917,7 +8917,7 @@ C
                end if
             else if (ii.eq.10) then
                body10='Pluto    '
-               call JPLephPlutoMJ(pos,crc250,irc) ! retrieve Sun geocentric mean-of-date JD position
+               call JPLephPlutoMJ(pos,crc250,irc) ! retrieve Pluto geocentric mean-of-date JD position
                if (irc.ne.0) then
                   lencrc=length(crc250,250,10)
                   crc250=crc250(1:lencrc)//' < '//myname//
@@ -9001,15 +9001,36 @@ C     make report
                repid(nrep)=eventId + (ii-1)*10 + 1
                repval(nrep)=azimuth
             end if
-            nrep=nrep+1
-            if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A," ",A," Elv:",F10.3,'//
-     &              '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &              T30(1:lent),event100(1:lend),body10,
-     &              elevation,azimuth,range
-               repJD(nrep)=JD + ii*1.0D-9 + 2.0D-10
-               repid(nrep)=eventId + (ii-1)*10 + 2
-               repval(nrep)=range
+C
+            if (ii.eq.1) then
+               sunCart(1)=cart(1)
+               sunCart(2)=cart(2)
+               sunCart(3)=cart(3)
+            else if (ii.le.5) then ! inner planets or moon
+               bodyCart(1)=cart(1)
+               bodyCart(2)=cart(2)
+               bodyCart(3)=cart(3)
+               sunRel(1)=sunCart(1)-bodyCart(1)
+               sunRel(2)=sunCart(2)-bodyCart(2)
+               sunRel(3)=sunCart(3)-bodyCart(3)
+               sunDist=dsqrt(max(0.0D0,
+     &              sunRel(1)*sunRel(1)+
+     &              sunRel(2)*sunRel(2)+
+     &              sunRel(3)*sunRel(3) ))
+               dot=-(bodyCart(1)*sunRel(1)+
+     &              bodyCart(2)*sunRel(2)+
+     &              bodyCart(3)*sunRel(3) )/ (polar(1)*sunDist)
+               mill=0.5D0*(1.0D0+dot)*100.0D0 ! illumination
+               nrep=nrep+1
+               if (nrep.le.maxrep) then
+                  write(rep250(nrep),
+     &                 '(A,X,A," ",A," Illumination:",F5.1)')
+     &                 T30(1:lent),event100(1:lend),body10,
+     &                 mill
+                  repJD(nrep)=JD + ii*1.0D-9 + 2.0D-10
+                  repid(nrep)=eventId + (ii-1)*10 + 3
+                  repval(nrep)=mill
+               end if
             end if
             if (bdeb)write(*,*)myname,'Ended minor loop.',dt
          end do
@@ -10941,7 +10962,7 @@ C
       data bdeb/.false./
       real sunPos(6)
       real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
-      real sunPolar(3)
+      real sunPolar(3),sunDist
       real moonPos(6)
       real moonCart(3)
       real moonPolar(3)
@@ -11108,12 +11129,16 @@ C     moon position
                return
             end if
             call newOrigo(sunCart,moonCart) ! shift origo to moon center
+            sunDist=dsqrt(max(0.0D0,
+     &           sunCart(1)*sunCart(1) +
+     &           sunCart(2)*sunCart(2) +
+     &           sunCart(3)*sunCart(3) ))
             earthCart(1)=-moonCart(1)
             earthCart(2)=-moonCart(2)
             earthCart(3)=-moonCart(3)
             dot=(earthCart(1)*sunCart(1)+
      &           earthCart(2)*sunCart(2)+
-     &           earthCart(3)*sunCart(3))/(moonPolar(1)*sunPolar(1))
+     &           earthCart(3)*sunCart(3))/(moonPolar(1)*sunDist)
             rMoon     =  1738.0D0
             mill=0.5D0*(1.0D0+dot)*100.0D0 ! lunar illumination
             mazi=moonPolar(3)*DEG
