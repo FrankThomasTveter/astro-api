@@ -130,7 +130,7 @@ C
       integer :: ii,jj,dd,lens
       character*25 :: dat25
 C     
-      secdec=1
+      secdec=0
       read(off6(2:6),'(I2,X,I2)',iostat=irc) hh1,mi1
       if (irc.ne.0) then
          irc=0
@@ -219,6 +219,7 @@ C     ! write moon phase information
                x50=getVal50(repVal(ii),lenx)
                write(s250,100)dat25,x50(1:lenx),
      &              rep250(ii)(21:lens)
+               ! write(50,*)":"//rep250(ii)(1:lens)//":"
                call chop0(s250,250)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
