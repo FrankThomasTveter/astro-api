@@ -248,8 +248,8 @@ C     ! write moon shadow information
          end if
 
  100  FORMAT('<moonphase time="',A25,'" value="',A,'"/>')
- 101  FORMAT('<moonshadow time="',A25,'" elevation="',A,
-     &     '" azimuth="',A,'"/>')
+ 101  FORMAT('<moonshadow time="',A25,'" iangle="',A,
+     &     '" cangle="',A,'"/>')
 C     110 - REPORT LOCAL TC EF MOON POSITION AT TIME INCREMENT
          eventId=110
          nrep=0
@@ -334,7 +334,7 @@ C     <xsl:template match="/*/astro:Event[@Id='600']/astro:Report">
 C     <sunrise time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
-            if (repId(ii).eq.600.and. ! elevation
+            if (repId(ii).eq.600.and. ! event
      &           repId(ii+1).eq.601) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
@@ -379,7 +379,7 @@ C     <xsl:template match="/*/astro:Event[@Id='610']/astro:Report">
 C     <sunset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
-            if (repId(ii).eq.610.and. ! elevation
+            if (repId(ii).eq.610.and. ! event
      &           repId(ii+1).eq.611) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
@@ -424,9 +424,9 @@ C     <xsl:template match="/*/astro:Event[@Id='620']/astro:Report">
 C     <solarnoon time="{@time}" elevation="{@repVal}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
-            if (repId(ii).eq.620.and. ! elevation
+            if (repId(ii).eq.620.and. ! upper limb elevation
      &           repId(ii+1).eq.621.and. ! azimuth
-     &           repId(ii+2).eq.622) then ! upper limb elevation
+     &           repId(ii+2).eq.622) then ! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
@@ -437,7 +437,7 @@ C               write(*,*)'REP:',ii,repjd(ii),tstartJD,tstopJD,
 C     &              offset ! rep250(ii)(21:lens)
                x50=getValn50(repval(ii),lenx,4)
                y50=getValn50(repval(ii+1),leny,4)
-               sup=(repval(ii+2).gt.-refraction)
+               sup=(repval(ii).gt.-refraction)
                if (sup) then
                   write(s250,620)dat25,x50(1:lenx),y50(1:leny) !rep250(ii)(21:lens)
                else
@@ -481,9 +481,9 @@ C     <xsl:template match="/*/astro:Event[@Id='630']/astro:Report">
 C     <solarmidnight time="{@time}" elevation="{@repVal}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
-            if (repId(ii).eq.630.and. ! elevation
+            if (repId(ii).eq.630.and. ! upper limb elevation
      &           repId(ii+1).eq.631.and. ! azimuth
-     &           repId(ii+2).eq.632) then! upper limb elevation
+     &           repId(ii+2).eq.632) then! elevation
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
@@ -492,7 +492,7 @@ C     ! write sunrise information
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                x50=getValn50(repval(ii),lenx,4)
                y50=getValn50(repval(ii+1),leny,4)
-               sup=(repval(ii+2).gt.-refraction)
+               sup=(repval(ii).gt.-refraction)
                if (sup) then
                   write(s250,630)dat25,x50(1:lenx),y50(1:leny) !rep250(ii)(21:lens)
                else
@@ -536,7 +536,7 @@ C     <xsl:template match="/*/astro:Event[@Id='800']/astro:Report">
 C     <moonrise time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-3
-            if (repId(ii).eq.800.and. ! elevation
+            if (repId(ii).eq.800.and. ! event
      &           repId(ii+1).eq.803 .and. ! azimuth
      &           repId(ii+3).eq.805) then ! illumination
 C     ! write sunrise information
@@ -585,7 +585,7 @@ C     <xsl:template match="/*/astro:Event[@Id='810']/astro:Report">
 C     <moonset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep
-            if (repId(ii).eq.810.and. ! elevation
+            if (repId(ii).eq.810.and. ! event
      &           repId(ii+1).eq.813 .and. ! azimuth
      &           repId(ii+3).eq.815) then ! illumination
 C     ! write sunrise information
@@ -634,9 +634,9 @@ C     <xsl:template match="/*/astro:Event[@Id='820']/astro:Report">
 C     <high_moon time="{@time}" elevation="{@repVal}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-3
-            if (repId(ii).eq.820 .and. ! elevation
+            if (repId(ii).eq.820 .and. ! upper limb elevation
      &           repId(ii+1).eq.823 .and. ! azimuth
-     &           repId(ii+2).eq.824 .and. ! limb elevation
+     &           repId(ii+2).eq.824 .and. ! elevation
      &           repId(ii+3).eq.825) then ! illumination
 C     ! write sunrise information
                t2000=repJD(ii)+offset
@@ -647,7 +647,7 @@ C     ! write sunrise information
                x50=getValn50(repval(ii),lenx,4)
                y50=getValn50(repval(ii+1),leny,4)
                z50=getValn50(repval(ii+3),lenz,1)
-               sup=(repval(ii+2).gt.-refraction)
+               sup=(repval(ii).gt.-refraction)
                if (sup) then
                   write(s250,820)dat25,x50(1:lenx),y50(1:leny),
      &                 z50(1:lenz) ! rep250(ii)(21:lens)
@@ -695,9 +695,9 @@ C     <xsl:template match="/*/astro:Event[@Id='830']/astro:Report">
 C     <low_moon time="{@time}" elevation="{@repVal}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-3
-            if (repId(ii).eq.830 .and. ! elevation
+            if (repId(ii).eq.830 .and. ! upper limb elevation
      &           repId(ii+1).eq.833 .and. ! azimuth
-     &           repId(ii+2).eq.834 .and. ! limb elevation
+     &           repId(ii+2).eq.834 .and. ! elevation
      &           repId(ii+3).eq.835) then ! illumination
 C     ! write sunrise information
                t2000=repJD(ii)+offset
@@ -708,7 +708,7 @@ C     ! write sunrise information
                x50=getValn50(repval(ii),lenx,4)
                y50=getValn50(repval(ii+1),leny,4)
                z50=getValn50(repval(ii+3),lenz,1)
-               sup=(repval(ii+2).gt.-refraction)
+               sup=(repval(ii).gt.-refraction)
                if (sup) then
                   write(s250,830)dat25,x50(1:lenx),y50(1:leny),
      &                 z50(1:lenz) ! rep250(ii)(21:lens)
@@ -758,7 +758,7 @@ C     <xsl:template match="/*/astro:Event[@Id='900']/astro:Report">
 C     <polardaystart time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep
-            if (repId(ii).eq.900) then ! elevation
+            if (repId(ii).eq.900) then ! event
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
@@ -801,7 +801,7 @@ C     <xsl:template match="/*/astro:Event[@Id='910']/astro:Report">
 C     <polardayend time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep
-            if (repId(ii).eq.910) then ! elevation
+            if (repId(ii).eq.910) then ! event
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
@@ -844,7 +844,7 @@ C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
 C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep
-            if (repId(ii).eq.920) then ! elevation
+            if (repId(ii).eq.920) then ! event
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
@@ -887,7 +887,7 @@ C     <xsl:template match="/*/astro:Event[@Id='930']/astro:Report">
 C     <polarnightend time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep
-            if (repId(ii).eq.930) then ! elevation
+            if (repId(ii).eq.930) then ! event
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)

@@ -6463,8 +6463,8 @@ C
 C
       character*22 myname
       data myname /'reportMaxMoonElevation'/
-      external getMoonElevation
-      real getMoonElevation
+      external getMoonUpperElevation
+      real getMoonUpperElevation
       real dtin                 ! initial step length
 C
       dtin=0.05D0
@@ -6472,7 +6472,7 @@ C
 C
       req(lval)=.false.;req(lsun)=.false.;req(lmoon)=.true.
       call reportLLMax(
-     &     getMoonElevation,addLLreport,
+     &     getMoonUpperElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -6660,15 +6660,15 @@ C
       real dtin                 ! initial step length
       character*22 myname
       data myname /'reportMaxSunElevation'/
-      external getSunElevation
-      real getSunElevation
+      external getSunUpperElevation
+      real getSunUpperElevation
 C
       call chop0(event100,100)
 C
       dtin=0.05D0
       req(lval)=.false.;req(lsun)=.true.;req(lmoon)=.false.
       call reportLLMax(
-     &     getSunElevation,addLLreport,
+     &     getSunUpperElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -7154,8 +7154,8 @@ C
 C
       character*22 myname
       data myname /'reportMinMoonElevation'/
-      external getMoonElevation
-      real getMoonElevation
+      external getMoonUpperElevation
+      real getMoonUpperElevation
       real dtin                 ! initial step length
 C
       dtin=0.05D0
@@ -7163,7 +7163,7 @@ C
 C
       req(lval)=.false.;req(lsun)=.false.;req(lmoon)=.true.
       call reportLLMin(
-     &     getMoonElevation,addLLreport,
+     &     getMoonUpperElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -7349,15 +7349,15 @@ C
       real dtin                 ! initial step length
       character*22 myname
       data myname /'reportMinSunElevation'/
-      external getSunElevation
-      real getSunElevation
+      external getSunUpperElevation
+      real getSunUpperElevation
 C
       call chop0(event100,100)
 C
       dtin=0.05D0
       req(lval)=.false.;req(lsun)=.true.;req(lmoon)=.false.
       call reportLLMin(
-     &     getSunElevation,addLLreport,
+     &     getSunUpperElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -7581,7 +7581,7 @@ C
       real*8 PI,TWOPI,PIH,DEG,RAD
       COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
 C
-      real refraction,saz,sel
+      real refraction,iangle,cangle
       parameter (refraction= 34.0D0/60.0D0) ! refraction in degrees ( http://en.wikipedia.org/wiki/Atmospheric_refraction : 34')
       real angNight, angDay,angle
       real ang,moonAng,atan2deg,getAngle,phase
@@ -7633,7 +7633,8 @@ C
 C
 C     get shadow angles
 C
-      call getMoonShadow(JD,loclat,loclon,lochgt,saz,sel,crc250,irc)
+      call getMoonShadow(JD,loclat,loclon,lochgt,
+     &     iangle,cangle,crc250,irc)
       if(irc.ne.0) then
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//' < '//myname//
@@ -7724,20 +7725,20 @@ C     make reports
       nrep=nrep+1
       if (nrep.le.maxrep) then
          write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
-     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (azi=",
-     &        saz,",ele=",sel,")"
+     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (cangle=",
+     &        cangle,",iangle=",iangle,")"
          call chop0(rep250(nrep),250)
-         repval(nrep)=saz
+         repval(nrep)=cangle
          repJD(nrep)=JD + 1.0D-9
          repid(nrep)=eventid + 3
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
          write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
-     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (azi=",
-     &        saz,",ele=",sel,")"
+     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (cangle=",
+     &        cangle,",iangle=",iangle,")"
          call chop0(rep250(nrep),250)
-         repval(nrep)=sel
+         repval(nrep)=iangle
          repJD(nrep)=JD + 2.0D-9
          repid(nrep)=eventid + 4
       end if
@@ -8052,7 +8053,7 @@ C
       real rMoon
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real elevation,azimuth,range,sel,saz
+      real elevation,azimuth,range,iangle,cangle
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -8184,7 +8185,7 @@ C     get moon phase
 C
          phase=getMoonPhase(JD,crc250,irc) ! moon phase
 C
-         call getShadow(sunCart,moonCart,sel,saz,crc250,irc)
+         call getShadow(sunCart,moonCart,iangle,cangle,crc250,irc)
          if(irc.ne.0) then
             lencrc=length(crc250,250,10)
             crc250=crc250(1:lencrc)//' < '//myname//
@@ -8195,7 +8196,7 @@ C
 C
          azimuth=moonPolar(3)*DEG
          elevation=moonPolar(2)*DEG
-C     &        + (rMoon/moonPolar(1))*DEG ! disk upper limb
+     &        + (rMoon/moonPolar(1))*DEG ! disk upper limb
          range=moonPolar(1)
 C     make report
          if (nrep+1.le.maxrep) then
@@ -8251,20 +8252,22 @@ C     make report
          nrep=nrep+1
          if (nrep.le.maxrep) then
             write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
-     &           T30(1:lent),event100(1:lend)," * SHADOW ANGLES (azi=",
-     &           saz,",ele=",sel,")"
+     &           T30(1:lent),event100(1:lend),
+     &           " * SHADOW ANGLES (cangle=",
+     &           cangle,",iangle=",iangle,")"
             call chop0(rep250(nrep),250)
-            repval(nrep)=saz
+            repval(nrep)=cangle
             repJD(nrep)=JD - 1.0D-9 + 3.0D-10
             repid(nrep)=eventid + 3
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
             write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
-     &           T30(1:lent),event100(1:lend)," * SHADOW ANGLES (azi=",
-     &           saz,",ele=",sel,")"
+     &           T30(1:lent),event100(1:lend),
+     &           " * SHADOW ANGLES (cangle=",
+     &           cangle,",iangle=",iangle,")"
             call chop0(rep250(nrep),250)
-            repval(nrep)=sel
+            repval(nrep)=iangle
             repJD(nrep)=JD - 1.0D-9 + 4.0D-10
             repid(nrep)=eventid + 4
          end if
@@ -9985,7 +9988,7 @@ C
 C     
          azimuth=sunPolar(3)*DEG
          elevation=sunPolar(2)*DEG
-C     &        + (rSun/sunPolar(1))*DEG ! disk upper limb
+     &        + (rSun/sunPolar(1))*DEG ! disk upper limb
          range=sunPolar(1)
 C     make report
          if (nrep+1.le.maxrep) then
@@ -11070,7 +11073,7 @@ C     sun position
          end if
          rSun     = 682500.0D0
          sazi=sunPolar(3)*DEG
-         sele=sunPolar(2)*DEG + (rSun/sunPolar(1))*DEG
+         sele=sunPolar(2)*DEG !  + (rSun/sunPolar(1))*DEG
 C     
          if (req(lsun)) then
             nrep=nrep+1         ! sun azimuth
@@ -11085,7 +11088,7 @@ C
             if (nrep.le.maxrep) then
                write(rep250(nrep),'(A,X,A,X,A)')
      &              T30(1:lent),event100(1:lend),
-     &              " (Solar limb elevation)"
+     &              " (Solar elevation)"
                repval(nrep)=sele
                repJD(nrep)=JD
                repid(nrep)=eventid + 2
@@ -11142,7 +11145,7 @@ C     moon position
             rMoon     =  1738.0D0
             mill=0.5D0*(1.0D0+dot)*100.0D0 ! lunar illumination
             mazi=moonPolar(3)*DEG
-            mele=moonPolar(2)*DEG + (rMoon/moonPolar(1))*DEG
+            mele=moonPolar(2)*DEG ! + (rMoon/moonPolar(1))*DEG
 C
             nrep=nrep+1         ! moon azimuth
             if (nrep.le.maxrep) then
@@ -11152,11 +11155,11 @@ C
                repJD(nrep)=JD
                repid(nrep)=eventid + 3
             end if
-            nrep=nrep+1         ! moon upperl limb elevation
+            nrep=nrep+1         ! moon elevation
             if (nrep.le.maxrep) then
                write(rep250(nrep),'(A,X,A,X,A)')
      &              T30(1:lent),event100(1:lend),
-     &              " (Lunar limb elevation)"
+     &              " (Lunar elevation)"
                repval(nrep)=mele
                repJD(nrep)=JD
                repid(nrep)=eventid + 4
@@ -13482,8 +13485,8 @@ C
 C
       character*22 myname
       data myname /'searchMaxMoonElevation'/
-      external getMoonElevation
-      real getMoonElevation
+      external getMoonUpperElevation
+      real getMoonUpperElevation
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
@@ -13498,7 +13501,7 @@ C
 C
       req(lval)=.false.;req(lsun)=.false.;req(lmoon)=.true.
       searchMaxMoonElevation=searchLLMax(
-     &     getMoonElevation,addLLreport,
+     &     getMoonUpperElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -13711,8 +13714,8 @@ C
 C
       character*22 myname
       data myname /'searchMaxSunElevation'/
-      external getSunElevation
-      real getSunElevation
+      external getSunUpperElevation
+      real getSunUpperElevation
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
@@ -13726,7 +13729,7 @@ C
       end if
       req(lval)=.false.;req(lsun)=.true.;req(lmoon)=.false.
       searchMaxSunElevation=searchLLMax(
-     &     getSunElevation,addLLreport,
+     &     getSunUpperElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -14389,8 +14392,8 @@ C
 C
       character*22 myname
       data myname /'searchMinMoonElevation'/
-      external getMoonElevation
-      real getMoonElevation
+      external getMoonUpperElevation
+      real getMoonUpperElevation
 C
       dtin=0.05D0
       if (direction.eq.1) then
@@ -14403,7 +14406,7 @@ C
 C
       req(lval)=.false.;req(lsun)=.false.;req(lmoon)=.true.
       searchMinMoonElevation=searchLLMin(
-     &     getMoonElevation,addLLreport,
+     &     getMoonUpperElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -14616,8 +14619,8 @@ C
 C
       character*22 myname
       data myname /'searchMinSunElevation'/
-      external getSunElevation
-      real getSunElevation
+      external getSunUpperElevation
+      real getSunUpperElevation
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
@@ -14631,7 +14634,7 @@ C
       end if
       req(lval)=.false.;req(lsun)=.true.;req(lmoon)=.false.
       searchMinSunElevation=searchLLMin(
-     &     getSunElevation,addLLreport,
+     &     getSunUpperElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -18238,9 +18241,10 @@ C
 C
       return
       end function getMoonPhase
+C
       subroutine getMoonShadow(JD,
      &     loclat,loclon,lochgt,
-     &     azimuth,elevation,crc250,irc)
+     &     iangle,cangle,crc250,irc)
 C
 C     returns shadow angle of the moon... (azi+ele of sun seen from moon in TC-EF coordinate-system)
 C
@@ -18249,7 +18253,7 @@ C
       real loclat
       real loclon
       real lochgt
-      real azimuth,elevation   ! azimuth (0->earth) and elevation of sun seen from moon in TC-EF c-s
+      real cangle,iangle   ! cangle (0->earth) and iangle of sun seen from moon in TC-EF c-s
       character*250 crc250      ! error description
       integer irc
       integer lencrc
@@ -18350,7 +18354,7 @@ C
          return
       end if
 C
-      call getShadow(sunCart,moonCart,elevation,azimuth,crc250,irc)
+      call getShadow(sunCart,moonCart,iangle,cangle,crc250,irc)
       if(irc.ne.0) then
          lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//' < '//myname//
@@ -18361,13 +18365,13 @@ C
       return
       end subroutine getMoonShadow
 
-      subroutine getShadow(sunCart,moonCart,sel,saz,
+      subroutine getShadow(sunCart,moonCart,iangle,cangle,
      &     crc250,irc)
       implicit none
       real sunCart(3)  ! east,north,zenith
       real moonCart(3) ! east,north,zenith
-      real sel   ! apparent sun elevation 90:no shadow, -90:only shadow
-      real saz     ! apparent sun azimuth, 0:up, 90:right,180:down,270:left
+      real iangle      ! apparent incidence angle 90:no shadow, -90:only shadow
+      real cangle      ! apparent clock angle, 0:up, 90:right,180:down,270:left
       character*250 crc250      ! error description
       integer irc
       real xx(3,3),dot(3),moondist,sundist,rr
@@ -18386,7 +18390,7 @@ C
       xx(2,3)=moonCart(2)/moonDist
       xx(3,3)=moonCart(3)/moonDist
       dot(3)=sunCart(1)*xx(1,3)+sunCart(2)*xx(2,3)+sunCart(3)*xx(3,3)
-      sel=-dasin(dot(3)/sunDist)*deg ! invert elevation
+      iangle=-dasin(dot(3)/sunDist)*deg ! invert elevation
       xx(1,1)=-xx(2,3)                    ! left axis
       xx(2,1)=xx(1,3)
       xx(3,1)=0.0D0
@@ -18409,13 +18413,13 @@ C
          xx(2,2)=xx(2,2)/rr
          xx(3,2)=xx(3,2)/rr
       else
-         saz=0.0D0
+         cangle=0.0D0
          return
       end if
       dot(1)=sunCart(1)*xx(1,1)+sunCart(2)*xx(2,1)+sunCart(3)*xx(3,1) ! left
       dot(2)=sunCart(1)*xx(1,2)+sunCart(2)*xx(2,2)+sunCart(3)*xx(3,2) ! up
       dot(1)=-dot(1) ! left->right
-      saz = (pi + datan2(-dot(1),-dot(2)))*deg
+      cangle = (pi + datan2(-dot(1),-dot(2)))*deg
       return
       end subroutine getShadow      
       real function getMoonUpperElevation(JD,
