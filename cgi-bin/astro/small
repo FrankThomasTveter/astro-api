@@ -9,7 +9,7 @@ my $days = "2";
 my $date = "2019-03-28";
 my $offset = "-05:00";
 
-my @lines = &Astro::Api::short($lat,$lon,$height,$days,$date,$offset);
+my @lines = &Astro::Api::small($lat,$lon,$height,$days,$date,$offset);
 
 # Print HTTP headers
 

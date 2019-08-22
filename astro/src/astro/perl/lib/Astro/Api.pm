@@ -10,8 +10,8 @@ use Astro::Astro qw(:all);
 
 require Exporter;
 our @ISA = ("Exporter");
-our @EXPORT = qw(state short event xs_state xs_short xs_event xs_DTGToJD xs_JDToDTG astroEvent);    
-our %EXPORT_TAGS = ( all => [qw(state short event xs_state xs_short xs_event xs_DTGToJD xs_JDToDTG astroEvent)]);
+our @EXPORT = qw(state short small event xs_state xs_short xs_small xs_event xs_DTGToJD xs_JDToDTG astroEvent);    
+our %EXPORT_TAGS = ( all => [qw(state short small event xs_state xs_short xs_small xs_event xs_DTGToJD xs_JDToDTG astroEvent)]);
 our $license_url;
 
 sub config_value {
@@ -25,6 +25,10 @@ sub state {
 
 sub short {
     return pm_short(@_);
+}
+
+sub small {
+    return pm_small(@_);
 }
 
 sub event {

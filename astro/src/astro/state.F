@@ -13,10 +13,10 @@ C
       character*250 :: line250(maxline)
 C     
       integer mjd
-      parameter (mjd=100)
+      parameter (mjd=1000)
       integer njd
       character*30 jd30(mjd)
-      real lat,lon,hgt
+      real lat,lon,hgt,stp,dur,dt,jd,jd0
       character*250 crc250
       integer irc
 C
@@ -35,6 +35,8 @@ C
       integer :: ii, jj,istart,istop,nval
       real :: sec1,sec2,dsec1,dsec2,sec
       logical :: debug, bdeb
+      character*1 :: c1
+      character*30 :: b30
 C
       bdeb=.false.
 C     call chop0(s1000,1000) ! s1000 is already char(0)-terminated
@@ -51,6 +53,8 @@ C
       lat=0.0D0
       lon=0.0D0
       hgt=0.0D0
+      stp=0.0D0
+      dur=0.0D0
       njd=0
       ii=1
       mode=0                    ! initial
@@ -82,7 +86,19 @@ C
                istop=istart-1
             else if (s1000(ii:min(1000,ii+2)).eq.'dtg') then
                if (bdeb) write(*,*) 'Found "dtg"',ii,mode
-               mode=4           ! search for height
+               mode=4           ! search for dtg
+               ii=ii+3
+               istart=ii
+               istop=istart-1
+            else if (s1000(ii:min(1000,ii+2)).eq.'dur') then
+               if (bdeb) write(*,*) 'Found "dur"',ii,mode
+               mode=5           ! search for per
+               ii=ii+3
+               istart=ii
+               istop=istart-1
+            else if (s1000(ii:min(1000,ii+2)).eq.'stp') then
+               if (bdeb) write(*,*) 'Found "stp"',ii,mode
+               mode=6           ! search for stp
                ii=ii+3
                istart=ii
                istop=istart-1
@@ -165,11 +181,83 @@ c$$$  end if
                istop=ii
                ii=ii+1
             end if
+         else if (mode.eq.5) then ! search for dur
+            if (s1000(ii:ii).eq.'=') then
+               ii=ii+1
+               istart=ii
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
+               if (bdeb) write(*,*) 'Found dur: "'//
+     &              s1000(istart:istop)//'"',ii,mode,nval
+               read(s1000(istart:istop),*,iostat=irc) 
+     &              dur
+               if (irc.ne.0) then
+                  irc=0
+               end if
+               ii=ii+1
+               mode=0
+            else
+               istop=ii
+               ii=ii+1
+            end if
+         else if (mode.eq.6) then ! search for stp
+            if (s1000(ii:ii).eq.'=') then
+               ii=ii+1
+               istart=ii
+            else if (s1000(ii:ii).eq.';'.or.s1000(ii:ii).eq.'&') then ! we are done
+               if (bdeb) write(*,*) 'Found stp: "'//
+     &              s1000(istart:istop)//'"',ii,mode,nval
+               read(s1000(istart:istop),*,iostat=irc) 
+     &              stp
+               if (irc.ne.0) then
+                  irc=0
+               end if
+               ii=ii+1
+               mode=0
+            else
+               istop=ii
+               ii=ii+1
+            end if
          else
             ii=ii+1
          end if
          bdone=(ii.gt.lens)
       end do
+      !write(*,*)'Stp/Dur:',stp,dur
+      if (stp.gt.0.0D0 .and. dur.gt.0.0D0.and.njd.gt.0) then
+         b30=jd30(1)
+         do ii=1,30
+            c1=b30(ii:ii)
+            if (c1.ne.'.'.and.
+     &           c1.ne.'1'.and.
+     &           c1.ne.'2'.and.
+     &           c1.ne.'3'.and.
+     &           c1.ne.'4'.and.
+     &           c1.ne.'5'.and.
+     &           c1.ne.'6'.and.
+     &           c1.ne.'7'.and.
+     &           c1.ne.'8'.and.
+     &           c1.ne.'9'.and.
+     &           c1.ne.'0') b30(ii:ii)=' '
+         end do
+         read(b30,*,iostat=irc)yy,mm,dd,hh,mi,sec
+         if (irc.ne.0) then
+            write(crc250,'(A," Unable to read date from:",A,":",A)')
+     &           b30,jd30(1)
+            return
+         end if
+         CALL DATE2JD(JD0,YY,MM,DD,HH,MI,SEC) 
+         dt=stp
+         !write(*,*)'DJ0:',yy,mm,dd,hh,mi,sec,njd,mjd,stp,dur
+         do while (dt.lt.dur.and.njd.lt.mjd)
+            njd=njd+1
+            dt=dt+stp
+            jd=jd0+dt
+            CALL JD2DATE(JD,YY,MM,DD,HH,MI,SEC) 
+            write(jd30(njd),100) yy,mm,dd,hh,mi,int(sec)
+            !write(*,*)"Date:",jd30(njd),njd
+         end do
+      end if
+ 100  FORMAT(I4.4,"-",I2.2,"-",I2.2,"T",I2.2,":",I2.2,":",I2.2,"Z")
       irc=0
       crc250=""
       call astroState(njd,JD30,lat,lon,hgt,

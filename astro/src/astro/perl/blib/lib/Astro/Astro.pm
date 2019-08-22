@@ -22,12 +22,16 @@ our @ISA = qw(Exporter);
 our %EXPORT_TAGS = ( 'all' => [ qw(
     pm_astroEvent
     pm_state
+    pm_short
+    pm_small
     pm_event
     pm_epochJD
     pm_JDepoch
     xs_DTGToJD
     xs_JDToDTG
     xs_astroEvent
+    xs_short
+    xs_small
     xs_event
     xs_state
 ) ] );
@@ -56,6 +60,16 @@ END {
 }
 
 sub pm_event {return xs_event(shift);}
+
+sub pm_short {
+    my ($lat,$lon,$hgt,$day,$dat,$off)=@_;
+    return xs_short($lat||"0.0",$lon||"0.0",$hgt||"0.0",$day||"0.0",$dat||"2019-01-01",$off||"+00:00");
+}
+
+sub pm_small {
+    my ($lat,$lon,$hgt,$day,$dat,$off)=@_;
+    return xs_small($lat||"0.0",$lon||"0.0",$hgt||"0.0",$day||"0.0",$dat||"2019-01-01",$off||"+00:00");
+}
 
 sub pm_state {return xs_state(shift);}
 
