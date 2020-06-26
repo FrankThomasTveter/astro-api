@@ -19,6 +19,9 @@ ENV TINI_VERSION v0.17.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 
+# following ENV is to avoid the install script waiting on user input when "Configuring tzdata"
+ENV DEBIAN_FRONTEND=noninteractive
+
 # install apache2
 RUN apt-get update && \
     apt-get -y install apache2
