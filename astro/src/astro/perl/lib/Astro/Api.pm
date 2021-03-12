@@ -24,7 +24,7 @@ sub state {
 }
 
 sub short {
-    return pm_short(@_);
+    return pm_short($ENV{QUERY_STRING});
 }
 
 sub small {

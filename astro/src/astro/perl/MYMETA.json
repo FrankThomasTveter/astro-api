@@ -4,13 +4,13 @@
       "Heiko Klein <heikok@met.no>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "ExtUtils::MakeMaker version 7.0401, CPAN::Meta::Converter version 2.150001",
+   "generated_by" : "ExtUtils::MakeMaker version 7.34, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "unknown"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : "2"
+      "version" : 2
    },
    "name" : "Astro",
    "no_index" : {
@@ -35,5 +35,6 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.06"
+   "version" : "0.06",
+   "x_serialization_backend" : "JSON::PP version 4.02"
 }
