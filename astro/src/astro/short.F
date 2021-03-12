@@ -35,6 +35,12 @@ C
       if (bdeb) write(*,*)'Query: "',s1000(1:lens)//'"',lens
 C
       nline=0
+      lat10="60.0"
+      lon10="10.0"
+      hgt10="0.0"
+      day10="0"
+      dat10="2020-01-01"
+      off6="+00:00"
 C
       ii=1
       mode=1                    ! initial
