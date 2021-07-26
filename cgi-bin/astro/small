@@ -1,21 +1,7 @@
-#!/usr/bin/perl
+#! /bin/csh
 #
-use Astro::Api qw(:all);
-use strict;
-my $lat = "40";
-my $lon = "74";
-my $height = "0";
-my $days = "2";
-my $date = "2019-03-28";
-my $offset = "-05:00";
-
-my @lines = &Astro::Api::small($lat,$lon,$height,$days,$date,$offset);
-
-# Print HTTP headers
-
-print "Content-Type: text/xml;\n";
-print "\n";
-
-foreach my $line (@lines) {
-    print "$line\n";
-}
+##setenv QUERY_STRING 'lat=41.2;lon=-73.7;hgt=0;days=3;date=2020-05-08;offset=+00:00;'
+setenv QUERY_STRING 'lat=60.0&lon=10.0&days=3;date=2020-03-11&offset=+01:00;'
+#
+./small.pl
+#

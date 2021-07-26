@@ -63,10 +63,7 @@ sub pm_event {return xs_event(shift);}
 
 sub pm_short {return xs_short(shift);}
 
-sub pm_small {
-    my ($lat,$lon,$hgt,$day,$dat,$off)=@_;
-    return xs_small($lat||"0.0",$lon||"0.0",$hgt||"0.0",$day||"0.0",$dat||"2019-01-01",$off||"+00:00");
-}
+sub pm_small {return xs_small(shift);}
 
 sub pm_state {return xs_state(shift);}
 

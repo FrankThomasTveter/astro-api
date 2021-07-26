@@ -1,6 +1,7 @@
 #! /bin/csh
 #
-setenv QUERY_STRING 'lat=41.2;lon=-73.7;hgt=0;days=3;date=2020-05-08;offset=+00:00;'
+##setenv QUERY_STRING 'lat=41.2;lon=-73.7;hgt=0;days=3;date=2020-05-08;offset=+00:00;'
+setenv QUERY_STRING 'lat=60.0&lon=10.0&days=3;date=2020-03-11&offset=+01:00;'
 #
 ./short.pl
 #

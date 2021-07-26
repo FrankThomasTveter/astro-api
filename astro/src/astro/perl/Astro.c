@@ -324,57 +324,28 @@ XS_EUPXS(XS_Astro__Astro_xs_small); /* prototype to pass -Wmissing-prototypes */
 XS_EUPXS(XS_Astro__Astro_xs_small)
 {
     dVAR; dXSARGS;
-    if (items != 6)
-       croak_xs_usage(cv,  "lat, lon, hgt, day, dat, off");
+    if (items != 1)
+       croak_xs_usage(cv,  "s");
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
 #line 78 "Astro.xs"
-      char *lat10;
-      char *lon10;
-      char *hgt10;
-      char *day10;
-      char *dat10;
-      char *off6;
-      int maxline = 1500;
+      char *s1000;
+      int maxline = 5000;
       int nline;
       int *lenline;
       char *line250;
       int lenr=250;
       int ii;
-#line 346 "Astro.c"
-	char *	lat = (char *)SvPV_nolen(ST(0))
+#line 341 "Astro.c"
+	char *	s = (char *)SvPV_nolen(ST(0))
 ;
-	char *	lon = (char *)SvPV_nolen(ST(1))
-;
-	char *	hgt = (char *)SvPV_nolen(ST(2))
-;
-	char *	day = (char *)SvPV_nolen(ST(3))
-;
-	char *	dat = (char *)SvPV_nolen(ST(4))
-;
-	char *	off = (char *)SvPV_nolen(ST(5))
-;
-#line 91 "Astro.xs"
-    /*printf("  xs_input= %s %s %s %s %s %s\n", lat,lon,hgt,day,dat,off);*/
-    lat10 = calloc(sizeof(char), 10);
-    lon10 = calloc(sizeof(char), 10);
-    hgt10 = calloc(sizeof(char), 10);
-    day10 = calloc(sizeof(char), 10);
-    dat10 = calloc(sizeof(char), 10);
-    off6 = calloc(sizeof(char), 6);
-    /*printf("  xs_between= %s %s %s %s %s %s\n", lat,lon,hgt,day,dat,off);*/
-    strncpy(lat10,lat,10);
-    strncpy(lon10,lon,10);
-    strncpy(hgt10,hgt,10);
-    strncpy(day10,day,10);
-    strncpy(dat10,dat,10);
-    strncpy(off6,off,6);
-    /*printf("  xs_alloc= %s %s %s %s %s %s\n", lat,lon,hgt,day,dat,off);*/
+#line 86 "Astro.xs"
+    s1000 = calloc(sizeof(char), 1000);
+    strcpy(s1000,s);
     lenline = malloc(sizeof(int)*maxline);
     line250 = calloc(sizeof(char), lenr*maxline);
-    //printf("  xs_start= %s %s %s %s %s %s\n", lat10,lon10,hgt10,day10,dat10,off6);
-    small_(lat10,lon10,hgt10,day10,dat10,off6,&maxline,&nline,lenline,line250,10,10,10,10,10,6,250);
+    small_(s1000,&maxline,&nline,lenline,line250,1000,250);
     /* make return stack */
     EXTEND(SP, nline);
     for (ii=0; ii < nline ; ii++ ) {
@@ -385,15 +356,10 @@ XS_EUPXS(XS_Astro__Astro_xs_small)
        PUSHs(sv_2mortal(newSVpv(&line250[ii*250],lenline[ii])));
       };
     };
-    free(lat10);
-    free(lon10);
-    free(hgt10);
-    free(dat10);
-    free(day10);
-    free(off6);
+    free(s1000);
     free(lenline);
     free(line250);
-#line 397 "Astro.c"
+#line 363 "Astro.c"
 	PUTBACK;
 	return;
     }
@@ -409,7 +375,7 @@ XS_EUPXS(XS_Astro__Astro_xs_event)
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
-#line 132 "Astro.xs"
+#line 108 "Astro.xs"
       char *s1000;
       int maxline = 5000;
       int nline;
@@ -417,10 +383,10 @@ XS_EUPXS(XS_Astro__Astro_xs_event)
       char *line250;
       int lenr=250;
       int ii;
-#line 421 "Astro.c"
+#line 387 "Astro.c"
 	char *	s = (char *)SvPV_nolen(ST(0))
 ;
-#line 140 "Astro.xs"
+#line 116 "Astro.xs"
     s1000 = calloc(sizeof(char), 1000);
     strcpy(s1000,s);
     lenline = malloc(sizeof(int)*maxline);
@@ -439,7 +405,7 @@ XS_EUPXS(XS_Astro__Astro_xs_event)
     free(s1000);
     free(lenline);
     free(line250);
-#line 443 "Astro.c"
+#line 409 "Astro.c"
 	PUTBACK;
 	return;
     }
@@ -455,7 +421,7 @@ XS_EUPXS(XS_Astro__Astro_xs_state)
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
-#line 162 "Astro.xs"
+#line 138 "Astro.xs"
       char *s1000;
       int maxline = 1500;
       int nline;
@@ -463,10 +429,10 @@ XS_EUPXS(XS_Astro__Astro_xs_state)
       char *line250;
       int lenr=250;
       int ii;
-#line 467 "Astro.c"
+#line 433 "Astro.c"
 	char *	s = (char *)SvPV_nolen(ST(0))
 ;
-#line 170 "Astro.xs"
+#line 146 "Astro.xs"
     s1000 = calloc(sizeof(char), 1000);
     strcpy(s1000,s);
     lenline = malloc(sizeof(int)*maxline);
@@ -484,7 +450,7 @@ XS_EUPXS(XS_Astro__Astro_xs_state)
     free(s1000);
     free(lenline);
     free(line250);
-#line 488 "Astro.c"
+#line 454 "Astro.c"
 	PUTBACK;
 	return;
     }
@@ -500,7 +466,7 @@ XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
     PERL_UNUSED_VAR(ax); /* -Wall */
     SP -= items;
     {
-#line 191 "Astro.xs"
+#line 167 "Astro.xs"
       double* eventVal;
       int maxrep = 1000;
       int nrep;
@@ -511,7 +477,7 @@ XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
       char *crc250;
       int ii;
       int lenr=250;
-#line 515 "Astro.c"
+#line 481 "Astro.c"
 	double	tstartJD = (double)SvNV(ST(0))
 ;
 	int	searchCode = (int)SvIV(ST(1))
@@ -541,7 +507,7 @@ XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
 		}
 	} STMT_END
 ;
-#line 202 "Astro.xs"
+#line 178 "Astro.xs"
     /* allocate and assign input array */
     neventVal=av_len(eventValin)+1;
     if (neventVal<=0) { /* make sure at least one element exists */
@@ -598,7 +564,7 @@ XS_EUPXS(XS_Astro__Astro_xs_astroEvent)
     free(repVal);
     free(rep250);
     free(crc250);
-#line 602 "Astro.c"
+#line 568 "Astro.c"
 	PUTBACK;
 	return;
     }

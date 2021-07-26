@@ -1,6 +1,6 @@
-      PROGRAM SHORTBIN
+      PROGRAM SMALLBIN
 C     
-C     SHORTBIN PROGRAM FOR DATA TEST READ
+C     SMALLBIN PROGRAM FOR DATA TEST READ
 C
       IMPLICIT NONE
       CHARACTER*1000 :: s1000
@@ -23,9 +23,8 @@ C
          stop("JPL-error")
       end if
 C
-C      s1000="lat=60.0&lon=10.0&days=3;date=2020-03-11&offset=+01:00;"
       s1000="lat=65.745&lon=10.0&days=3;date=2020-06-20&offset=+01:00;"
-      CALL SHORT(s1000,         ! query string
+      CALL SMALL(s1000,         ! query string
      &     maxline,             ! maximum number of output lines
      &     nline,               ! number of output lines
      &     lenline,             ! length of each out250

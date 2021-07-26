@@ -28,7 +28,7 @@ sub short {
 }
 
 sub small {
-    return pm_small(@_);
+    return pm_small($ENV{QUERY_STRING});
 }
 
 sub event {

@@ -65,6 +65,8 @@ C     i  eventVal(2) = longtitude of observer (deg)
 C     i  eventVal(3) = height of observer (deg)
 C     o  repId = 120 -> if (repval >= 1) "sun is above horison" (repval <=-1) "sun is below"
 C     o  repId = 121 -> if (repval >= 1) "polar day" (repval =0) "no polar effect" (repval<=-1) "polar night"
+C     o  repId = 122 -> repval = sun elevation (deg)
+C     o  repId = 123 -> repval = sun azimuth (deg)
 C     
 C     EVENTID  = 130 : 'REPORT LOCAL TC EF SUN POSITION AT TIME INCREMENT'
 C     i  eventVal(1) = latitude of observer (deg)
@@ -9630,6 +9632,16 @@ C     make reports
          end if
          repJD(nrep)=JD + 1.0D-10
          repid(nrep)=eventId + 1
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
+     &           '" deg * ELEVATION")')
+     &           T30(1:lent),event100(1:lend),
+     &           elevation
+         repval(nrep)=elevation
+         repJD(nrep)=JD + 2.0D-10
+         repid(nrep)=eventId + 2
       end if
       if (bdeb)write(*,*)myname,'Ended minor loop.',idt
       if (bdeb)write(*,*)myname,'Done.',irc
