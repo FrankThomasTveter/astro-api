@@ -34,6 +34,14 @@ C
      &     irc)                 ! error return code (0=ok)
 C     
 C     ASTRONOMICAL EVENT IDENTIFICATION TABLE
+C
+C     EVENTID  = 90 : 'REPORT LOCAL VISIBLE MOON IN PERIOD'
+C     i  eventVal(1) = latitude of observer (deg)
+C     i  eventVal(2) = longtitude of observer (deg)
+C     i  eventVal(3) = height of observer (deg)
+C     o  repId = 90 -> repVal = hours visible moon in period
+C     o  repId = 91 -> Moon rise.
+C     o  repId = 95 -> Moon set.
 C     
 C     EVENTID  = 100  'REPORT LOCAL INITIAL MOON STATE'
 C     i  eventVal(1) = latitude of observer (deg)
@@ -42,13 +50,11 @@ C     i  eventVal(3) = height of observer (deg)
 C     o  repId = 100 -> if (repval >= 1) "moon is above horison" (repval <=-1) "moon is below"
 C     o  repId = 101 -> if (repval >= 1) "lunar polar day" (repval =0) "no lunar polar effect" (repval<=-1) "lunar polar night"
 C     o  repId = 102 -> moon phase (0<=repval<25 = "waxing crescent", 25<=repval<50="waxing gibbous",50<=repval<75="waning gibbous",75<=repval<100="waning crescent")
-C     EVENTID  = 90 : 'REPORT LOCAL VISIBLE MOON IN PERIOD'
-C     i  eventVal(1) = latitude of observer (deg)
-C     i  eventVal(2) = longtitude of observer (deg)
-C     i  eventVal(3) = height of observer (deg)
-C     o  repId = 90 -> repVal = hours visible moon in period
-C     o  repId = 91 -> Moon rise.
-C     o  repId = 95 -> Moon set.
+C     o  repId = 103 -> repval = clock shadow angle
+C     o  repId = 104 -> repval = illumination shadow angle
+C     o  repId = 105 -> repval = moon elevation (deg)
+C     o  repId = 106 -> repval = moon azimuth (deg)
+C     o  repId = 107 -> repval = moon range (km)
 C     
 C     EVENTID  = 110 : 'REPORT LOCAL TC EF MOON POSITION AT TIME INCREMENT'
 C     i  eventVal(1) = latitude of observer (deg)
@@ -67,6 +73,7 @@ C     o  repId = 120 -> if (repval >= 1) "sun is above horison" (repval <=-1) "s
 C     o  repId = 121 -> if (repval >= 1) "polar day" (repval =0) "no polar effect" (repval<=-1) "polar night"
 C     o  repId = 122 -> repval = sun elevation (deg)
 C     o  repId = 123 -> repval = sun azimuth (deg)
+C     o  repId = 124 -> repval = sun range (km)
 C     
 C     EVENTID  = 130 : 'REPORT LOCAL TC EF SUN POSITION AT TIME INCREMENT'
 C     i  eventVal(1) = latitude of observer (deg)
@@ -3542,7 +3549,7 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0D-10
+            repJD(jj)=repJD(jj)-2.0d-9
          end do
       else IF (eventId.eq.620) THEN  !  'DETECT LOCAL DIURNAL MAXIMUM SOLAR ELEVATION -SUNMAXEL[0]%2&3&$'
          event100='LOCAL DIURNAL MAXIMUM SOLAR ELEVATION'
@@ -3811,7 +3818,7 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0D-10
+            repJD(jj)=repJD(jj)-2.0d-9
          end do
       ELSE IF (eventId.eq.660) THEN !  'DETECT LOCAL DIURNAL NAUTICAL TWILIGHT START -NAUSTART[0]%2&3&$'
          event100='LOCAL DIURNAL NAUTICAL TWILIGHT START'
@@ -3883,7 +3890,7 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+2.0D-10
+            repJD(jj)=repJD(jj)+2.0d-9
          end do
       ELSE IF (eventId.eq.670) THEN !  'DETECT LOCAL DIURNAL NAUTICAL TWILIGHT STOP -NAUSTOP[0]%2&3&$'
          event100='LOCAL DIURNAL NAUTICAL TWILIGHT STOP'
@@ -3955,7 +3962,7 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0D-10
+            repJD(jj)=repJD(jj)-2.0d-9
          end do
       ELSE IF (eventId.eq.680) THEN !  'DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT START -ASTSTART[0]%2&3&$'
          event100='LOCAL DIURNAL ASTRONOMICAL TWILIGHT START'
@@ -4027,7 +4034,7 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+2.0D-10
+            repJD(jj)=repJD(jj)+2.0d-9
          end do
       ELSE IF (eventId.eq.690) THEN !  'DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT STOP -ASTSTOP[0]%2&3&$'
          event100='LOCAL DIURNAL ASTRONOMICAL TWILIGHT STOP'
@@ -4099,7 +4106,7 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0D-10
+            repJD(jj)=repJD(jj)-2.0d-9
          end do
       ELSE IF (eventId.eq.700) THEN  !  'DETECT LOCAL DIURNAL NIGHT START -NIGHTSTART[0]%2&3&$'
          event100='LOCAL DIURNAL NIGHT START'
@@ -4171,7 +4178,7 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+2.0D-10
+            repJD(jj)=repJD(jj)+2.0d-9
          end do
       ELSE IF (eventId.eq.710) THEN !  'DETECT LOCAL DIURNAL NIGHT STOP -NIGHTSTOP[0]%2&3&$'
          event100='LOCAL DIURNAL NIGHT STOP'
@@ -4243,7 +4250,7 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0D-10
+            repJD(jj)=repJD(jj)-2.0d-9
          end do
       ELSE IF (eventId.eq.750) THEN !  'DETECT LOCAL DIURNAL SUN AZIMUTH (0=NORTH, 90=EAST) -SUNAZI[*]%2&3&$'
          if (neventVal.lt.4) then
@@ -4877,7 +4884,7 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+1.0D-10
+            repJD(jj)=repJD(jj)+1.0d-9
          end do
       ELSE IF (eventId.eq.910) THEN !  'DETECT LOCAL POLAR DAY STOP -POLDAYSTOP[0]%2&3&$'
          event100='LOCAL POLAR SUN DAY STOP'
@@ -4972,7 +4979,7 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-1.0D-10
+            repJD(jj)=repJD(jj)-1.0d-9
          end do
       ELSE IF (eventId.eq.920) THEN !  'DETECT LOCAL POLAR NIGHT START -POLNIGHTSTART[0]%2&3&$'
          event100='LOCAL POLAR SUN NIGHT START'
@@ -5067,7 +5074,7 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+5.0D-10
+            repJD(jj)=repJD(jj)+5.0d-9
          end do
       ELSE IF (eventId.eq.930) THEN !  'DETECT LOCAL POLAR NIGHT STOP -POLNIGHTSTOP[0]%2&3&$'
          event100='LOCAL POLAR SUN NIGHT STOP'
@@ -5162,7 +5169,7 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-5.0D-10
+            repJD(jj)=repJD(jj)-5.0d-9
          end do
       ELSE IF (eventId.eq.940) THEN !  'DETECT LOCAL POLAR LUNAR DAY START -POLDAYSTART[0]%2&3&$'
          event100='LOCAL POLAR LUNAR DAY START'
@@ -5257,7 +5264,7 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+5.0D-10
+            repJD(jj)=repJD(jj)+5.0d-9
          end do
       ELSE IF (eventId.eq.950) THEN !  'DETECT LOCAL POLAR LUNAR DAY STOP -POLDAYSTOP[0]%2&3&$'
          event100='LOCAL POLAR LUNAR DAY STOP'
@@ -5296,7 +5303,7 @@ C
                return
             end if
             do jj=inrep,nrep
-               repJD(jj)=repJD(jj)-1.0D-10
+               repJD(jj)=repJD(jj)-1.0d-9
             end do
          else
             if (lprev) then
@@ -5355,7 +5362,7 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-5.0D-10
+            repJD(jj)=repJD(jj)-5.0d-9
          end do
       ELSE IF (eventId.eq.960) THEN !  'DETECT LOCAL POLAR LUNAR NIGHT START -POLNIGHTSTART[0]%2&3&$'
          event100='LOCAL POLAR LUNAR NIGHT START'
@@ -5394,7 +5401,7 @@ C
                return
             end if
             do jj=inrep,nrep
-               repJD(jj)=repJD(jj)+1.0D-10
+               repJD(jj)=repJD(jj)+1.0d-9
             end do
          else
             if (lprev) then
@@ -5453,7 +5460,7 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+5.0D-10
+            repJD(jj)=repJD(jj)+5.0d-9
          end do
       ELSE IF (eventId.eq.970) THEN !  'DETECT LOCAL POLAR LUNAR NIGHT STOP -POLNIGHTSTOP[0]%2&3&$'
          event100='LOCAL POLAR LUNAR NIGHT STOP'
@@ -5492,7 +5499,7 @@ C
                return
             end if
             do jj=inrep,nrep
-               repJD(jj)=repJD(jj)-1.0D-10
+               repJD(jj)=repJD(jj)-1.0d-9
             end do
          else
             if (lprev) then
@@ -5551,7 +5558,7 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-5.0D-10
+            repJD(jj)=repJD(jj)-5.0d-9
          end do
       ELSE IF (eventId.eq.980) THEN !  'DETECT LOCAL SOLAR ECLIPSE (MINOCC MAXOCC)'
          if (neventVal.lt.5) then
@@ -7571,14 +7578,17 @@ C
       real moonPos(6)
       real moonCart(3)
       real moonPolar(3)
+      common /CMOON/ moonPos, moonCart, moonPolar
       real rxy
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real elevation
+      real elevation,azimuth,range
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
       integer lenv
+      real rMoon
+      parameter ( rMoon     =  1738.0D0 )
 C     
       real*8 PI,TWOPI,PIH,DEG,RAD
       COMMON /CBASIC/ PI,TWOPI,PIH,DEG,RAD
@@ -7612,6 +7622,11 @@ C     report moon above/below horison
 C
       elevation=getMoonUpperElevation(JD,
      &     loclat,loclon,lochgt,crc250,irc) ! uppder disk limb
+C     moonPolar is in a common-block set by getMoonUpperElevation...
+      azimuth=moonPolar(3)*DEG
+C      elevation=moonPolar(2)*DEG
+C     &     + (rMoon/moonPolar(1))*DEG ! disk upper limb
+      range=moonPolar(1)
 C     
 C     polar moon day
 C
@@ -7697,7 +7712,7 @@ C     make reports
      &           T30(1:lent),event100(1:lend)," * NO POLAR EFFECT"
             repval(nrep)=0.0D0
          end if
-         repJD(nrep)=JD
+         repJD(nrep)=JD + 1.0d-9
          repid(nrep)=eventId + 1
       end if
       nrep=nrep+1
@@ -7721,7 +7736,7 @@ C     make reports
          end if
          call chop0(rep250(nrep),250)
          repval(nrep)=phase
-         repJD(nrep)=JD
+         repJD(nrep)=JD + 2.0d-9
          repid(nrep)=eventid + 2
       end if
       nrep=nrep+1
@@ -7731,7 +7746,7 @@ C     make reports
      &        cangle,",iangle=",iangle,")"
          call chop0(rep250(nrep),250)
          repval(nrep)=cangle
-         repJD(nrep)=JD + 1.0D-9
+         repJD(nrep)=JD + 3.0d-9
          repid(nrep)=eventid + 3
       end if
       nrep=nrep+1
@@ -7741,8 +7756,38 @@ C     make reports
      &        cangle,",iangle=",iangle,")"
          call chop0(rep250(nrep),250)
          repval(nrep)=iangle
-         repJD(nrep)=JD + 2.0D-9
+         repJD(nrep)=JD + 4.0d-9
          repid(nrep)=eventid + 4
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
+     &        '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
+     &        T30(1:lent),event100(1:lend),
+     &        elevation,azimuth,range
+         repJD(nrep)=JD + 5.0d-9
+         repid(nrep)=eventId + 5
+         repval(nrep)=elevation
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
+     &        '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
+     &        T30(1:lent),event100(1:lend),
+     &        elevation,azimuth,range
+         repJD(nrep)=JD + 6.0d-9
+         repid(nrep)=eventId + 6
+         repval(nrep)=azimuth
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
+     &        '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
+     &        T30(1:lent),event100(1:lend),
+     &        elevation,azimuth,range
+         repJD(nrep)=JD + 7.0d-9
+         repid(nrep)=eventId + 7
+         repval(nrep)=range
       end if
       if (bdeb)write(*,*)myname,'Done.',irc
       return
@@ -7884,26 +7929,26 @@ C
       if (tstartJD.lt.tendJD) then
          do ii=snrep+1,nrep
             if (repId(ii).eq.sid.and.
-     &           repJD(ii).le.tendJD+1.0D-10) then
+     &           repJD(ii).le.tendJD+1.0d-9) then
                sum=sum + (repJD(ii)-tstartJD)
             end if
          end do
          do ii=rnrep+1,snrep
             if (repId(ii).eq.rid.and.
-     &           repJD(ii).le.tendJD+1.0D-10) then
+     &           repJD(ii).le.tendJD+1.0d-9) then
                sum=sum - (repJD(ii)-tstartJD)
             end if
          end do
       else
          do ii=snrep+1,nrep
             if (repId(ii).eq.sid.and.
-     &           repJD(ii).ge.tendJD-1.0D-10) then
+     &           repJD(ii).ge.tendJD-1.0d-9) then
                sum=sum + (tstartJD-repJD(ii))
             end if
          end do
          do ii=rnrep+1,snrep
             if (repId(ii).eq.rid.and.
-     &           repJD(ii).ge.tendJD-1.0D-10) then
+     &           repJD(ii).ge.tendJD-1.0d-9) then
                sum=sum - (tstartJD-repJD(ii))
             end if
          end do
@@ -8048,11 +8093,14 @@ C
       real sunPos(6)
       real sunCart(3)  ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3) ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
+      common /CSUN/ sunPos, sunCart, sunPolar
       real moonPos(6)
       real moonCart(3)
       real moonPolar(3)
+      common /CMOON/ moonPos, moonCart, moonPolar
       real rxy
       real rMoon
+      parameter ( rMoon     =  1738.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real elevation,azimuth,range,iangle,cangle
@@ -8097,7 +8145,6 @@ C
 C
 C     get moon position in local polar coordinates (azimuth, elevation, range)
 C
-         rMoon     =  1738.0D0
          call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
          if (irc.ne.0) then
             lencrc=length(crc250,250,10)
@@ -8227,7 +8274,7 @@ C     make report
      &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
      &           T30(1:lent),event100(1:lend),
      &           elevation,azimuth,range
-            repJD(nrep)=JD - 1.0D-9
+            repJD(nrep)=JD - 1.0d-8
             repid(nrep)=eventId + 0
             repval(nrep)=elevation
          end if
@@ -8237,7 +8284,7 @@ C     make report
      &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
      &           T30(1:lent),event100(1:lend),
      &           elevation,azimuth,range
-            repJD(nrep)=JD - 1.0D-9 + 1.0D-10
+            repJD(nrep)=JD - 1.0d-8 + 1.0d-9
             repid(nrep)=eventId + 1
             repval(nrep)=azimuth
          end if
@@ -8247,7 +8294,7 @@ C     make report
      &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
      &           T30(1:lent),event100(1:lend),
      &           elevation,azimuth,range
-            repJD(nrep)=JD - 1.0D-9 + 2.0D-10
+            repJD(nrep)=JD - 1.0d-8 + 2.0d-9
             repid(nrep)=eventId + 2
             repval(nrep)=range
          end if
@@ -8259,7 +8306,7 @@ C     make report
      &           cangle,",iangle=",iangle,")"
             call chop0(rep250(nrep),250)
             repval(nrep)=cangle
-            repJD(nrep)=JD - 1.0D-9 + 3.0D-10
+            repJD(nrep)=JD - 1.0d-8 + 3.0d-9
             repid(nrep)=eventid + 3
          end if
          nrep=nrep+1
@@ -8270,7 +8317,7 @@ C     make report
      &           cangle,",iangle=",iangle,")"
             call chop0(rep250(nrep),250)
             repval(nrep)=iangle
-            repJD(nrep)=JD - 1.0D-9 + 4.0D-10
+            repJD(nrep)=JD - 1.0d-8 + 4.0d-9
             repid(nrep)=eventid + 4
          end if
          nrep=nrep+1
@@ -8384,7 +8431,7 @@ C
       end if
 C     
       do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0D-10
+         repJD(jj)=repJD(jj)-1.0d-9
       end do
       
       return
@@ -8448,7 +8495,7 @@ C
       end if
 C     
       do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0D-10
+         repJD(jj)=repJD(jj)-1.0d-9
       end do
       
       return
@@ -8992,7 +9039,7 @@ C     make report
      &              '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
      &              T30(1:lent),event100(1:lend),body10,
      &              elevation,azimuth,range
-               repJD(nrep)=JD + ii*1.0D-9
+               repJD(nrep)=JD + ii*1.0d-8
                repid(nrep)=eventId + (ii-1)*10 + 0
                repval(nrep)=elevation
             end if
@@ -9002,7 +9049,7 @@ C     make report
      &              '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
      &              T30(1:lent),event100(1:lend),body10,
      &              elevation,azimuth,range
-               repJD(nrep)=JD + ii*1.0D-9 + 1.0D-10
+               repJD(nrep)=JD + ii*1.0d-8 + 1.0d-9
                repid(nrep)=eventId + (ii-1)*10 + 1
                repval(nrep)=azimuth
             end if
@@ -9032,7 +9079,7 @@ C
      &                 '(A,X,A," ",A," Illumination:",F5.1)')
      &                 T30(1:lent),event100(1:lend),body10,
      &                 mill
-                  repJD(nrep)=JD + ii*1.0D-9 + 2.0D-10
+                  repJD(nrep)=JD + ii*1.0d-8 + 2.0d-9
                   repid(nrep)=eventId + (ii-1)*10 + 3
                   repval(nrep)=mill
                end if
@@ -9522,6 +9569,9 @@ C
       real sunPos(6)
       real sunCart(3)
       real sunPolar(3)
+      common /CSUN/ sunPos, sunCart, sunPolar
+      real rSun
+      parameter ( rSun     = 682500.0D0 )
       real rxy
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
@@ -9561,6 +9611,11 @@ C     sun above/below horison
 C
       elevation=getSunUpperElevation(JD,
      &     loclat,loclon,lochgt,crc250,irc) ! ippder disk limb
+C     sunPolar is in a common-block set by getSunUpperElevation...
+      azimuth=sunPolar(3)*DEG
+C      elevation=sunPolar(2)*DEG
+C     &     + (rSun/sunPolar(1))*DEG ! disk upper limb
+      range=sunPolar(1)
 C     
 C     polar sun day
 C
@@ -9575,8 +9630,8 @@ C
       else
          angNight=angle + refraction ! target polar angle
       end if
-C      
-CC      !write(*,*)myname,'Polar Sun ang:',angDay,angNight,loclat
+C     
+C      !write(*,*)myname,'Polar Sun ang:',angDay,angNight,loclat
 C
 C     make report
 C
@@ -9630,7 +9685,7 @@ C     make reports
      &           T30(1:lent),event100(1:lend)," * NO POLAR EFFECT"
             repval(nrep)=0.0D0
          end if
-         repJD(nrep)=JD + 1.0D-10
+         repJD(nrep)=JD + 1.0d-9
          repid(nrep)=eventId + 1
       end if
       nrep=nrep+1
@@ -9640,9 +9695,29 @@ C     make reports
      &           T30(1:lent),event100(1:lend),
      &           elevation
          repval(nrep)=elevation
-         repJD(nrep)=JD + 2.0D-10
+         repJD(nrep)=JD + 2.0d-9
          repid(nrep)=eventId + 2
       end if
+         nrep=nrep+1
+         if (nrep.le.maxrep) then
+            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
+     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
+     &           T30(1:lent),event100(1:lend),
+     &           elevation,azimuth,range
+            repJD(nrep)=JD + 3.0d-9
+            repid(nrep)=eventId + 3
+            repval(nrep)=azimuth
+         end if
+         nrep=nrep+1
+         if (nrep.le.maxrep) then
+            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
+     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
+     &           T30(1:lent),event100(1:lend),
+     &           elevation,azimuth,range
+            repJD(nrep)=JD + 4.0d-9
+            repid(nrep)=eventId + 4
+            repval(nrep)=range
+         end if
       if (bdeb)write(*,*)myname,'Ended minor loop.',idt
       if (bdeb)write(*,*)myname,'Done.',irc
       return
@@ -9788,14 +9863,14 @@ C      end do
       if (tstartJD.lt.tendJD) then
          do ii=snrep+1,nrep
             if (repId(ii).eq.sid.and.
-     &           repJD(ii).le.tendJD+1.0D-10) then
+     &           repJD(ii).le.tendJD+1.0d-9) then
 C               write(*,*)'SID:',ii,repid(ii),repjd(ii)-tstartjd
                sum=sum + (repJD(ii)-tstartJD)
             end if
          end do
          do ii=rnrep+1,snrep
             if (repId(ii).eq.rid.and.
-     &           repJD(ii).le.tendJD+1.0D-10) then
+     &           repJD(ii).le.tendJD+1.0d-9) then
 C               write(*,*)'RID:',ii,repid(ii),repjd(ii)-tstartjd
                sum=sum - (repJD(ii)-tstartJD)
             end if
@@ -9803,13 +9878,13 @@ C               write(*,*)'RID:',ii,repid(ii),repjd(ii)-tstartjd
       else
          do ii=snrep+1,nrep
             if (repId(ii).eq.sid.and.
-     &           repJD(ii).ge.tendJD-1.0D-10) then
+     &           repJD(ii).ge.tendJD-1.0d-9) then
                sum=sum + (tstartJD-repJD(ii))
             end if
          end do
          do ii=rnrep+1,snrep
             if (repId(ii).eq.rid.and.
-     &           repJD(ii).ge.tendJD-1.0D-10) then
+     &           repJD(ii).ge.tendJD-1.0d-9) then
                sum=sum - (tstartJD-repJD(ii))
             end if
          end do
@@ -9903,8 +9978,10 @@ C
       real sunPos(6)
       real sunCart(3)
       real sunPolar(3)
+      common /CSUN/ sunPos, sunCart, sunPolar
       real rxy
       real rSun
+      parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real elevation,azimuth,range
@@ -9949,7 +10026,6 @@ C
 C
 C     get sun position in local polar coordinates (azimuth, elevation, range)
 C
-         rSun     = 682500.0D0
          call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
          if (irc.ne.0) then
             lencrc=length(crc250,250,10)
@@ -10002,7 +10078,9 @@ C
          elevation=sunPolar(2)*DEG
      &        + (rSun/sunPolar(1))*DEG ! disk upper limb
          range=sunPolar(1)
+C
 C     make report
+C
          if (nrep+1.le.maxrep) then
             if (secdec.gt.0) then
                write(fmt100,'(A,I2.2,A,I1,A)')
@@ -10029,7 +10107,7 @@ C     make report
      &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
      &           T30(1:lent),event100(1:lend),
      &           elevation,azimuth,range
-            repJD(nrep)=JD - 2.0D-9
+            repJD(nrep)=JD - 2.0d-8
             repid(nrep)=eventId + 0
             repval(nrep)=elevation
          end if
@@ -10039,7 +10117,7 @@ C     make report
      &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
      &           T30(1:lent),event100(1:lend),
      &           elevation,azimuth,range
-            repJD(nrep)=JD - 2.0D-9 + 1.0D-10
+            repJD(nrep)=JD - 2.0d-8 + 1.0d-9
             repid(nrep)=eventId + 1
             repval(nrep)=azimuth
          end if
@@ -10049,7 +10127,7 @@ C     make report
      &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
      &           T30(1:lent),event100(1:lend),
      &           elevation,azimuth,range
-            repJD(nrep)=JD - 2.0D-9 + 2.0D-10
+            repJD(nrep)=JD - 2.0d-8 + 2.0d-9
             repid(nrep)=eventId + 2
             repval(nrep)=range
          end if
@@ -10977,14 +11055,18 @@ C
       data bdeb/.false./
       real sunPos(6)
       real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
-      real sunPolar(3),sunDist
+      real sunPolar(3)
+      common /CSUN/ sunPos, sunCart, sunPolar
       real moonPos(6)
       real moonCart(3)
       real moonPolar(3)
+      common /CMOON/ moonPos, moonCart, moonPolar
       real earthCart(3)
-      real sunAng,earthAng,ang
+      real sunAng,earthAng,ang,sunDist
       real rxy
       real rMoon,rSun
+      parameter ( rMoon     =  1738.0D0 )
+      parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation,illumination,dot
@@ -11083,7 +11165,6 @@ C     sun position
             call chop0(crc250,250)
             return
          end if
-         rSun     = 682500.0D0
          sazi=sunPolar(3)*DEG
          sele=sunPolar(2)*DEG !  + (rSun/sunPolar(1))*DEG
 C     
@@ -11154,7 +11235,6 @@ C     moon position
             dot=(earthCart(1)*sunCart(1)+
      &           earthCart(2)*sunCart(2)+
      &           earthCart(3)*sunCart(3))/(moonPolar(1)*sunDist)
-            rMoon     =  1738.0D0
             mill=0.5D0*(1.0D0+dot)*100.0D0 ! lunar illumination
             mazi=moonPolar(3)*DEG
             mele=moonPolar(2)*DEG ! + (rMoon/moonPolar(1))*DEG
@@ -15013,7 +15093,7 @@ C
       end if
 C     
       do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0D-10
+         repJD(jj)=repJD(jj)-1.0d-9
       end do
       
       return
@@ -15086,7 +15166,7 @@ C
       end if
 C     
       do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0D-10
+         repJD(jj)=repJD(jj)-1.0d-9
       end do
       
       return
@@ -16151,7 +16231,7 @@ C
       end if
 C     
       do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0D-10
+         repJD(jj)=repJD(jj)-1.0d-9
       end do
       
       return
@@ -16224,7 +16304,7 @@ C
       end if
 C     
       do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0D-10
+         repJD(jj)=repJD(jj)-1.0d-9
       end do
       
       return
@@ -17157,8 +17237,10 @@ C
       real moonPos(6)
       real moonCart(3)
       real moonPolar(3)
+      common /CMOON/ moonPos, moonCart, moonPolar
       real rxy
       real rMoon
+      parameter ( rMoon     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation
@@ -17180,7 +17262,6 @@ C
       real a,f
       parameter (a=6378.155 D0,f=1.D0/298.257 D0)
 C
-      rMoon     = 682500.0D0
       call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -17728,8 +17809,10 @@ C
       real moonPos(6)
       real moonCart(3)
       real moonPolar(3)
+      common /CMOON/ moonPos, moonCart, moonPolar
       real rxy
       real rMoon
+      parameter ( rMoon     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation
@@ -17747,7 +17830,6 @@ C
       integer length
       external length
 C
-      rMoon     = 682500.0D0
       call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -17795,7 +17877,6 @@ C
          call chop0(crc250,250)
          return
       end if
-
 C
       azimuth=moonPolar(3)*DEG
       elevation=moonPolar(2)*DEG
@@ -17824,8 +17905,10 @@ C
       real moonPos(6)
       real moonCart(3)
       real moonPolar(3)
+      common /CMOON/ moonPos, moonCart, moonPolar
       real rxy
       real rMoon
+      parameter ( rMoon     =  1738.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation
@@ -17843,7 +17926,6 @@ C
       integer length
       external length
 C
-      rMoon     =  1738.0D0
       call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -18272,9 +18354,11 @@ C
       real sunPos(6)
       real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3) ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
+      common /CSUN/ sunPos, sunCart, sunPolar
       real moonPos(6)
       real moonCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real moonPolar(3) ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
+      common /CMOON/ moonPos, moonCart, moonPolar
       real earthCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunAng,earthAng,ang
 C
@@ -18452,8 +18536,10 @@ C
       real moonPos(6)
       real moonCart(3)
       real moonPolar(3)
+      common /CMOON/ moonPos, moonCart, moonPolar
       real rxy
       real rMoon
+      parameter ( rMoon     = 1738.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation
@@ -18473,7 +18559,6 @@ C
       integer length
       external length
 C
-      rMoon     = 1738.0D0
       call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -18675,8 +18760,10 @@ C
       integer irc
       integer lencrc
       real sunPos(6)
-      real axis(6)
-      real rSun,rEarth,dist
+      real axis(6),dist
+      real rSun,rEarth
+      parameter ( rSun     = 682500.0D0)
+      parameter ( rEarth   =   6378.0D0 )
 C
       character*20 myname
       data myname /'getPolarSunAngle'/
@@ -18734,8 +18821,6 @@ C
 C
 C     correct for upper sun limb (assuming that Sun disc has same size locally as from GC)
 C     
-      rSun     = 682500.0D0
-      rEarth   =   6378.0D0 
       dist=getAbs(sunPos)
 C
       if (loclat.gt.0.0D0) then
@@ -18770,8 +18855,10 @@ C
       integer irc
       integer lencrc
       real sunPos(6)
-      real axis(6)
-      real rSun,rEarth,dist
+      real axis(6),dist
+      real rSun,rEarth
+      parameter ( rSun     = 682500.0D0 )
+      parameter ( rEarth   =   6378.0D0 )
 C
       character*20 myname
       data myname /'getPolarSunAngleX'/
@@ -18829,8 +18916,6 @@ C
 C
 C     correct for upper sun limb (assuming that Sun disc has same size locally as from GC)
 C     
-      rSun     = 682500.0D0
-      rEarth   =   6378.0D0 
       dist=getAbs(sunPos)
 C
       if (loclat.gt.0.0D0) then
@@ -18880,8 +18965,10 @@ C
       integer irc
       integer lencrc
       real moonPos(6)
-      real axis(6)
-      real rMoon,rEarth,dist
+      real axis(6),dist
+      real rMoon,rEarth
+      parameter ( rMoon    =   1738.1D0 )
+      parameter ( rEarth   =   6378.0D0 )
 C
       character*20 myname
       data myname /'getPolarMoonAngle'/
@@ -18968,8 +19055,6 @@ C
 C
 C     correct for upper moon limb (assuming that Moon disc has same size locally as from GC)
 C     
-      rMoon    =   1738.1D0
-      rEarth   =   6378.0D0 
       dist=getAbs(moonPos)
 C
       if (loclat.gt.0.0D0) then
@@ -19011,6 +19096,8 @@ C
       character*20 myname
       data myname /'getPolarMoonAngleX'/
       real dist,rEarth,rMoon
+      parameter ( rMoon    =   1736.1D0 )
+      parameter ( rEarth   =   6378.0D0 )
       real ang0,ang,moonAng,atan2deg,getAngle,getAbs
       external atan2deg,getAngle,getAbs
       integer length
@@ -19079,8 +19166,6 @@ C
 C
 C     correct for upper sun limb (assuming that Sun disc has same size locally as from GC)
 C     
-      rMoon    =   1736.1D0
-      rEarth   =   6378.0D0 
       dist=getAbs(moonPos)
 C
 C      !write(*,*)'PolarMoonAngle:',ang,moonPos
@@ -19248,8 +19333,10 @@ C
       real sunPos(6)
       real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3)
+      common /CSUN/ sunPos, sunCart, sunPolar
       real rxy
       real rSun
+      parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation
@@ -19271,7 +19358,6 @@ C
       real a,f
       parameter (a=6378.155 D0,f=1.D0/298.257 D0)
 C
-      rSun     = 682500.0D0
       call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -19346,8 +19432,10 @@ C
       real sunPos(6)
       real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3)
+      common /CSUN/ sunPos, sunCart, sunPolar
       real rxy
       real rSun
+      parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation
@@ -19365,7 +19453,6 @@ C
       integer length
       external length
 C
-      rSun     = 682500.0D0
       call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -19781,8 +19868,10 @@ C
       real sunPos(6)
       real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3)
+      common /CSUN/ sunPos, sunCart, sunPolar
       real rxy
       real rSun
+      parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation
@@ -19802,7 +19891,6 @@ C
       integer length
       external length
 C
-      rSun     = 682500.0D0
       call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
@@ -20222,8 +20310,10 @@ C
       real sunPos(6)
       real sunCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3)
+      common /CSUN/ sunPos, sunCart, sunPolar
       real rxy
       real rSun
+      parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation
@@ -20243,7 +20333,6 @@ C
       integer length
       external length
 C
-      rSun     = 682500.0D0
       call JPLephRead(JD,crc250,irc) ! load current solar system positions into memory
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)

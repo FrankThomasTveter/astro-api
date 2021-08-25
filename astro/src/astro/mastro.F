@@ -3263,9 +3263,9 @@ C     sort reports chronologically
             rr=ind(rrx)
             call chop0(rep250(rr,ll),250)
             lenr=length(rep250(rr,ll),250,20)
-            write(*,*) "***REP*** "//locid100(ll)(1:lenl)//
-     &           "  "//rep250(rr,ll)(1:lenr),
-     &           repid(rr,ll),repval(rr,ll)
+            write(*,*) repid(rr,ll),
+     &           repval(rr,ll),locid100(ll)(1:lenl)//
+     &           "  "//rep250(rr,ll)(1:lenr) ! ,repJD(rrx,ll)
          end do
       end do
 C

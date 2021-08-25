@@ -128,8 +128,8 @@ C
       character*250 crc250      ! error description
       integer irc               ! error return code (0=ok)
 C
-      character*50 :: x50, y50, z50, t50
-      integer :: lenx, leny, lenz, lent
+      character*50 :: r50, t50, u50, v50, w50, x50, y50, z50
+      integer :: lenr, lent, lenu, lenv, lenw, lenx, leny, lenz
 C
       integer, external :: length
       integer :: yy1,mm1,dd1,hh1,mi1
@@ -206,10 +206,12 @@ C     120 - REPORT LOCAL INITIAL SUN STATE
      &        secdec,           ! number of second decimals used in output report string 
      &        crc250,           ! error description
      &        irc)              ! error return code (0=ok)
-         do ii=1,nrep-2
+         do ii=1,nrep-4
             if (repId(ii).eq.120 .and. ! sun state
      &           repId(ii+1).eq.121 .and. ! polar effect
-     &           repId(ii+2).eq.122) then ! elevation
+     &           repId(ii+2).eq.122 .and. ! elevation
+     &           repId(ii+3).eq.123 .and. ! azimuth
+     &           repId(ii+4).eq.124) then ! range
 C     ! write sun information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
@@ -217,22 +219,24 @@ C     ! write sun information
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                if (nint(repVal(ii)).eq.1) then
-                  y50="true"
+                  u50="true"
                else
-                  y50="false"
+                  u50="false"
                end if
-               leny=len(trim(y50))
+               lenu=len(trim(u50))
                if (nint(repVal(ii+1)).eq.1) then
-                  z50="day"
+                  v50="day"
                else if (nint(repVal(ii+1)).eq.0) then
-                  z50="none"
+                  v50="none"
                else if (nint(repVal(ii+1)).eq.-1) then
-                  z50="night"
+                  v50="night"
                end if
-               lenz=len(trim(z50))
+               lenv=len(trim(v50))
                x50=getValN50(repval(ii+2),lenx,4)
-               write(s250,120)dat25,x50(1:lenx),
-     &              y50(1:leny),z50(1:lenz)
+               y50=getValN50(repval(ii+3),leny,4)
+               z50=getValN50(repval(ii+4),lenz,1)
+               write(s250,120)dat25,x50(1:lenx),y50(1:leny),z50(1:lenz),
+     &              u50(1:lenu),v50(1:lenv)
                call chop0(s250,250)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
@@ -241,65 +245,13 @@ C     ! write sun information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 120     FORMAT('<sun time="',A25,'" elevation="',A,
+ 120     FORMAT('<sunState time="',A25,'" elevation="',A,
+     &     '" azimuth="',A,
+     &     '" range="',A,
      &        '" visible="',A,'" polar="',A,'"/>')
-         if (dd.eq.1) then
 C     
 C     100 - REPORT LOCAL INITIAL MOON STATE
-            eventId=100
-            nrep=0
-            irc=0
-            tstopjd=tstartjd+1.0D0
-            call astroEvent(
-     &           tstartJD,      ! start time (in julianDay)
-     &           searchCode,    ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
-     &           tstopJD,       ! report all events end time (in julianDay)
-     &           eventId,       ! requested event id (SEE TABLE BELOW)
-     &           neventVal,     ! number of event input data (SEE TABLE BELOW)
-     &           eventVal,      ! event input data (SEE TABLE BELOW)
-     &           maxrep,        ! maximum number of output reports
-     &           nrep,          ! number of output reports
-     &           repJD,         ! time of output report (in julianDay)
-     &           repId,         ! output report identification (SEE TABLE BELOW)
-     &           repVal,        ! output report value (SEE TABLE BELOW)
-     &           rep250,        ! output report string (redundant description)
-     &           secdec,        ! number of second decimals used in output report string 
-     &           crc250,        ! error description
-     &           irc)           ! error return code (0=ok)
-C     <!-- moon stuff -->
-C     <xsl:template match="/*/astro:Event[@Id='100']">
-C     <moonphase time="{astro:Report[@repId='102']/@time}"
-C     value="{astro:Report[@repId='102']/@repVal}"
-C     desc="{substring(astro:Report[@repId='102']/@hint,21)}"/>
-C     <moonshadow time="{astro:Report[@repId='103']/@time}"
-C     elevation="{astro:Report[@repId='104']/@repVal}"
-C     azimuth="{astro:Report[@repId='103']/@repVal}"
-C     desc="{substring(astro:Report[@repId='103']/@hint,21)}"/>
-C     </xsl:template>
-            do ii=1,nrep-2
-               if (repId(ii).eq.102 .and.
-     &              repId(ii+1).eq.103 .and.
-     &              repId(ii+2).eq.104) then ! phase
-C     ! write moon shadow information
-                  call chop0(rep250(ii),250)
-                  lens=length(rep250(ii+1),250,20)
-                  x50=getValN50(repval(ii+2),lenx,4)
-                  y50=getValN50(repval(ii+1),leny,4)
-                  write(s250,100)dat25,x50(1:lenx),y50(1:leny) ! rep250(ii+1)(21:lens)
-                  call chop0(s250,250)
-                  lens=length(s250,250,30)
-                  nline=min(maxline,nline+1)
-                  jdline(nline)=t2000-1.0D-5
-                  write(line250(nline),'(A)') '   '//s250(1:lens)
-                  lenline(nline)=len(trim(line250(nline)))
-               end if
-            end do
-         end if
- 100     FORMAT('<moonShadow time="',A25,'" iangle="',A,
-     &        '" cangle="',A,'"/>')
-         
-C     110 - REPORT LOCAL TC EF MOON POSITION AT TIME INCREMENT
-         eventId=110
+         eventId=100
          nrep=0
          irc=0
          tstopjd=tstartjd+1.0D0
@@ -319,45 +271,69 @@ C     110 - REPORT LOCAL TC EF MOON POSITION AT TIME INCREMENT
      &        secdec,           ! number of second decimals used in output report string 
      &        crc250,           ! error description
      &        irc)              ! error return code (0=ok)
-C     <xsl:template match="/*/astro:Event[@Id='110']/astro:Report">
-C     <moonposition time="{@time}"
-C     elevation="{@repVal}"
-C     azimuth="{following-sibling::astro:Report[@repId='111' and @time = current()/@time]/@repVal}"
-C     range="{following-sibling::astro:Report[@repId='112' and @time = current()/@time]/@repVal}"
-C     phase="{following-sibling::astro:Report[@repId='115' and @time = current()/@time]/@repVal}"
-C     desc="{substring(@hint,21)}"/>
+C     <!-- moon stuff -->
+C     <xsl:template match="/*/astro:Event[@Id='100']">
+C     <moonphase time="{astro:Report[@repId='102']/@time}"
+C     value="{astro:Report[@repId='102']/@repVal}"
+C     desc="{substring(astro:Report[@repId='102']/@hint,21)}"/>
+C     <moonshadow time="{astro:Report[@repId='103']/@time}"
+C     elevation="{astro:Report[@repId='104']/@repVal}"
+C     azimuth="{astro:Report[@repId='103']/@repVal}"
+C     desc="{substring(astro:Report[@repId='103']/@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-5
-            if (repId(ii).eq.110.and. ! elevation
-     &           repId(ii+1).eq.111 .and. ! azimuth
-     &           repId(ii+2).eq.112 .and. ! range
-     &           repId(ii+5).eq.115) then ! phase
-C     ! write moon phase information
-               t2000=repJD(ii)+offset
-               call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+         do ii=1,nrep-7
+            if (repId(ii).eq.100 .and. ! above horison
+     &           repId(ii+1).eq.101 .and. ! polar
+     &           repId(ii+2).eq.102 .and. ! phase
+     &           repId(ii+3).eq.103 .and. ! clock angle
+     &           repId(ii+4).eq.104 .and. ! illumination angle
+     &           repId(ii+5).eq.105 .and. ! elevation
+     &           repId(ii+6).eq.106 .and. ! azimuth
+     &           repId(ii+7).eq.107) then ! range
+C     ! write moon shadow information
                call chop0(rep250(ii),250)
-               lens=length(rep250(ii),250,20)
-               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               x50=getValn50(repval(ii),lenx,4)
-               y50=getValn50(repval(ii+1),leny,4)
-               z50=getValn50(repval(ii+2),lenz,1)
-               t50=getValn50(repval(ii+5),lent,1)
-               write(s250,110)dat25,x50(1:lenx),y50(1:leny),
-     &              z50(1:lenz),t50(1:lent) ! rep250(ii)(21:lens)
+               lens=length(rep250(ii+1),250,20)
+               if (nint(repVal(ii)).eq.1) then
+                  u50="true"
+               else
+                  u50="false"
+               end if
+               lenu=len(trim(u50))
+               if (nint(repVal(ii+1)).eq.1) then
+                  v50="day"
+               else if (nint(repVal(ii+1)).eq.0) then
+                  v50="none"
+               else if (nint(repVal(ii+1)).eq.-1) then
+                  v50="night"
+               end if
+               lenv=len(trim(v50))
+               w50=getValN50(repval(ii+2),lenw,1) ! phase
+               x50=getValN50(repval(ii+5),lenx,4) ! elevation
+               y50=getValN50(repval(ii+6),leny,4) ! azimuth
+               z50=getValN50(repval(ii+7),lenz,1) ! range
+               r50=getValN50(repval(ii+3),lenr,1) ! clock
+               t50=getValN50(repval(ii+4),lent,1) ! illumination
+               write(s250,100)dat25,
+     &              x50(1:lenx),y50(1:leny),z50(1:lenz),
+     &              r50(1:lenr),t50(1:lent),
+     &              w50(1:lenw),
+     &              u50(1:lenu),v50(1:lenv)
                call chop0(s250,250)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
-               jdline(nline)=t2000
+               jdline(nline)=t2000+1.0D-5
                write(line250(nline),'(A)') '   '//s250(1:lens)
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 110  FORMAT('<moon time="',A25,'" elevation="',A,
-     &     '" azimuth="',A,
-     &     '" range="',A,
-     &     '" phase="',A,'"/>')
-
-C
+ 100     FORMAT('<moonState time="',A25,'" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
+     &        '" cangle="',A,
+     &        '" iangle="',A,
+     &        '" phase="',A,
+     &        '" visible="',A,'" polar="',A,'"/>')
+C     
 C     600 - DETECT LOCAL DIURNAL SUN RISE
          eventId=600
          nrep=0
@@ -604,7 +580,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 660  FORMAT('<twilightNauticalStart time="',A25,'" azimuth="',A,'"/>')
+ 660  FORMAT('<nauticalTwilightBegins time="',A25,'" azimuth="',A,'"/>')
 
 C     670 - DETECT LOCAL DIURNAL NAUTICAL TWILIGHT STOP
          eventId=670
@@ -649,7 +625,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 670  FORMAT('<twilightNauticalEnd time="',A25,'" azimuth="',A,'"/>')
+ 670  FORMAT('<nauticalTwilightEnds time="',A25,'" azimuth="',A,'"/>')
 C
 C     680 - DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT START
          eventId=680
@@ -694,7 +670,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 680     FORMAT('<twilightAstronomicalStart time="',A25,
+ 680     FORMAT('<astronomicalTwilightBegins time="',A25,
      &        '" azimuth="',A,'"/>')
          
 C     690 - DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT STOP
@@ -740,7 +716,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 690     FORMAT('<twilightAstronomicalEnd time="',A25,
+ 690     FORMAT('<astronomicalTwilightEnds time="',A25,
      &        '" azimuth="',A,'"/>')
 C     
 C     700 - DETECT LOCAL DIURNAL NIGHT START
@@ -786,7 +762,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 700     FORMAT('<nightStart time="',A25,'" azimuth="',A,'"/>')
+ 700     FORMAT('<nightBegins time="',A25,'" azimuth="',A,'"/>')
 
 C     710 - DETECT LOCAL DIURNAL NIGHT STOP
          eventId=710
@@ -831,7 +807,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 710     FORMAT('<nightStop time="',A25,'" azimuth="',A,'"/>')
+ 710     FORMAT('<nightEnds time="',A25,'" azimuth="',A,'"/>')
 
 C     800 - DETECT LOCAL DIURNAL MOON RISE
          eventId=800
@@ -1096,7 +1072,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 900  FORMAT('<polarDayStart time="',A25,'"/>')
+ 900  FORMAT('<polarDayBegins time="',A25,'"/>')
 
 C     910 - DETECT LOCAL POLAR SUN DAY STOP
          eventId=910
@@ -1139,7 +1115,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 910  FORMAT('<polarDayEnd time="',A25,'"/>')
+ 910  FORMAT('<polarDayEnds time="',A25,'"/>')
 
 C     920 - DETECT LOCAL POLAR SUN NIGHT START
          eventId=920
@@ -1182,7 +1158,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 920  FORMAT('<polarNightStart time="',A25,'"/>')
+ 920  FORMAT('<polarNightBegins time="',A25,'"/>')
 
 C     940 - DETECT LOCAL POLAR SUN NIGHT STOP
          eventId=940
@@ -1225,7 +1201,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 930  FORMAT('<polarNightEnd time="',A25,'"/>')
+ 930  FORMAT('<polarNightEnds time="',A25,'"/>')
 C
 C     push data to output arrays
 C
@@ -1248,7 +1224,7 @@ C     close time tag
          ilenline(inline)=len(trim(iline250(inline)))
       end do
 C
-C     add a final moonposition
+C     add a final moonstate
 C
       tstartjd=date-offset+real(days)
       s2000=date+real(days)
@@ -1262,12 +1238,71 @@ C
       write(iline250(inline),'(A)') '  '//s250(1:lens)
       ilenline(inline)=len(trim(iline250(inline)))
       
-
-C     110 - REPORT LOCAL TC EF MOON POSITION AT TIME INCREMENT
-      eventId=110
+C     
+C     120 - REPORT LOCAL INITIAL SUN STATE
+      eventId=120
       nrep=0
       irc=0
-      
+      tstopjd=tstartjd+1.0D0
+      call astroEvent(
+     &     tstartJD,            ! start time (in julianDay)
+     &     searchCode,          ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
+     &     tstopJD,             ! report all events end time (in julianDay)
+     &     eventId,             ! requested event id (SEE TABLE BELOW)
+     &     neventVal,           ! number of event input data (SEE TABLE BELOW)
+     &     eventVal,            ! event input data (SEE TABLE BELOW)
+     &     maxrep,              ! maximum number of output reports
+     &     nrep,                ! number of output reports
+     &     repJD,               ! time of output report (in julianDay)
+     &     repId,               ! output report identification (SEE TABLE BELOW)
+     &     repVal,              ! output report value (SEE TABLE BELOW)
+     &     rep250,              ! output report string (redundant description)
+     &     secdec,              ! number of second decimals used in output report string 
+     &     crc250,              ! error description
+     &     irc)                 ! error return code (0=ok)
+      do ii=1,nrep-4
+         if (repId(ii).eq.120 .and. ! sun state
+     &        repId(ii+1).eq.121 .and. ! polar effect
+     &        repId(ii+2).eq.122 .and. ! elevation
+     &        repId(ii+3).eq.123 .and. ! azimuth
+     &        repId(ii+4).eq.124) then ! range
+C     ! write sun information
+            t2000=repJD(ii)+offset
+            call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+            write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
+            call chop0(rep250(ii),250)
+            lens=length(rep250(ii),250,20)
+            if (nint(repVal(ii)).eq.1) then
+               u50="true"
+            else
+               u50="false"
+            end if
+            lenu=len(trim(u50))
+            if (nint(repVal(ii+1)).eq.1) then
+               v50="day"
+            else if (nint(repVal(ii+1)).eq.0) then
+               v50="none"
+            else if (nint(repVal(ii+1)).eq.-1) then
+               v50="night"
+            end if
+            lenv=len(trim(v50))
+            x50=getValN50(repval(ii+2),lenx,4)
+            y50=getValN50(repval(ii+3),leny,4)
+            z50=getValN50(repval(ii+4),lenz,1)
+            write(s250,120)dat25,x50(1:lenx),y50(1:leny),z50(1:lenz),
+     &           u50(1:lenu),v50(1:lenv)
+            call chop0(s250,250)
+            lens=length(s250,250,30)
+            inline=min(imaxline,inline+1)
+            write(iline250(inline),'(A)') '   '//s250(1:lens)
+            ilenline(inline)=len(trim(iline250(inline)))
+         end if
+      end do
+
+C     100 - REPORT LOCAL INITIAL MOON STATE
+      eventId=100
+      nrep=0
+      irc=0
       tstopjd=tstartjd+1.0D0
       call astroEvent(
      &     tstartJD,            ! start time (in julianDay)
@@ -1294,32 +1329,54 @@ C     range="{following-sibling::astro:Report[@repId='112' and @time = current()
 C     phase="{following-sibling::astro:Report[@repId='115' and @time = current()/@time]/@repVal}"
 C     desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-      do ii=1,nrep-5
-         if (repId(ii).eq.110) then ! elevation
-C     ! write moon phase information
-            t2000=repJD(ii)+offset
-            call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+      do ii=1,nrep-7
+         if (repId(ii).eq.100 .and. ! above horison
+     &        repId(ii+1).eq.101 .and. ! polar
+     &        repId(ii+2).eq.102 .and. ! phase
+     &        repId(ii+3).eq.103 .and. ! clock angle
+     &        repId(ii+4).eq.104 .and. ! illumination angle
+     &        repId(ii+5).eq.105 .and. ! elevation
+     &        repId(ii+6).eq.106 .and. ! azimuth
+     &        repId(ii+7).eq.107) then ! range
+C     ! write moon shadow information
             call chop0(rep250(ii),250)
-            lens=length(rep250(ii),250,20)
-C            write(*,*) "times:",tstartjd, t2000,offset,dd1,hh1
-            write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-            if (repId(ii+1).eq.111 .and. ! azimuth
-     &           repId(ii+2).eq.112 .and. ! range
-     &           repId(ii+5).eq.115) then ! phase
-               x50=getValn50(repval(ii),lenx,4)
-               y50=getValn50(repval(ii+1),leny,4)
-               z50=getValn50(repval(ii+2),lenz,1)
-               t50=getValn50(repval(ii+5),lent,1)
-               write(s250,110)dat25,x50(1:lenx),y50(1:leny),
-     &                 z50(1:lenz),t50(1:lent) ! rep250(ii)(21:lens)
-               call chop0(s250,250)
-               lens=length(s250,250,30)
-               inline=min(imaxline,inline+1)
-               write(iline250(inline),'(A)') '   '//s250(1:lens)
-               ilenline(inline)=len(trim(iline250(inline)))
+            lens=length(rep250(ii+1),250,20)
+            if (nint(repVal(ii)).eq.1) then
+               u50="true"
+            else
+               u50="false"
             end if
+            lenu=len(trim(u50))
+            if (nint(repVal(ii+1)).eq.1) then
+               v50="day"
+            else if (nint(repVal(ii+1)).eq.0) then
+               v50="none"
+            else if (nint(repVal(ii+1)).eq.-1) then
+               v50="night"
+            end if
+            lenv=len(trim(v50))
+            w50=getValN50(repval(ii+2),lenw,1) ! phase
+            x50=getValN50(repval(ii+5),lenx,4) ! elevation
+            y50=getValN50(repval(ii+6),leny,4) ! azimuth
+            z50=getValN50(repval(ii+7),lenz,1) ! range
+            r50=getValN50(repval(ii+3),lenr,1) ! clock
+            t50=getValN50(repval(ii+4),lent,1) ! illumination
+
+            write(*,*) 'Adding final moonstate'
+
+            write(s250,100)dat25,
+     &           x50(1:lenx),y50(1:leny),z50(1:lenz),
+     &           r50(1:lenr),t50(1:lent),
+     &           w50(1:lenw),
+     &           u50(1:lenu),v50(1:lenv)
+            call chop0(s250,250)
+            lens=length(s250,250,30)
+            inline=min(imaxline,inline+1)
+            write(iline250(inline),'(A)') '   '//s250(1:lens)
+            ilenline(inline)=len(trim(iline250(inline)))
          end if
       end do
+C
 C     close time tag
       write(s250,91)
       call chop0(s250,250)
