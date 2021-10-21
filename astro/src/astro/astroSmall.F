@@ -69,7 +69,7 @@ C
 
       nline=min(maxline,nline+1)
       write(line250(nline),'(A)')
-     &     '<astroData xmlns:xsi='//
+     &     '<astrodata xmlns:xsi='//
      &     '"http://www.w3.org/2001/XMLSchema-instance"'//
      &     ' xsi:noNamespaceSchemaLocation='//
      &     '"http://schema.api.met.no/schemas/astrodata-2.0.xsd">'
@@ -84,7 +84,7 @@ C
      &     maxline,nline,line250,lenline)
 
       nline=min(maxline,nline+1)
-      write(line250(nline),'(A)')'</astroData>'
+      write(line250(nline),'(A)')'</astrodata>'
       lenline(nline)=len(trim(line250(nline)))
 C     
       contains
@@ -134,6 +134,10 @@ C
       integer, external :: length
       integer :: yy1,mm1,dd1,hh1,mi1
       integer :: newnn
+
+      real rSun, rMoon, elevation, azimuth, range, upperlimb
+      parameter ( rSun     = 682500.0D0 )
+      parameter ( rMoon     =  1738.0D0 )
 
       character*250 :: s250
       character*50 :: val50
@@ -245,9 +249,9 @@ C     ! write sun information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 120     FORMAT('<sunState time="',A25,'" elevation="',A,
-     &     '" azimuth="',A,
-     &     '" range="',A,
+ 120     FORMAT('<sunposition time="',A25,'" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
      &        '" visible="',A,'" polar="',A,'"/>')
 C     
 C     100 - REPORT LOCAL INITIAL MOON STATE
@@ -321,12 +325,12 @@ C     ! write moon shadow information
                call chop0(s250,250)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
-               jdline(nline)=t2000+1.0D-5
+               jdline(nline)=t2000-1.0D-5
                write(line250(nline),'(A)') '   '//s250(1:lens)
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 100     FORMAT('<moonState time="',A25,'" elevation="',A,
+ 100     FORMAT('<moonposition time="',A25,'" elevation="',A,
      &        '" azimuth="',A,
      &        '" range="',A,
      &        '" cangle="',A,
@@ -360,14 +364,14 @@ C     <sunrise time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
             if (repId(ii).eq.600.and. ! event
-     &           repId(ii+1).eq.601) then ! azimuth
+     &           repId(ii+2).eq.602) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii+2),leny,4)
                write(s250,600)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -377,7 +381,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 600  FORMAT('<sunRise time="',A25,'" azimuth="',A,'"/>')
+ 600  FORMAT('<sunrise time="',A25,'" azimuth="',A,'"/>')
 
 C     610 - DETECT LOCAL DIURNAL SUN SET
          eventId=610
@@ -405,14 +409,14 @@ C     <sunset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
             if (repId(ii).eq.610.and. ! event
-     &           repId(ii+1).eq.611) then ! azimuth
+     &           repId(ii+2).eq.612) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii+2),leny,4)
                write(s250,610)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -422,7 +426,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 610  FORMAT('<sunSet time="',A25,'" azimuth="',A,'"/>')
+ 610  FORMAT('<sunset time="',A25,'" azimuth="',A,'"/>')
 
 C     620 - DETECT LOCAL DIURNAL MAXIMUM SOLAR ELEVATION
          eventId=620
@@ -449,9 +453,9 @@ C     <xsl:template match="/*/astro:Event[@Id='620']/astro:Report">
 C     <solarnoon time="{@time}" elevation="{@repVal}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
-            if (repId(ii).eq.620.and. ! upper limb elevation
-     &           repId(ii+1).eq.621.and. ! azimuth
-     &           repId(ii+2).eq.622) then ! elevation
+            if (repId(ii+1).eq.621.and. ! elevation
+     &           repId(ii+2).eq.622.and. ! azimuth
+     &           repId(ii+3).eq.623) then ! range
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
@@ -460,13 +464,19 @@ C     ! write sunrise information
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
 C               write(*,*)'REP:',ii,repjd(ii),tstartJD,tstopJD,
 C     &              offset ! rep250(ii)(21:lens)
-               x50=getValn50(repval(ii),lenx,4)
-               y50=getValn50(repval(ii+1),leny,4)
-               sup=(repval(ii).gt.-refraction)
+               x50=getValn50(repval(ii+1),lenx,4)
+               y50=getValn50(repval(ii+2),leny,4)
+               z50=getValn50(repval(ii+3),lenz,1)
+               elevation=repval(ii+1)
+               range=repval(ii+3)
+               upperlimb=elevation + (rSun/range)
+               sup=(upperlimb.gt.-refraction)
                if (sup) then
-                  write(s250,620)dat25,x50(1:lenx),y50(1:leny) !rep250(ii)(21:lens)
+                  write(s250,620)dat25,x50(1:lenx),y50(1:leny),
+     &                 z50(1:lenz) !rep250(ii)(21:lens)
                else
-                  write(s250,621)dat25,x50(1:lenx),y50(1:leny) !rep250(ii)(21:lens)
+                  write(s250,621)dat25,x50(1:lenx),y50(1:leny),
+     &                 z50(1:lenz) !rep250(ii)(21:lens)
                end if
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -476,10 +486,16 @@ C     &              offset ! rep250(ii)(21:lens)
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 620  FORMAT('<sunHigh time="',A25,'" elevation="',A,
-     &        '" azimuth="',A,'" visible="true"/>')
- 621  FORMAT('<sunHigh time="',A25,'" elevation="',A,
-     &        '" azimuth="',A,'" visible="false"/>')
+ 620     FORMAT('<solarnoon time="',A25,
+     &        '" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
+     &        '" visible="true"/>')
+ 621     FORMAT('<solarnoon time="',A25,
+     &        '" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
+     &        '" visible="false"/>')
 
 C     630 - DETECT LOCAL DIURNAL MINIMUM SOLAR ELEVATION
          eventId=630
@@ -506,22 +522,28 @@ C     <xsl:template match="/*/astro:Event[@Id='630']/astro:Report">
 C     <solarmidnight time="{@time}" elevation="{@repVal}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
-            if (repId(ii).eq.630.and. ! upper limb elevation
-     &           repId(ii+1).eq.631.and. ! azimuth
-     &           repId(ii+2).eq.632) then! elevation
+            if (repId(ii+1).eq.631.and. ! elevation
+     &           repId(ii+2).eq.632.and. ! azimuth
+     &           repId(ii+3).eq.633) then! range
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               x50=getValn50(repval(ii),lenx,4)
-               y50=getValn50(repval(ii+1),leny,4)
-               sup=(repval(ii).gt.-refraction)
+               x50=getValn50(repval(ii+1),lenx,4)
+               y50=getValn50(repval(ii+2),leny,4)
+               z50=getValn50(repval(ii+3),lenz,1)
+               elevation=repval(ii+1)
+               range=repval(ii+3)
+               upperlimb=elevation + (rSun/range)
+               sup=(upperlimb.gt.-refraction)
                if (sup) then
-                  write(s250,630)dat25,x50(1:lenx),y50(1:leny) !rep250(ii)(21:lens)
+                  write(s250,630)dat25,x50(1:lenx),y50(1:leny),
+     &                 z50(1:lenz) !rep250(ii)(21:lens)
                else
-                  write(s250,631)dat25,x50(1:lenx),y50(1:leny) !rep250(ii)(21:lens)
+                  write(s250,631)dat25,x50(1:lenx),y50(1:leny),
+     &                 z50(1:lenz) !rep250(ii)(21:lens)
                end if
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -531,12 +553,19 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 630  FORMAT('<sunLow time="',A25,'" elevation="',
-     &        A,'" azimuth="',A,'" visible="true"/>')
- 631  FORMAT('<sunLow time="',A25,'" elevation="',
-     &        A,'" azimuth="',A,'" visible="false"/>')
-
+ 630     FORMAT('<solarmidnight time="',A25,
+     &        '" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
+     &        '" visible="true"/>')
+ 631     FORMAT('<solarmidnight time="',A25,
+     &        '" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
+     &        '" visible="false"/>')
+         
 C
+#ifdef TWILIGHT
 C     660 - DETECT LOCAL DIURNAL NAUTICAL TWILIGHT START
          eventId=660
          nrep=0
@@ -808,6 +837,7 @@ C     ! write sunrise information
             end if
          end do
  710     FORMAT('<nightEnds time="',A25,'" azimuth="',A,'"/>')
+#endif
 
 C     800 - DETECT LOCAL DIURNAL MOON RISE
          eventId=800
@@ -835,16 +865,16 @@ C     <moonrise time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-3
             if (repId(ii).eq.800.and. ! event
-     &           repId(ii+1).eq.803 .and. ! azimuth
-     &           repId(ii+3).eq.805) then ! illumination
+     &           repId(ii+2).eq.804 .and. ! azimuth
+     &           repId(ii+4).eq.806) then ! illumination
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
-               z50=getValn50(repval(ii+3),lenz,1)
+               y50=getValn50(repval(ii+2),leny,4)
+               z50=getValn50(repval(ii+4),lenz,1)
                write(s250,800)dat25,y50(1:leny),
      &              z50(1:lenz) ! rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -855,7 +885,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 800  FORMAT('<moonRise time="',A25,'" azimuth="',A,
+ 800  FORMAT('<moonrise time="',A25,'" azimuth="',A,
      &        '" illumination="',A,'"/>')
 
 C     810 - DETECT LOCAL DIURNAL MOON SET
@@ -884,16 +914,16 @@ C     <moonset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep
             if (repId(ii).eq.810.and. ! event
-     &           repId(ii+1).eq.813 .and. ! azimuth
-     &           repId(ii+3).eq.815) then ! illumination
+     &           repId(ii+2).eq.814 .and. ! azimuth
+     &           repId(ii+4).eq.816) then ! illumination
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
-               z50=getValn50(repval(ii+3),lenz,1)
+               y50=getValn50(repval(ii+2),leny,4)
+               z50=getValn50(repval(ii+4),lenz,1)
                write(s250,810)dat25,y50(1:leny),
      &              z50(1:lenz) ! rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -904,7 +934,7 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 810  FORMAT('<moonSet time="',A25,'" azimuth="',A,
+ 810  FORMAT('<moonset time="',A25,'" azimuth="',A,
      &        '" illumination="',A,'"/>')
 
 C     820 - DETECT LOCAL DIURNAL MAXIMUM MOON ELEVATION
@@ -932,26 +962,30 @@ C     <xsl:template match="/*/astro:Event[@Id='820']/astro:Report">
 C     <high_moon time="{@time}" elevation="{@repVal}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-3
-            if (repId(ii).eq.820 .and. ! upper limb elevation
-     &           repId(ii+1).eq.823 .and. ! azimuth
-     &           repId(ii+2).eq.824 .and. ! elevation
-     &           repId(ii+3).eq.825) then ! illumination
+            if (repId(ii+1).eq.823 .and. ! elevation
+     &           repId(ii+2).eq.824 .and. ! azimuth
+     &           repId(ii+3).eq.825 .and. ! range
+     &           repId(ii+4).eq.826) then ! illumination
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               x50=getValn50(repval(ii),lenx,4)
-               y50=getValn50(repval(ii+1),leny,4)
+               x50=getValn50(repval(ii+1),lenx,4)
+               y50=getValn50(repval(ii+2),leny,4)
                z50=getValn50(repval(ii+3),lenz,1)
-               sup=(repval(ii).gt.-refraction)
+               u50=getValn50(repval(ii+4),lenu,1)
+               elevation=repval(ii+1)
+               range=repval(ii+3)
+               upperlimb=elevation + (rMoon/range)
+               sup=(upperlimb.gt.-refraction)
                if (sup) then
                   write(s250,820)dat25,x50(1:lenx),y50(1:leny),
-     &                 z50(1:lenz) ! rep250(ii)(21:lens)
+     &                 z50(1:lenz), u50(1:lenu) ! rep250(ii)(21:lens)
                else
                   write(s250,821)dat25,x50(1:lenx),y50(1:leny),
-     &                 z50(1:lenz) ! rep250(ii)(21:lens)
+     &                 z50(1:lenz), u50(1:lenu) ! rep250(ii)(21:lens)
                end if
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -961,10 +995,12 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 820  FORMAT('<moonHigh time="',A25,'" elevation="',A,
-     &        '" azimuth="',A,'" illumination="',A,
+ 820  FORMAT('<high_moon time="',A25,'" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
+     &        '" illumination="',A,
      &        '" visible="true"/>')
- 821  FORMAT('<moonHigh time="',A25,'" elevation="',A,
+ 821  FORMAT('<high_moon time="',A25,'" elevation="',A,
      &        '" azimuth="',A,'" illumination="',A,
      &        '" visible="false"/>')
 
@@ -993,26 +1029,30 @@ C     <xsl:template match="/*/astro:Event[@Id='830']/astro:Report">
 C     <low_moon time="{@time}" elevation="{@repVal}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-3
-            if (repId(ii).eq.830 .and. ! upper limb elevation
-     &           repId(ii+1).eq.833 .and. ! azimuth
-     &           repId(ii+2).eq.834 .and. ! elevation
-     &           repId(ii+3).eq.835) then ! illumination
+            if (repId(ii+1).eq.833 .and. ! elevation
+     &           repId(ii+2).eq.834 .and. ! azimuth
+     &           repId(ii+3).eq.835 .and. ! range
+     &           repId(ii+4).eq.836) then ! illumination
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               x50=getValn50(repval(ii),lenx,4)
-               y50=getValn50(repval(ii+1),leny,4)
+               x50=getValn50(repval(ii+1),lenx,4)
+               y50=getValn50(repval(ii+2),leny,4)
                z50=getValn50(repval(ii+3),lenz,1)
-               sup=(repval(ii).gt.-refraction)
+               u50=getValn50(repval(ii+4),lenu,1)
+               elevation=repval(ii+1)
+               range=repval(ii+3)
+               upperlimb=elevation + (rMoon/range)
+               sup=(upperlimb.gt.-refraction)
                if (sup) then
                   write(s250,830)dat25,x50(1:lenx),y50(1:leny),
-     &                 z50(1:lenz) ! rep250(ii)(21:lens)
+     &                 z50(1:lenz),u50(1:lenu) ! rep250(ii)(21:lens)
                else
                   write(s250,831)dat25,x50(1:lenx),y50(1:leny),
-     &                 z50(1:lenz) ! rep250(ii)(21:lens)
+     &                 z50(1:lenz),u50(1:lenu) ! rep250(ii)(21:lens)
                end if
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -1022,13 +1062,17 @@ C     ! write sunrise information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 830  FORMAT('<moonLow time="',A25,'" elevation="',A,
-     &        '" azimuth="',A,'" illumination="',A,
+ 830     FORMAT('<low_moon time="',A25,'" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
+     &        '" illumination="',A,
      &        '" visible="true"/>')
- 831  FORMAT('<moonLow time="',A25,'" elevation="',A,
-     &        '" azimuth="',A,'" illumination="',A,
+ 831     FORMAT('<low_moon time="',A25,'" elevation="',A,
+     &        '" azimuth="',A,
+     &        '" range="',A,
+     &        '" illumination="',A,
      &        '" visible="false"/>')
-
+         
 C     900 - DETECT LOCAL POLAR SUN DAY START
          eventId=900
          nrep=0
@@ -1395,8 +1439,8 @@ C     close location tag
  80   FORMAT('<location latitude="',A
      &     ,'" longitude="',A,'" height="',A,'">')
  81   FORMAT('</location>')
- 90   FORMAT('<day date="',A10,'">')
- 91   FORMAT('</day>')
+ 90   FORMAT('<time date="',A10,'">')
+ 91   FORMAT('</time>')
 
 
  999  FORMAT(I4.4,"-",I2.2,"-",I2.2,"T",I2.2,":",I2.2,":",I2.2,A6) ! 19

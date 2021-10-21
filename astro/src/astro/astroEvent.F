@@ -456,8 +456,8 @@ C
 C
       logical req(3)
       integer, parameter :: lval  = 1  ! value
-      integer, parameter :: lsun  = 2  ! sun center elevation
-      integer, parameter :: lmoon = 3  ! sun upper elevation
+      integer, parameter :: lsun  = 2  ! sun
+      integer, parameter :: lmoon = 3  ! moon
 C
       character*12 myname
       data myname /'ASTROEVENT'/
@@ -6472,8 +6472,8 @@ C
 C
       character*22 myname
       data myname /'reportMaxMoonElevation'/
-      external getMoonUpperElevation
-      real getMoonUpperElevation
+      external getMoonElevation
+      real getMoonElevation
       real dtin                 ! initial step length
 C
       dtin=0.05D0
@@ -6481,7 +6481,7 @@ C
 C
       req(lval)=.false.;req(lsun)=.false.;req(lmoon)=.true.
       call reportLLMax(
-     &     getMoonUpperElevation,addLLreport,
+     &     getMoonElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -6669,15 +6669,15 @@ C
       real dtin                 ! initial step length
       character*22 myname
       data myname /'reportMaxSunElevation'/
-      external getSunUpperElevation
-      real getSunUpperElevation
+      external getSunElevation
+      real getSunElevation
 C
       call chop0(event100,100)
 C
       dtin=0.05D0
       req(lval)=.false.;req(lsun)=.true.;req(lmoon)=.false.
       call reportLLMax(
-     &     getSunUpperElevation,addLLreport,
+     &     getSunElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -7163,8 +7163,8 @@ C
 C
       character*22 myname
       data myname /'reportMinMoonElevation'/
-      external getMoonUpperElevation
-      real getMoonUpperElevation
+      external getMoonElevation
+      real getMoonElevation
       real dtin                 ! initial step length
 C
       dtin=0.05D0
@@ -7172,7 +7172,7 @@ C
 C
       req(lval)=.false.;req(lsun)=.false.;req(lmoon)=.true.
       call reportLLMin(
-     &     getMoonUpperElevation,addLLreport,
+     &     getMoonElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -7358,15 +7358,15 @@ C
       real dtin                 ! initial step length
       character*22 myname
       data myname /'reportMinSunElevation'/
-      external getSunUpperElevation
-      real getSunUpperElevation
+      external getSunElevation
+      real getSunElevation
 C
       call chop0(event100,100)
 C
       dtin=0.05D0
       req(lval)=.false.;req(lsun)=.true.;req(lmoon)=.false.
       call reportLLMin(
-     &     getSunUpperElevation,addLLreport,
+     &     getSunElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -7582,7 +7582,7 @@ C
       real rxy
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real elevation,azimuth,range
+      real elevation,azimuth,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -7620,12 +7620,12 @@ C
 C     
 C     report moon above/below horison
 C
-      elevation=getMoonUpperElevation(JD,
-     &     loclat,loclon,lochgt,crc250,irc) ! uppder disk limb
+      upperlimb=getMoonUpperElevation(JD,
+     &     loclat,loclon,lochgt,crc250,irc) ! disk uppder limb
+C
 C     moonPolar is in a common-block set by getMoonUpperElevation...
       azimuth=moonPolar(3)*DEG
-C      elevation=moonPolar(2)*DEG
-C     &     + (rMoon/moonPolar(1))*DEG ! disk upper limb
+      elevation=moonPolar(2)*DEG
       range=moonPolar(1)
 C     
 C     polar moon day
@@ -7685,7 +7685,7 @@ C
 C     make reports
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         if (elevation.gt.-refraction) then ! moon is up
+         if (upperlimb.gt.-refraction) then ! moon is up
             write(rep250(nrep),'(A,X,A,X,A)')
      &           T30(1:lent),event100(1:lend)," * ABOVE HORISON"
             repval(nrep)=+1.0D0
@@ -8103,7 +8103,7 @@ C
       parameter ( rMoon     =  1738.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real elevation,azimuth,range,iangle,cangle
+      real elevation,azimuth,range,iangle,cangle,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -8245,8 +8245,8 @@ C
 C
          azimuth=moonPolar(3)*DEG
          elevation=moonPolar(2)*DEG
-     &        + (rMoon/moonPolar(1))*DEG ! disk upper limb
          range=moonPolar(1)
+         upperlimb=elevation + (rMoon/moonPolar(1))*DEG ! disk upper limb
 C     make report
          if (nrep+1.le.maxrep) then
             if (secdec.gt.0) then
@@ -9053,6 +9053,16 @@ C     make report
                repid(nrep)=eventId + (ii-1)*10 + 1
                repval(nrep)=azimuth
             end if
+            nrep=nrep+1
+            if (nrep.le.maxrep) then
+               write(rep250(nrep),'(A,X,A," ",A," Elv:",F10.3,'//
+     &              '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
+     &              T30(1:lent),event100(1:lend),body10,
+     &              elevation,azimuth,range
+               repJD(nrep)=JD + ii*1.0d-8 + 1.0d-9
+               repid(nrep)=eventId + (ii-1)*10 + 2
+               repval(nrep)=range
+            end if
 C
             if (ii.eq.1) then
                sunCart(1)=cart(1)
@@ -9575,7 +9585,7 @@ C
       real rxy
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real elevation,azimuth,range
+      real elevation,azimuth,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -9609,12 +9619,12 @@ C
 C     
 C     sun above/below horison
 C
-      elevation=getSunUpperElevation(JD,
-     &     loclat,loclon,lochgt,crc250,irc) ! ippder disk limb
+      upperlimb=getSunUpperElevation(JD,
+     &     loclat,loclon,lochgt,crc250,irc) ! disk upper limb
+C
 C     sunPolar is in a common-block set by getSunUpperElevation...
       azimuth=sunPolar(3)*DEG
-C      elevation=sunPolar(2)*DEG
-C     &     + (rSun/sunPolar(1))*DEG ! disk upper limb
+      elevation=sunPolar(2)*DEG
       range=sunPolar(1)
 C     
 C     polar sun day
@@ -9658,7 +9668,7 @@ C
 C     make reports
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         if (elevation.gt.-refraction) then ! sun is up
+         if (upperlimb.gt.-refraction) then ! sun is up
             write(rep250(nrep),'(A,X,A,X,A)')
      &           T30(1:lent),event100(1:lend)," * ABOVE HORISON"
             repval(nrep)=+1.0D0
@@ -9984,7 +9994,7 @@ C
       parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real elevation,azimuth,range
+      real elevation,azimuth,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -10076,8 +10086,8 @@ C
 C     
          azimuth=sunPolar(3)*DEG
          elevation=sunPolar(2)*DEG
-     &        + (rSun/sunPolar(1))*DEG ! disk upper limb
          range=sunPolar(1)
+         upperlimb=elevation + (rSun/sunPolar(1))*DEG ! disk upper limb
 C
 C     make report
 C
@@ -11070,7 +11080,7 @@ C
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
       real azimuth,elevation,illumination,dot
-      real sele, sazi, mazi, mele, mill
+      real sele, sazi, sran, mazi, mele, mran, mill
       integer YY1,MM1,DD1,HH1,MI1
       real sec1,fact
 C
@@ -11167,16 +11177,9 @@ C     sun position
          end if
          sazi=sunPolar(3)*DEG
          sele=sunPolar(2)*DEG !  + (rSun/sunPolar(1))*DEG
+         sran=sunPolar(1) ! range
 C     
          if (req(lsun)) then
-            nrep=nrep+1         ! sun azimuth
-            if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A,X,A)')
-     &              T30(1:lent),event100(1:lend)," (Solar azimuth)"
-               repval(nrep)=sazi
-               repJD(nrep)=JD
-               repid(nrep)=eventid + 1
-            end if
             nrep=nrep+1         ! sun center elevation
             if (nrep.le.maxrep) then
                write(rep250(nrep),'(A,X,A,X,A)')
@@ -11184,7 +11187,24 @@ C
      &              " (Solar elevation)"
                repval(nrep)=sele
                repJD(nrep)=JD
+               repid(nrep)=eventid + 1
+            end if
+            nrep=nrep+1         ! sun azimuth
+            if (nrep.le.maxrep) then
+               write(rep250(nrep),'(A,X,A,X,A)')
+     &              T30(1:lent),event100(1:lend)," (Solar azimuth)"
+               repval(nrep)=sazi
+               repJD(nrep)=JD
                repid(nrep)=eventid + 2
+            end if
+            nrep=nrep+1         ! sun range
+            if (nrep.le.maxrep) then
+               write(rep250(nrep),'(A,X,A,X,A)')
+     &              T30(1:lent),event100(1:lend),
+     &              " (Solar range)"
+               repval(nrep)=sran
+               repJD(nrep)=JD
+               repid(nrep)=eventid + 3
             end if
          end if
 C     moon position
@@ -11238,15 +11258,8 @@ C     moon position
             mill=0.5D0*(1.0D0+dot)*100.0D0 ! lunar illumination
             mazi=moonPolar(3)*DEG
             mele=moonPolar(2)*DEG ! + (rMoon/moonPolar(1))*DEG
+            mran=moonPolar(1)    ! range
 C
-            nrep=nrep+1         ! moon azimuth
-            if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A,X,A)')
-     &              T30(1:lent),event100(1:lend)," (Lunar azimuth)"
-               repval(nrep)=mazi
-               repJD(nrep)=JD
-               repid(nrep)=eventid + 3
-            end if
             nrep=nrep+1         ! moon elevation
             if (nrep.le.maxrep) then
                write(rep250(nrep),'(A,X,A,X,A)')
@@ -11254,7 +11267,24 @@ C
      &              " (Lunar elevation)"
                repval(nrep)=mele
                repJD(nrep)=JD
+               repid(nrep)=eventid + 3
+            end if
+            nrep=nrep+1         ! moon azimuth
+            if (nrep.le.maxrep) then
+               write(rep250(nrep),'(A,X,A,X,A)')
+     &              T30(1:lent),event100(1:lend)," (Lunar azimuth)"
+               repval(nrep)=mazi
+               repJD(nrep)=JD
                repid(nrep)=eventid + 4
+            end if
+            nrep=nrep+1         ! moon range
+            if (nrep.le.maxrep) then
+               write(rep250(nrep),'(A,X,A,X,A)')
+     &              T30(1:lent),event100(1:lend),
+     &              " (Lunar range)"
+               repval(nrep)=mran
+               repJD(nrep)=JD
+               repid(nrep)=eventid + 5
             end if
             nrep=nrep+1         ! moon illumination
             if (nrep.le.maxrep) then
@@ -11263,7 +11293,7 @@ C
      &              " (Lunar illumination)"
                repval(nrep)=mill
                repJD(nrep)=JD
-               repid(nrep)=eventid + 5
+               repid(nrep)=eventid + 6
             end if
          end if
       end if
@@ -13577,8 +13607,8 @@ C
 C
       character*22 myname
       data myname /'searchMaxMoonElevation'/
-      external getMoonUpperElevation
-      real getMoonUpperElevation
+      external getMoonElevation
+      real getMoonElevation
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
@@ -13593,7 +13623,7 @@ C
 C
       req(lval)=.false.;req(lsun)=.false.;req(lmoon)=.true.
       searchMaxMoonElevation=searchLLMax(
-     &     getMoonUpperElevation,addLLreport,
+     &     getMoonElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -13806,8 +13836,8 @@ C
 C
       character*22 myname
       data myname /'searchMaxSunElevation'/
-      external getSunUpperElevation
-      real getSunUpperElevation
+      external getSunElevation
+      real getSunElevation
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
@@ -13821,7 +13851,7 @@ C
       end if
       req(lval)=.false.;req(lsun)=.true.;req(lmoon)=.false.
       searchMaxSunElevation=searchLLMax(
-     &     getSunUpperElevation,addLLreport,
+     &     getSunElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -14484,8 +14514,8 @@ C
 C
       character*22 myname
       data myname /'searchMinMoonElevation'/
-      external getMoonUpperElevation
-      real getMoonUpperElevation
+      external getMoonElevation
+      real getMoonElevation
 C
       dtin=0.05D0
       if (direction.eq.1) then
@@ -14498,7 +14528,7 @@ C
 C
       req(lval)=.false.;req(lsun)=.false.;req(lmoon)=.true.
       searchMinMoonElevation=searchLLMin(
-     &     getMoonUpperElevation,addLLreport,
+     &     getMoonElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -14711,8 +14741,8 @@ C
 C
       character*22 myname
       data myname /'searchMinSunElevation'/
-      external getSunUpperElevation
-      real getSunUpperElevation
+      external getSunElevation
+      real getSunElevation
       real tendJD             ! end time in JD
       real dtin                 ! initial step length
 C
@@ -14726,7 +14756,7 @@ C
       end if
       req(lval)=.false.;req(lsun)=.true.;req(lmoon)=.false.
       searchMinSunElevation=searchLLMin(
-     &     getSunUpperElevation,addLLreport,
+     &     getSunElevation,addLLreport,
      &     lat,lon,hgt,
      &     tstartJD,tendJD,dtin,secdec,
      &     eventId,event100,maxrep,nrep,repJD,repid,repval,rep250,
@@ -17815,7 +17845,7 @@ C
       parameter ( rMoon     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real azimuth,elevation
+      real azimuth,elevation,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -17880,7 +17910,8 @@ C
 C
       azimuth=moonPolar(3)*DEG
       elevation=moonPolar(2)*DEG
-     &     + (rMoon/moonPolar(1))*DEG
+      range=moonPolar(1)
+      upperlimb=elevation + (rMoon/moonPolar(1))*DEG
 C
       getMoonAzimuth=azimuth
 
@@ -17911,7 +17942,7 @@ C
       parameter ( rMoon     =  1738.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real azimuth,elevation
+      real azimuth,elevation,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -17977,7 +18008,8 @@ C
 C
       azimuth=moonPolar(3)*DEG
       elevation=moonPolar(2)*DEG
-C     &     + (rMoon/moonPolar(1))*DEG
+      range=moonPolar(1)
+      upperlimb=elevation + (rMoon/moonPolar(1))*DEG
 C     
 C     Target: lat         gives moon set
 C     Target: lat+360.0D0 gives moon rise
@@ -18542,7 +18574,7 @@ C
       parameter ( rMoon     = 1738.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real azimuth,elevation
+      real azimuth,elevation,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -18610,21 +18642,22 @@ C
 C
       azimuth=moonPolar(3)*DEG
       elevation=moonPolar(2)*DEG
-     &     + (rMoon/moonPolar(1))*DEG
+      range=moonPolar(1)
+      upperlimb=elevation + (rMoon/moonPolar(1))*DEG
 C     
 C     Target: lat         gives moon set
 C     Target: lat+360.0D0 gives moon rise
 C
 CCc      if (abs(diffCycle(azimuth,90.0D0,360.0D0)).lt.90.0D0) then ! 12pm -> 12am (morning)
-         getMoonUpperElevation=elevation
+         getMoonUpperElevation=upperlimb
 CCC      else                      ! evening
-CCC         getMoonUpperElevation=elevation+360.0D0
+CCC         getMoonUpperElevation=upperlimb+360.0D0
 CCC      end if
-C      !write(*,*)myname,'Angles:',azimuth,elevation,
+C      !write(*,*)myname,'Angles:',azimuth,upperlimb,
 C     &     getMoonUpperElevation,moonPolar(2)*DEG
 C      !write(*,*)myname,'******:',azimuth,
 C     &     diffCycle(azimuth,90.0D0,360.0D0),
-C     &     elevation,getMoonUpperElevation
+C     &     upperlimb,getMoonUpperElevation
       return
       end function getMoonUpperElevation
 
@@ -18977,7 +19010,7 @@ C
       integer length
       external length
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real azimuth,elevation
+      real azimuth,elevation,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -19040,7 +19073,8 @@ C
 C
       azimuth=moonPolar(3)*DEG
       elevation=moonPolar(2)*DEG
-     &     + ((rMoon-rEarth)/moonPolar(1))*DEG
+      range=moonPolar(1)
+      upperlimb=elevation + ((rMoon-rEarth)/moonPolar(1))*DEG
 C     
 C      !write(*,*)'AngleBB:',r(1),r(2),r(3),
 C     &     90.0-(elevation+(34.0/60.0))
@@ -19438,7 +19472,7 @@ C
       parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real azimuth,elevation
+      real azimuth,elevation,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -19504,7 +19538,8 @@ C
 C
       azimuth=sunPolar(3)*DEG
       elevation=sunPolar(2)*DEG
-     &     + (rSun/sunPolar(1))*DEG
+      range=sunPolar(1)
+      upperlimb=elevation + (rSun/sunPolar(1))*DEG
 C
       getSunAzimuth=azimuth
 
@@ -19874,7 +19909,7 @@ C
       parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real azimuth,elevation
+      real azimuth,elevation,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -19941,7 +19976,8 @@ C
 C
       azimuth=sunPolar(3)*DEG
       elevation=sunPolar(2)*DEG
-C     &     + (rSun/sunPolar(1))*DEG
+      range=sunPolar(1)
+      upperlimb=elevation + (rSun/sunPolar(1))*DEG
 C     
 C     Target: lat         gives sun set
 C     Target: lat+360.0D0 gives sun rise
@@ -20316,7 +20352,7 @@ C
       parameter ( rSun     = 682500.0D0 )
       real axis(6)
       real phid,xle,xh          ! geodetic lat,lon,altitude above ellipsoide
-      real azimuth,elevation
+      real azimuth,elevation,range,upperlimb
       real*8 r(4), an(7)        ! location in Geocentric Cartesian Earth-Fixed
       integer mode
       parameter (mode=3)        ! only transform pos
@@ -20382,22 +20418,23 @@ C
 C
       azimuth=sunPolar(3)*DEG
       elevation=sunPolar(2)*DEG
-     &     + (rSun/sunPolar(1))*DEG
+      range=sunPolar(1)
+      upperlimb=elevation + (rSun/sunPolar(1))*DEG
 C     
 C      write(*,*)'AngleAA:',r(1),r(2),r(3),
-C     &     90.0-(elevation+(34.0/60.0))
+C     &     90.0-(upperlimb+(34.0/60.0))
 C     
 C     Target: lat         gives sun set
 C     Target: lat+360.0D0 gives sun rise
 C
 C      if (abs(diffCycle(azimuth,90.0D0,360.0D0)).lt.90.0D0) then ! 12pm -> 12am (morning)
-         getSunUpperElevation=elevation
+         getSunUpperElevation=upperlimb
 C      else                      ! evening
-C         getSunUpperElevation=elevation+360.0D0
+C         getSunUpperElevation=upperlimb+360.0D0
 C      end if
 C      !write(*,*)myname,'******:',azimuth,
 C     &     diffCycle(azimuth,90.0D0,360.0D0),
-C     &     elevation,getSunUpperElevation
+C     &     upperlimb,getSunUpperElevation
       return
       end function getSunUpperElevation
 C
