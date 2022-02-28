@@ -54,7 +54,7 @@
       real RE,FLAT,FLATSQ,CLIGHT, xflatsq
       COMMON /CGEOME/ RE,FLAT,FLATSQ,CLIGHT
       integer ii,jj,tt,ttx
-      real jd2000(njd),rot(3,nbodies), pos(6,nbodies)
+      real jd2000(njd),rot(3,nbodies), pos(6,nbodies), pol(6,nbodies)
       integer yy,mm,dd,hh,mi,ind(njd)
       real sec, loc(3,5), p(3,3), ip(3,3)
       real cd,sd,cr,sr,clat,slat,clon,slon
@@ -147,8 +147,12 @@
          rot(2,ii)=cd*sr
          rot(3,ii)=sd
          call multiply(ip,rot(1,ii)) ! -> mean of date J2000
-         pole(1,ii)=atan2deg(rot(1,ii),rot(2,ii))
-         pole(2,ii)=asindeg(rot(3,ii))
+         pol(1,ii)=atan2deg(rot(1,ii),rot(2,ii))
+         pol(2,ii)=asindeg(rot(3,ii))
+         pol(3,ii)=pole(3,ii)
+         pol(4,ii)=pole(4,ii)
+         pol(5,ii)=pole(5,ii)
+         pol(6,ii)=pole(6,ii)
       end do
 !     
 !     print rotation vectors in MJD2000 ( = world coordinate system)
@@ -189,12 +193,12 @@
       do jj=1,nbodies
          nline=min(maxline,nline+1)
          write(line250(nline),'(2X,17(A))')
-     &        '<body ra="',ccr(pole(1,jj)),
-     &        '" dec="',ccr(pole(2,jj)),
-     &        '" w="',ccr(pole(3,jj)),
-     &        '" dwdt="',ccr(pole(4,jj)),
-     &        '" main="',trim(nam10(nint(pole(5,jj)))),
-     &        '" xmu="',ccr(pole(6,jj)),
+     &        '<body ra="',ccr(pol(1,jj)),
+     &        '" dec="',ccr(pol(2,jj)),
+     &        '" w="',ccr(pol(3,jj)),
+     &        '" dwdt="',ccr(pol(4,jj)),
+     &        '" main="',trim(nam10(nint(pol(5,jj)))),
+     &        '" xmu="',ccr(pol(6,jj)),
      &        '" id="',cci(jj),
      &        '" name="',trim(nam10(jj)),
      &        '"/>'
