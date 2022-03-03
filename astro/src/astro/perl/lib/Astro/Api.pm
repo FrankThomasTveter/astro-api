@@ -5,6 +5,7 @@ package Astro::Api;
 
 use strict;
 use warnings;
+use URI::Escape;
 
 use Astro::Astro qw(:all);
 
@@ -20,20 +21,20 @@ sub config_value {
 
 sub state {
     # reads $ENV{QUERY_STRING} directly
-    return pm_state($ENV{QUERY_STRING});
+    return pm_state(uri_unescape($ENV{QUERY_STRING}));
 }
 
 sub short {
-    return pm_short($ENV{QUERY_STRING});
+    return pm_short(uri_unescape($ENV{QUERY_STRING}));
 }
 
 sub small {
-    return pm_small($ENV{QUERY_STRING});
+    return pm_small(uri_unescape($ENV{QUERY_STRING}));
 }
 
 sub event {
     # reads $ENV{QUERY_STRING} directly
-    return pm_event($ENV{QUERY_STRING});
+    return pm_event(uri_unescape($ENV{QUERY_STRING}));
 }
 
 # sub used to test library...
