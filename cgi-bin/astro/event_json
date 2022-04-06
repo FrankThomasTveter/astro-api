@@ -1,0 +1,7 @@
+#! /bin/csh
+#
+setenv QUERY_STRING 'eventStart=2008-06-23T23:00:00Z;eventSearch=1;eventVal1=60.;eventVal2=0.;eventVal3=0.;event1Id=810;'
+#setenv QUERY_STRING 'debug=1;eventVal1=60.0;eventVal2=0.0;eventVal3=0.0;eventVal4=90;eventStart=2014-10-10T10:10:10Z;eventSearch=1;event1Id=800;event2Id=810;event3Id=820;event4Id=830;event5Id=840;'
+#
+./event_json.pl
+#
