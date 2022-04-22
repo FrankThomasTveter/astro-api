@@ -4,6 +4,7 @@
 # it tries to read from <stdin>.
 #
 # Running the program using an input file:
+./astro_old.bin < astro.in
 ./astro.bin < astro.in
 #
 # If you wish to give input on the command line,

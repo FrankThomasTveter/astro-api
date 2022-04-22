@@ -35,13 +35,13 @@ C
 C     
 C     ASTRONOMICAL EVENT IDENTIFICATION TABLE
 C
-C     EVENTID  = 90 : 'REPORT LOCAL VISIBLE MOON IN PERIOD'
+C     EVENTID  = 80 : 'REPORT LOCAL VISIBLE MOON IN PERIOD'
 C     i  eventVal(1) = latitude of observer (deg)
 C     i  eventVal(2) = longtitude of observer (deg)
 C     i  eventVal(3) = height of observer (deg)
-C     o  repId = 90 -> repVal = hours visible moon in period
-C     o  repId = 91 -> Moon rise.
-C     o  repId = 95 -> Moon set.
+C     o  repId = 80 -> repVal = hours visible moon in period
+C     o  repId = 81 -> Moon rise.
+C     o  repId = 85 -> Moon set.
 C     
 C     EVENTID  = 100  'REPORT LOCAL INITIAL MOON STATE'
 C     i  eventVal(1) = latitude of observer (deg)
@@ -459,9 +459,9 @@ C
       integer, parameter :: lsun  = 2  ! sun
       integer, parameter :: lmoon = 3  ! moon
       logical zp(3)
-      integer, parameter :: lele  = 1  ! elevation
-      integer, parameter :: lazi  = 2  ! azimuth
-      integer, parameter :: lran  = 3  ! range
+      integer, parameter :: lazi  = 1  ! azimuth
+      integer, parameter :: lran  = 2  ! range
+      integer, parameter :: lele  = 3  ! elevation
       character*12 myname
       data myname /'ASTROEVENT'/
       logical bdeb
@@ -7768,8 +7768,7 @@ C     make reports
       nrep=nrep+1
       if (nrep.le.maxrep) then
          write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
-     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (cangle=",
-     &        cangle,",iangle=",iangle,")"
+     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (clock)"
          call chop0(rep250(nrep),250)
          repval(nrep)=cangle
          repJD(nrep)=JD + 3.0d-9
@@ -7777,9 +7776,9 @@ C     make reports
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
-     &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (cangle=",
-     &        cangle,",iangle=",iangle,")"
+         write(rep250(nrep),'(A,X,A,X,A)')
+     &        T30(1:lent),event100(1:lend),
+     &        " * SHADOW ANGLES (insidence)"
          call chop0(rep250(nrep),250)
          repval(nrep)=iangle
          repJD(nrep)=JD + 4.0d-9
@@ -7787,33 +7786,27 @@ C     make reports
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &        '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &        T30(1:lent),event100(1:lend),
-     &        elevation,azimuth,range
-         repJD(nrep)=JD + 5.0d-9
-         repid(nrep)=eventId + 5
-         repval(nrep)=elevation
-      end if
-      nrep=nrep+1
-      if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &        '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &        T30(1:lent),event100(1:lend),
-     &        elevation,azimuth,range
-         repJD(nrep)=JD + 6.0d-9
-         repid(nrep)=eventId + 6
+         write(rep250(nrep),'(A,X,A," (azimuth)")')
+     &        T30(1:lent),event100(1:lend)
+         repJD(nrep)=JD + dfloat(4+lazi)*1.0d-9
+         repid(nrep)=eventId + 4 + lazi
          repval(nrep)=azimuth
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &        '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &        T30(1:lent),event100(1:lend),
-     &        elevation,azimuth,range
-         repJD(nrep)=JD + 7.0d-9
-         repid(nrep)=eventId + 7
+         write(rep250(nrep),'(A,X,A," (range)")')
+     &        T30(1:lent),event100(1:lend)
+         repJD(nrep)=JD + (4+lran)*1.0d-9
+         repid(nrep)=eventId + 4 + lran
          repval(nrep)=range
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A," (elevation)")')
+     &        T30(1:lent),event100(1:lend)
+         repJD(nrep)=JD + (4+lele)*1.0d-9
+         repid(nrep)=eventId + 4 + lele
+         repval(nrep)=elevation
       end if
       if (bdeb)write(*,*)myname,'Done.',irc
       return
@@ -8297,40 +8290,33 @@ C     make report
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation,azimuth,range
-            repJD(nrep)=JD - 1.0d-8
-            repid(nrep)=eventId + 0
-            repval(nrep)=elevation
-         end if
-         nrep=nrep+1
-         if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation,azimuth,range
-            repJD(nrep)=JD - 1.0d-8 + 1.0d-9
-            repid(nrep)=eventId + 1
+            write(rep250(nrep),'(A,X,A," (azimuth)")')
+     &           T30(1:lent),event100(1:lend)
+            repJD(nrep)=JD - 1.0d-8 + (lazi-1)*1.0d-9
+            repid(nrep)=eventId - 1 + lazi
             repval(nrep)=azimuth
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation,azimuth,range
-            repJD(nrep)=JD - 1.0d-8 + 2.0d-9
-            repid(nrep)=eventId + 2
+            write(rep250(nrep),'(A,X,A," (range)")')
+     &           T30(1:lent),event100(1:lend)
+            repJD(nrep)=JD - 1.0d-8 + (lran-1)*1.0d-9
+            repid(nrep)=eventId - 1 + lran
             repval(nrep)=range
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
+            write(rep250(nrep),'(A,X,A," (elevation)")')
+     &           T30(1:lent),event100(1:lend)
+            repJD(nrep)=JD - 1.0d-8 + (lele-1)*1.0d-9
+            repid(nrep)=eventId - 1 + lele
+            repval(nrep)=elevation
+         end if
+         nrep=nrep+1
+         if (nrep.le.maxrep) then
+            write(rep250(nrep),'(A,X,A,X,A)')
      &           T30(1:lent),event100(1:lend),
-     &           " * SHADOW ANGLES (cangle=",
-     &           cangle,",iangle=",iangle,")"
+     &           " * SHADOW ANGLES (clock)"
             call chop0(rep250(nrep),250)
             repval(nrep)=cangle
             repJD(nrep)=JD - 1.0d-8 + 3.0d-9
@@ -8338,10 +8324,9 @@ C     make report
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A,X,A,F0.1,A,F0.1,A)')
+            write(rep250(nrep),'(A,X,A,X,A)')
      &           T30(1:lent),event100(1:lend),
-     &           " * SHADOW ANGLES (cangle=",
-     &           cangle,",iangle=",iangle,")"
+     &           " * SHADOW ANGLES (insidence)"
             call chop0(rep250(nrep),250)
             repval(nrep)=iangle
             repJD(nrep)=JD - 1.0d-8 + 4.0d-9
@@ -9069,33 +9054,27 @@ C     make report
             end if
             nrep=nrep+1
             if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A," ",A," Elv:",F10.3,'//
-     &              '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &              T30(1:lent),event100(1:lend),body10,
-     &              elevation,azimuth,range
-               repJD(nrep)=JD + ii*1.0d-8
-               repid(nrep)=eventId + (ii-1)*10 + 0
-               repval(nrep)=elevation
-            end if
-            nrep=nrep+1
-            if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A," ",A," Elv:",F10.3,'//
-     &              '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &              T30(1:lent),event100(1:lend),body10,
-     &              elevation,azimuth,range
-               repJD(nrep)=JD + ii*1.0d-8 + 1.0d-9
-               repid(nrep)=eventId + (ii-1)*10 + 1
+               write(rep250(nrep),'(A,X,A," ",A," (azimuth)")')
+     &              T30(1:lent),event100(1:lend),body10
+               repJD(nrep)=JD + ii*1.0d-8 + dfloat(lazi)*1.0d-9
+               repid(nrep)=eventId + (ii-1)*10 -1 + lazi
                repval(nrep)=azimuth
             end if
             nrep=nrep+1
             if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A," ",A," Elv:",F10.3,'//
-     &              '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &              T30(1:lent),event100(1:lend),body10,
-     &              elevation,azimuth,range
-               repJD(nrep)=JD + ii*1.0d-8 + 1.0d-9
-               repid(nrep)=eventId + (ii-1)*10 + 2
+               write(rep250(nrep),'(A,X,A," ",A," (range)")')
+     &              T30(1:lent),event100(1:lend),body10
+               repJD(nrep)=JD + ii*1.0d-8 + lran*1.0d-9
+               repid(nrep)=eventId + (ii-1)*10 - 1 + lran
                repval(nrep)=range
+            end if
+            nrep=nrep+1
+            if (nrep.le.maxrep) then
+               write(rep250(nrep),'(A,X,A," ",A," (elevation)")')
+     &              T30(1:lent),event100(1:lend),body10
+               repJD(nrep)=JD + ii*1.0d-8 + lele*1.0d-9
+               repid(nrep)=eventId + (ii-1)*10 - 1 + lele
+               repval(nrep)=elevation
             end if
 C
             if (ii.eq.1) then
@@ -9123,7 +9102,7 @@ C
      &                 '(A,X,A," ",A," Illumination:",F5.1)')
      &                 T30(1:lent),event100(1:lend),body10,
      &                 mill
-                  repJD(nrep)=JD + ii*1.0d-8 + 2.0d-9
+                  repJD(nrep)=JD + ii*1.0d-8 + 3.0d-9
                   repid(nrep)=eventId + (ii-1)*10 + 3
                   repval(nrep)=mill
                end if
@@ -9741,34 +9720,28 @@ C     make reports
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg * ELEVATION")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation
-         repval(nrep)=elevation
-         repJD(nrep)=JD + 2.0d-9
-         repid(nrep)=eventId + 2
+         write(rep250(nrep),'(A,X,A," (azimuth)")')
+     &        T30(1:lent),event100(1:lend)
+         repJD(nrep)=JD + dfloat(1+lazi)*1.0d-9
+         repid(nrep)=eventId + 1 + lazi
+         repval(nrep)=azimuth
       end if
-         nrep=nrep+1
-         if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation,azimuth,range
-            repJD(nrep)=JD + 3.0d-9
-            repid(nrep)=eventId + 3
-            repval(nrep)=azimuth
-         end if
-         nrep=nrep+1
-         if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation,azimuth,range
-            repJD(nrep)=JD + 4.0d-9
-            repid(nrep)=eventId + 4
-            repval(nrep)=range
-         end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A," (range)")')
+     &        T30(1:lent),event100(1:lend)
+         repJD(nrep)=JD + (1+lran)*1.0d-9
+         repid(nrep)=eventId + 1 + lran
+         repval(nrep)=range
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+            write(rep250(nrep),'(A,X,A," (elevation)")')
+     &           T30(1:lent),event100(1:lend)
+         repval(nrep)=elevation
+         repJD(nrep)=JD + (1+lele)*1.0d-9
+         repid(nrep)=eventId + 1 + lele
+      end if
       if (bdeb)write(*,*)myname,'Ended minor loop.',idt
       if (bdeb)write(*,*)myname,'Done.',irc
       return
@@ -10154,33 +10127,27 @@ C
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation,azimuth,range
-            repJD(nrep)=JD - 2.0d-8
-            repid(nrep)=eventId + 0
-            repval(nrep)=elevation
-         end if
-         nrep=nrep+1
-         if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation,azimuth,range
-            repJD(nrep)=JD - 2.0d-8 + 1.0d-9
-            repid(nrep)=eventId + 1
+            write(rep250(nrep),'(A,X,A," (azimuth)")')
+     &           T30(1:lent),event100(1:lend)
+            repJD(nrep)=JD - 2.0d-8 + (lazi-1)*1.0d-9
+            repid(nrep)=eventId - 1 + lazi
             repval(nrep)=azimuth
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," Elv:",F10.3,'//
-     &           '" deg, Azi:",F10.3,", Rng:",F15.1," km")')
-     &           T30(1:lent),event100(1:lend),
-     &           elevation,azimuth,range
-            repJD(nrep)=JD - 2.0d-8 + 2.0d-9
-            repid(nrep)=eventId + 2
+            write(rep250(nrep),'(A,X,A," (range)")')
+     &           T30(1:lent),event100(1:lend)
+            repJD(nrep)=JD - 2.0d-8 + (lran-1)*1.0d-9
+            repid(nrep)=eventId - 1 + lran
             repval(nrep)=range
+         end if
+         nrep=nrep+1
+         if (nrep.le.maxrep) then
+            write(rep250(nrep),'(A,X,A," (elevation)")')
+     &           T30(1:lent),event100(1:lend)
+            repJD(nrep)=JD - 2.0d-8 + (lele-1)*1.0d-9
+            repid(nrep)=eventId - 1 + lele
+            repval(nrep)=elevation
          end if
          if (bdeb)write(*,*)myname,'Ended minor loop.',dt
 C     increment time
@@ -11239,25 +11206,14 @@ C     sun position
          sran=sunPolar(1) ! range
 C     
          if (zb(lsun)) then
-            if (zp(lele)) then
-               nrep=nrep+1      ! sun center elevation
-               if (nrep.le.maxrep) then
-                  write(rep250(nrep),'(A,X,A,X,A)')
-     &                 T30(1:lent),event100(1:lend),
-     &                 " (Solar elevation)"
-                  repval(nrep)=sele
-                  repJD(nrep)=JD
-                  repid(nrep)=eventid + 1
-               end if
-            end if
             if (zp(lazi)) then
                nrep=nrep+1      ! sun azimuth
                if (nrep.le.maxrep) then
                   write(rep250(nrep),'(A,X,A,X,A)')
-     &                 T30(1:lent),event100(1:lend)," (Solar azimuth)"
+     &                 T30(1:lent),event100(1:lend)," (azimuth)"
                   repval(nrep)=sazi
-                  repJD(nrep)=JD
-                  repid(nrep)=eventid + 2
+                  repJD(nrep)=JD + dfloat(lazi)*1.0d-9
+                  repid(nrep)=eventid + lazi
                end if
             end if
             if (zp(lran)) then
@@ -11265,10 +11221,21 @@ C
                if (nrep.le.maxrep) then
                   write(rep250(nrep),'(A,X,A,X,A)')
      &                 T30(1:lent),event100(1:lend),
-     &                 " (Solar range)"
+     &                 " (range)"
                   repval(nrep)=sran
-                  repJD(nrep)=JD
-                  repid(nrep)=eventid + 3
+                  repJD(nrep)=JD + lran*1.0d-9
+                  repid(nrep)=eventid + lran
+               end if
+            end if
+            if (zp(lele)) then
+               nrep=nrep+1      ! sun center elevation
+               if (nrep.le.maxrep) then
+                  write(rep250(nrep),'(A,X,A,X,A)')
+     &                 T30(1:lent),event100(1:lend),
+     &                 " (elevation)"
+                  repval(nrep)=sele
+                  repJD(nrep)=JD + lele*1.0d-9
+                  repid(nrep)=eventid + lele
                end if
             end if
          end if
@@ -11325,25 +11292,14 @@ C     moon position
             mele=moonPolar(2)*DEG ! + (rMoon/moonPolar(1))*DEG
             mran=moonPolar(1)    ! range
 C
-            if (zp(lele)) then
-               nrep=nrep+1      ! moon elevation
-               if (nrep.le.maxrep) then
-                  write(rep250(nrep),'(A,X,A,X,A)')
-     &                 T30(1:lent),event100(1:lend),
-     &                 " (Lunar elevation)"
-                  repval(nrep)=mele
-                  repJD(nrep)=JD
-                  repid(nrep)=eventid + 3
-               end if
-            end if
             if (zp(lazi)) then
                nrep=nrep+1      ! moon azimuth
                if (nrep.le.maxrep) then
                   write(rep250(nrep),'(A,X,A,X,A)')
-     &                 T30(1:lent),event100(1:lend)," (Lunar azimuth)"
+     &                 T30(1:lent),event100(1:lend)," (azimuth)"
                   repval(nrep)=mazi
-                  repJD(nrep)=JD
-                  repid(nrep)=eventid + 4
+                  repJD(nrep)=JD + dfloat(2+lazi)*1.0d-9
+                  repid(nrep)=eventid + 2 + lazi
                end if
             end if
             if (zp(lran)) then
@@ -11351,19 +11307,30 @@ C
                if (nrep.le.maxrep) then
                   write(rep250(nrep),'(A,X,A,X,A)')
      &                 T30(1:lent),event100(1:lend),
-     &                 " (Lunar range)"
+     &                 " (range)"
                   repval(nrep)=mran
-                  repJD(nrep)=JD
-                  repid(nrep)=eventid + 5
+                  repJD(nrep)=JD + (2+lran)*1.0d-9
+                  repid(nrep)=eventid + 2 + lran
+               end if
+            end if
+            if (zp(lele)) then
+               nrep=nrep+1      ! moon elevation
+               if (nrep.le.maxrep) then
+                  write(rep250(nrep),'(A,X,A,X,A)')
+     &                 T30(1:lent),event100(1:lend),
+     &                 " (elevation)"
+                  repval(nrep)=mele
+                  repJD(nrep)=JD + (2+lele)*1.0d-9
+                  repid(nrep)=eventid + 2 + lele
                end if
             end if
             nrep=nrep+1         ! moon illumination
             if (nrep.le.maxrep) then
                write(rep250(nrep),'(A,X,A,X,A)')
      &              T30(1:lent),event100(1:lend),
-     &              " (Lunar illumination)"
+     &              " (illumination)"
                repval(nrep)=mill
-               repJD(nrep)=JD
+               repJD(nrep)=JD + 6*1.0d-9
                repid(nrep)=eventid + 6
             end if
          end if

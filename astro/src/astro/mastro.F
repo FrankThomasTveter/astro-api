@@ -2126,8 +2126,8 @@ C
             return
          end if
       END IF
-      IF (lfldat(57)) THEN      !  'DETECT MOON IN UMBRA -UMBRA[0]'
-         eventId=105
+      IF (lfldat(57)) THEN      !  'REPORT LOCAL VISIBLE MOON'
+         eventId=80
          do ii=1,nloc
             eventVal(1)=loclat(ii)
             eventVal(2)=loclon(ii)
@@ -2160,8 +2160,8 @@ C
             end if
          end do
       END IF
-      IF (lfldat(58)) THEN      !  'DETECT MOON IN UMBRA -UMBRA[0]'
-         eventId=125
+      IF (lfldat(58)) THEN      !  'REPORT LOCAL VISIBLE SUN'
+         eventId=140
          do ii=1,nloc
             eventVal(1)=loclat(ii)
             eventVal(2)=loclon(ii)

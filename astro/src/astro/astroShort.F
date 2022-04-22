@@ -297,9 +297,9 @@ C     ! write moon phase information
                if (repId(ii+1).eq.111 .and. ! azimuth
      &              repId(ii+2).eq.112 .and. ! range
      &              repId(ii+5).eq.115) then ! phase
-                  x50=getVal50(repval(ii),lenx)
-                  y50=getVal50(repval(ii+1),leny)
-                  z50=getVal50(repval(ii+2),lenz)
+                  x50=getVal50(repval(ii+2),lenx)
+                  y50=getVal50(repval(ii),leny)
+                  z50=getVal50(repval(ii+1),lenz)
                   t50=getVal50(repval(ii+5),lent)
                   write(s250,110)dat25,x50(1:lenx),y50(1:leny),
      &                 z50(1:lenz),t50(1:lent),rep250(ii)(21:lens)
@@ -924,9 +924,9 @@ C            write(*,*) "times:",tstartjd, t2000,offset,dd1,hh1
             if (repId(ii+1).eq.111 .and. ! azimuth
      &           repId(ii+2).eq.112 .and. ! range
      &           repId(ii+5).eq.115) then ! phase
-               x50=getVal50(repval(ii),lenx)
-               y50=getVal50(repval(ii+1),leny)
-               z50=getVal50(repval(ii+2),lenz)
+               x50=getVal50(repval(ii+2),lenx)
+               y50=getVal50(repval(ii),leny)
+               z50=getVal50(repval(ii+1),lenz)
                t50=getVal50(repval(ii+5),lent)
                write(s250,110)dat25,x50(1:lenx),y50(1:leny),
      &                 z50(1:lenz),t50(1:lent),rep250(ii)(21:lens)
