@@ -215,17 +215,17 @@ C     azimuth="{astro:Report[@repId='103']/@repVal}"
 C     desc="{substring(astro:Report[@repId='103']/@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep-2
-            if (repId(ii).eq.102) then
+            if (repId(ii+2).eq.102) then ! phase
 C     ! write moon phase information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               x50=getVal50(repVal(ii),lenx)
+               x50=getVal50(repVal(ii+2),lenx)
                write(s250,100)dat25,x50(1:lenx),
      &              rep250(ii)(21:lens)
-               ! write(50,*)":"//rep250(ii)(1:lens)//":"
+               ! write(50,*)":"//rep250(ii+2)(1:lens)//":"
                call chop0(s250,250)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
@@ -233,15 +233,15 @@ C     ! write moon phase information
                write(line250(nline),'(A)') '   '//s250(1:lens)
                lenline(nline)=len(trim(line250(nline)))
 C     
-               if (repId(ii+1).eq.103 .and.
-     &              repId(ii+2).eq.104) then ! phase
+               if (repId(ii+3).eq.103 .and. ! clock angle
+     &              repId(ii+4).eq.104) then ! incidence
 C     ! write moon shadow information
                   call chop0(rep250(ii),250)
-                  lens=length(rep250(ii+1),250,20)
-                  x50=getVal50(repval(ii+2),lenx)
-                  y50=getVal50(repval(ii+1),leny)
+                  lens=length(rep250(ii),250,20)
+                  x50=getVal50(repval(ii+3),lenx)
+                  y50=getVal50(repval(ii+4),leny)
                   write(s250,101)dat25,x50(1:lenx),y50(1:leny),
-     &                 rep250(ii+1)(21:lens)
+     &                 rep250(ii)(21:lens)
                   call chop0(s250,250)
                   lens=length(s250,250,30)
                   nline=min(maxline,nline+1)
@@ -255,8 +255,8 @@ C     ! write moon shadow information
 
  100  FORMAT('<moonphase time="',A25,'" value="',A,
      &     '" desc="',A,'"/>')
- 101  FORMAT('<moonshadow time="',A25,'" elevation="',A,
-     &     '" azimuth="',A,'" desc="',A,'"/>')
+ 101  FORMAT('<moonshadow time="',A25,'" azimuth="',A,
+     &     '" elevation="',A,'" desc="',A,'"/>')
 C     110 - REPORT LOCAL TC EF MOON POSITION AT TIME INCREMENT
          eventId=110
          nrep=0
@@ -297,9 +297,9 @@ C     ! write moon phase information
                if (repId(ii+1).eq.111 .and. ! azimuth
      &              repId(ii+2).eq.112 .and. ! range
      &              repId(ii+5).eq.115) then ! phase
-                  x50=getVal50(repval(ii+2),lenx)
-                  y50=getVal50(repval(ii),leny)
-                  z50=getVal50(repval(ii+1),lenz)
+                  x50=getVal50(repval(ii),lenx)
+                  y50=getVal50(repval(ii+1),leny)
+                  z50=getVal50(repval(ii+2),lenz)
                   t50=getVal50(repval(ii+5),lent)
                   write(s250,110)dat25,x50(1:lenx),y50(1:leny),
      &                 z50(1:lenz),t50(1:lent),rep250(ii)(21:lens)
@@ -924,9 +924,9 @@ C            write(*,*) "times:",tstartjd, t2000,offset,dd1,hh1
             if (repId(ii+1).eq.111 .and. ! azimuth
      &           repId(ii+2).eq.112 .and. ! range
      &           repId(ii+5).eq.115) then ! phase
-               x50=getVal50(repval(ii+2),lenx)
-               y50=getVal50(repval(ii),leny)
-               z50=getVal50(repval(ii+1),lenz)
+               x50=getVal50(repval(ii),lenx)
+               y50=getVal50(repval(ii+1),leny)
+               z50=getVal50(repval(ii+2),lenz)
                t50=getVal50(repval(ii+5),lent)
                write(s250,110)dat25,x50(1:lenx),y50(1:leny),
      &                 z50(1:lenz),t50(1:lent),rep250(ii)(21:lens)

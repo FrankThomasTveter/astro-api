@@ -451,7 +451,7 @@ C
       real phase,soccmax,soccmin,refraction
       parameter (refraction= 34.0D0/60.0D0) ! refraction in degrees ( http://en.wikipedia.org/wiki/Atmospheric_refraction : 34')
       logical lmoccmax,lmoccmin,lsoccmax,lsoccmin
-      integer inrep,jnrep,lend,lene,length
+      integer inrep,jnrep,lend,lene,length,slot
       external length
 C
       logical zb(3)
@@ -459,9 +459,9 @@ C
       integer, parameter :: lsun  = 2  ! sun
       integer, parameter :: lmoon = 3  ! moon
       logical zp(3)
-      integer, parameter :: lazi  = 1  ! azimuth
-      integer, parameter :: lran  = 2  ! range
-      integer, parameter :: lele  = 3  ! elevation
+      integer, parameter :: lele  = 1  ! elevation
+      integer, parameter :: lazi  = 2  ! azimuth
+      integer, parameter :: lran  = 3  ! range
       character*12 myname
       data myname /'ASTROEVENT'/
       logical bdeb
@@ -519,6 +519,8 @@ C
 C
       IF (eventId.eq.80) THEN   !  'REPORT VISIBLE MOON IN PERIOD'
          event100='VISIBLE MOON'
+         inrep=nrep+1
+         slot=-3
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -581,8 +583,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.100) THEN !  'REPORT INITIAL MOON STATE'
          event100='LOCAL MOON STATE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -610,8 +617,13 @@ C
             call chop0(crc250,250)
             return
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.110) THEN !  'REPORT MOON POSITION AT TIME INCREMENT'
          event100='LOCAL MOON POSITION'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3.and.neventVal.lt.4) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -647,8 +659,13 @@ C     if (lall) then ! if search only process initial time
             return
          end if
 C     end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.120) THEN !  'REPORT INITIAL SUN STATE'
          event100='LOCAL SUN STATE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -676,8 +693,13 @@ C     end if
             call chop0(crc250,250)
             return
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.140) THEN !  'REPORT VISIBLE SUN IN PERIOD'
          event100='VISIBLE SUN'
+         inrep=nrep+1
+         slot=-3
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -740,8 +762,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.130) THEN !  'REPORT SUN POSITION AT TIME INCREMENT'
          event100='LOCAL SUN POSITION'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3.and.neventVal.lt.4) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -777,8 +804,13 @@ C     if (lall) then ! report for initial time only if search
             return
          end if
 C     end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.150) THEN !  'DETECT SOUTHERN SOLSTICE[0]'
          event100='SOUTHERN SOLSTICE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -836,8 +868,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.160) THEN !  'DETECT ASCENDING SOLAR EQUINOX -VERNAL[0]'
          event100= 'ASCENDING SOLAR EQUINOX'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -895,8 +932,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.170) THEN !  'DETECT NORTHERN SOLSTICE -SUMMER[0]'
          event100='NORTHERN SOLSTICE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -954,8 +996,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.180) THEN !  'DETECT DESCENDING SOLAR EQUINOX -AUTUMNAL[0]'
          event100= 'DESCENDING SOLAR EQUINOX'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1013,8 +1060,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.190) THEN !  'DETECT EARTH IN PERIHELION -PERIHELION[0]'
          event100= 'EARTH IN PERIHELION'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1071,8 +1123,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.195) THEN !  'DETECT EARTH IN APHELION -APHELION[0]'
          event100=   'EARTH IN APHELION'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1129,8 +1186,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.200) THEN !  'DETECT MOON IN PERIGEE -PERIGEE[0]'
          event100= 'MOON IN PERIGEE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1187,8 +1249,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.205) THEN !  'DETECT EARTH IN APOGEE [0]'
          event100=   'MOON IN APOGEE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1245,8 +1312,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.210) THEN !  'DETECT NEW MOON (PHASE=0/100) -MOONNEW[0]'
          event100='NEW MOON (PHASE=0/100)'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1304,8 +1376,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.220) THEN !  'DETECT FIRST QUARTER MOON (PHASE=25) -MOONFIRST[0]'
          event100='FIRST QUARTER MOON (PHASE=25)'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1363,8 +1440,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.230) THEN !  'DETECT FULL MOON (PHASE=50) -MOONFULL[0]'
          event100='FULL MOON (PHASE=50)'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1422,8 +1504,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.240) THEN !  'DETECT LAST QUARTER MOON (PHASE=75) -MOONLAST[0]'
          event100='LAST QUARTER MOON (PHASE=75)'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1481,7 +1568,12 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.250) THEN !  'DETECT MOON PHASE (0 TO 100) -MOONPHASE[*]'
+         inrep=nrep+1
+         slot=0
          if (neventVal.lt.1) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
      &           '" Expected 1 event value, got: ",I4)')
@@ -1541,8 +1633,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.260) THEN !  'DETECT MOON ILLUMINATION MINIMUM -MINMOONILLUM[*]'
          event100='MOON ILLUMINATION MINIMUM'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1599,8 +1696,13 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.270) THEN !  'DETECT MOON ILLUMINATION MAXIMUM -MAXMOONILLUM[*]'
          event100='MOON ILLUMINATION MAXIMUM'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1657,7 +1759,12 @@ C     end if
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.280) THEN !  'DETECT MOON ILLUMINATION (0 TO 100) -MOONILLUM[*]'
+         inrep=nrep+1
+         slot=0
          if (neventVal.lt.1) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
      &           '" Expected 1 event value, got: ",I4)')
@@ -1729,8 +1836,13 @@ C     Neptune 0° 0' 24"     0.0066667 deg/day  59799.14 days  163.72 Earth year
 C     Pluto   0° 0' 14"     0.0038889 deg/day  90553.40 days  247.92 Earth years 
 C     The Moon (around the Earth) 13° 10'35"  13.176389 deg/day 27.3216 days
 C     
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.290) THEN !  'DETECT LUNAR SOUTHERN SOLSTICE [0]'
          event100='SOUTHERN LUNASTICE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -1788,8 +1900,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.292) THEN !  'DETECT ASCENDING LUNAR EQUINOX'
          event100= 'ASCENDING LUNAR EQUINOX'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.0) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3413,8 +3530,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.600) THEN  !  'DETECT LOCAL DIURNAL SUN RISE -SUNRISE[0]%2&3&$'
          event100='LOCAL DIURNAL SUN RISE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3430,7 +3552,6 @@ C
          lat=eventVal(1)
          lon=eventVal(2)
          hgt=eventVal(3)
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunUpperElevation(target,
      &           lat,lon,hgt,
@@ -3482,8 +3603,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.610) THEN !  'DETECT LOCAL DIURNAL SUN SET -SUNSET[0]%2&3&$'
          event100='LOCAL DIURNAL SUN SET'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3499,7 +3625,6 @@ C
          lon=eventVal(2)
          hgt=eventVal(3)
          Target= -refraction    ! target elevation
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunUpperElevation(Target,
      &           lat,lon,hgt,
@@ -3552,10 +3677,12 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       else IF (eventId.eq.620) THEN  !  'DETECT LOCAL DIURNAL MAXIMUM SOLAR ELEVATION -SUNMAXEL[0]%2&3&$'
          event100='LOCAL DIURNAL MAXIMUM SOLAR ELEVATION'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3618,8 +3745,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.630) THEN !  'DETECT LOCAL DIURNAL MINIMUM SOLAR ELEVATION -SUNMINEL[0]%2&3&$'
          event100='LOCAL DIURNAL MINIMUM SOLAR ELEVATION'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3682,8 +3814,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.640) THEN !  'DETECT LOCAL DIURNAL CIVIL TWILIGHT START -CIVSTART[0]%2&3&$'
          event100='LOCAL DIURNAL CIVIL TWILIGHT START'
+         inrep=nrep+1
+         slot=1
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3699,7 +3836,6 @@ C
          lat=eventVal(1)
          lon=eventVal(2)
          hgt=eventVal(3)
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunUpperElevation(target,
      &           lat,lon,hgt,
@@ -3751,8 +3887,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.650) THEN !  'DETECT LOCAL DIURNAL CIVIL TWILIGHT STOP -CIVSTOP[0]%2&3&$'
          event100='LOCAL DIURNAL CIVIL TWILIGHT STOP'
+         inrep=nrep+1
+         slot=-1
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3768,7 +3909,6 @@ C
          lon=eventVal(2)
          hgt=eventVal(3)
          Target= -refraction    ! target elevation
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunUpperElevation(Target,
      &           lat,lon,hgt,
@@ -3821,10 +3961,12 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.660) THEN !  'DETECT LOCAL DIURNAL NAUTICAL TWILIGHT START -NAUSTART[0]%2&3&$'
          event100='LOCAL DIURNAL NAUTICAL TWILIGHT START'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3840,7 +3982,6 @@ C
          lon=eventVal(2)
          hgt=eventVal(3)
          Target= - 6.0D0        ! target elevation
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunElevation(Target,
      &           lat,lon,hgt,
@@ -3893,10 +4034,12 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+2.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.670) THEN !  'DETECT LOCAL DIURNAL NAUTICAL TWILIGHT STOP -NAUSTOP[0]%2&3&$'
          event100='LOCAL DIURNAL NAUTICAL TWILIGHT STOP'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3912,7 +4055,6 @@ C
          lon=eventVal(2)
          hgt=eventVal(3)
          Target= - 6.0D0        ! target elevation
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunElevation(Target,
      &           lat,lon,hgt,
@@ -3965,10 +4107,12 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.680) THEN !  'DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT START -ASTSTART[0]%2&3&$'
          event100='LOCAL DIURNAL ASTRONOMICAL TWILIGHT START'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -3984,7 +4128,6 @@ C
          lon=eventVal(2)
          hgt=eventVal(3)
          Target= - 12.0D0       ! target elevation
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunElevation(Target,
      &           lat,lon,hgt,
@@ -4037,10 +4180,12 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+2.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.690) THEN !  'DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT STOP -ASTSTOP[0]%2&3&$'
          event100='LOCAL DIURNAL ASTRONOMICAL TWILIGHT STOP'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4056,7 +4201,6 @@ C
          lon=eventVal(2)
          hgt=eventVal(3)
          Target= - 12.0D0       ! target elevation
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunElevation(Target,
      &           lat,lon,hgt,
@@ -4109,10 +4253,12 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.700) THEN  !  'DETECT LOCAL DIURNAL NIGHT START -NIGHTSTART[0]%2&3&$'
          event100='LOCAL DIURNAL NIGHT START'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4128,7 +4274,6 @@ C
          lon=eventVal(2)
          hgt=eventVal(3)
          Target= - 18.0D0       ! target elevation
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunElevation(Target,
      &           lat,lon,hgt,
@@ -4181,10 +4326,12 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+2.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.710) THEN !  'DETECT LOCAL DIURNAL NIGHT STOP -NIGHTSTOP[0]%2&3&$'
          event100='LOCAL DIURNAL NIGHT STOP'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4200,7 +4347,6 @@ C
          lon=eventVal(2)
          hgt=eventVal(3)
          Target= -18.0D0        ! target elevation
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportSunElevation(Target,
      &           lat,lon,hgt,
@@ -4253,9 +4399,11 @@ C
             end if
          end if
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-2.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.750) THEN !  'DETECT LOCAL DIURNAL SUN AZIMUTH (0=NORTH, 90=EAST) -SUNAZI[*]%2&3&$'
+         inrep=nrep+1
+         slot=0
          if (neventVal.lt.4) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
      &           '" Expected 4 event values, got: ",I4)')
@@ -4326,7 +4474,12 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.760) THEN !  'DETECT LOCAL DIURNAL APPARENT SOLAR TIME -SOLARTIME[*]%2&3&$'
+         inrep=nrep+1
+         slot=0
          if (neventVal.lt.4) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
      &           '" Expected 4 event values, got: ",I4)')
@@ -4397,7 +4550,12 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.770) THEN !  'DETECT LOCAL DIURNAL APPARENT LUNAR TIME -LUNARTIME[*]%2&3&$'
+         inrep=nrep+1
+         slot=0
          if (neventVal.lt.4) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
      &           '" Expected 4 event values, got: ",I4)')
@@ -4468,8 +4626,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.800) THEN !  'DETECT LOCAL DIURNAL MOON RISE -MOONRISE[0]%2&3&$'
          event100='LOCAL DIURNAL MOON RISE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4531,8 +4694,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.810) THEN !  'DETECT LOCAL DIURNAL MOON SET -MOONSET[0]%2&3&$'
          event100='LOCAL DIURNAL MOON SET'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4594,8 +4762,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       else IF (eventId.eq.820) THEN  !  'DETECT LOCAL DIURNAL MAXIMUM MOON ELEVATION  -MOONMAXEL[0]%2&3&$'
          event100='LOCAL DIURNAL MAXIMUM MOON ELEVATION '
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4658,8 +4831,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.830) THEN !  'DETECT LOCAL DIURNAL MINIMUM MOON ELEVATION  -MOONMINEL[0]%2&3&$'
          event100='LOCAL DIURNAL MINIMUM MOON ELEVATION '
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4722,7 +4900,12 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.840) THEN !  'DETECT LOCAL DIURNAL MOON AZIMUTH (0=NORTH, 90=EAST) -MOONAZI[*]%2&3&$'
+         inrep=nrep+1
+         slot=0
          if (neventVal.lt.4) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
      &           '" Expected 4 event values, got: ",I4)')
@@ -4794,8 +4977,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.900) THEN !  'DETECT LOCAL POLAR DAY START -POLDAYSTART[0]%2&3&$'
          event100='LOCAL POLAR SUN DAY START'
+         inrep=nrep+1
+         slot=2
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4815,7 +5003,6 @@ C
          else
             Target=180.0D0+lat - refraction ! target polar angle
          end if
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarSunAngle(Target,
      &           lat,lon,hgt,
@@ -4887,10 +5074,12 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+1.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.910) THEN !  'DETECT LOCAL POLAR DAY STOP -POLDAYSTOP[0]%2&3&$'
          event100='LOCAL POLAR SUN DAY STOP'
+         inrep=nrep+1
+         slot=-2
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -4910,7 +5099,6 @@ C
          else
             Target=-180.0D0-lat + refraction ! target polar angle
          end if
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarSunAngle(Target,
      &           lat,lon,hgt,
@@ -4982,10 +5170,12 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-1.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.920) THEN !  'DETECT LOCAL POLAR NIGHT START -POLNIGHTSTART[0]%2&3&$'
          event100='LOCAL POLAR SUN NIGHT START'
+         inrep=nrep+1
+         slot=2
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -5005,7 +5195,6 @@ C
          else
             Target=lat + refraction ! target polar angle
          end if
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarSunAngle(Target,
      &           lat,lon,hgt,
@@ -5077,10 +5266,12 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+5.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.930) THEN !  'DETECT LOCAL POLAR NIGHT STOP -POLNIGHTSTOP[0]%2&3&$'
          event100='LOCAL POLAR SUN NIGHT STOP'
+         inrep=nrep+1
+         slot=-2
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -5100,7 +5291,6 @@ C
          else
             Target= - lat - refraction ! target polar angle
          end if
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarSunAngle(Target,
      &           lat,lon,hgt,
@@ -5172,10 +5362,12 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-5.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.940) THEN !  'DETECT LOCAL POLAR LUNAR DAY START -POLDAYSTART[0]%2&3&$'
          event100='LOCAL POLAR LUNAR DAY START'
+         inrep=nrep+1
+         slot=2
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -5195,7 +5387,6 @@ C
          else
             Target=180.0D0+lat - refraction ! target polar angle
          end if
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarMoonAngle(Target,
      &           lat,lon,hgt,
@@ -5267,10 +5458,12 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+5.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.950) THEN !  'DETECT LOCAL POLAR LUNAR DAY STOP -POLDAYSTOP[0]%2&3&$'
          event100='LOCAL POLAR LUNAR DAY STOP'
+         inrep=nrep+1
+         slot=-2
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -5290,7 +5483,6 @@ C
          else
             Target=-180.0D0-lat + refraction ! target polar angle
          end if
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarMoonAngle(Target,
      &           lat,lon,hgt,
@@ -5305,9 +5497,6 @@ C
                call chop0(crc250,250)
                return
             end if
-            do jj=inrep,nrep
-               repJD(jj)=repJD(jj)-1.0d-9
-            end do
          else
             if (lprev) then
                tJD=searchPolarMoonAngle(Target,
@@ -5365,10 +5554,12 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-5.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.960) THEN !  'DETECT LOCAL POLAR LUNAR NIGHT START -POLNIGHTSTART[0]%2&3&$'
          event100='LOCAL POLAR LUNAR NIGHT START'
+         inrep=nrep+1
+         slot=2
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -5388,7 +5579,6 @@ C
          else
             Target=lat + refraction ! target polar angle
          end if
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarMoonAngle(Target,
      &           lat,lon,hgt,
@@ -5403,9 +5593,6 @@ C
                call chop0(crc250,250)
                return
             end if
-            do jj=inrep,nrep
-               repJD(jj)=repJD(jj)+1.0d-9
-            end do
          else
             if (lprev) then
                tJD=searchPolarMoonAngle(Target,
@@ -5463,10 +5650,12 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)+5.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.970) THEN !  'DETECT LOCAL POLAR LUNAR NIGHT STOP -POLNIGHTSTOP[0]%2&3&$'
          event100='LOCAL POLAR LUNAR NIGHT STOP'
+         inrep=nrep+1
+         slot=-2
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -5486,7 +5675,6 @@ C
          else
             Target=-lat - refraction ! target polar angle
          end if
-         inrep=nrep+1
          if (lall) then         ! report all
             call reportPolarMoonAngle(Target,
      &           lat,lon,hgt,
@@ -5501,9 +5689,6 @@ C
                call chop0(crc250,250)
                return
             end if
-            do jj=inrep,nrep
-               repJD(jj)=repJD(jj)-1.0d-9
-            end do
          else
             if (lprev) then
                tJD=searchPolarMoonAngle(Target,
@@ -5561,9 +5746,11 @@ C
             end if
          end do
          do jj=inrep,nrep
-            repJD(jj)=repJD(jj)-5.0d-9
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
          end do
       ELSE IF (eventId.eq.980) THEN !  'DETECT LOCAL SOLAR ECLIPSE (MINOCC MAXOCC)'
+         inrep=nrep+1
+         slot=0
          if (neventVal.lt.5) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
      &           '" Expected 5 event values, got: ",I4)')
@@ -5656,8 +5843,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.990) THEN !  'DETECT LOCAL PARTIAL SOLAR ECLIPSE BY MOON STOP -ECLIPSEPARTSTOP[0]%2&3&$'
          event100='SOLAR ECLIPSE'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.3) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -5725,8 +5917,13 @@ C
                end if
             end if
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE IF (eventId.eq.1000) THEN !  'REPORT POSITIONS AT TIME INCREMENT'
          event100='LOCAL SOLAR SYSTEM POSITIONS'
+         inrep=nrep+1
+         slot=0
          if (bdeb)write(*,*)myname,event100
          if (neventVal.lt.4) then
             write(buff250,'(" < ",A," > EventId: ",I4,'//
@@ -5759,6 +5956,9 @@ C
             call chop0(crc250,250)
             return
          end if
+         do jj=inrep,nrep
+            repJD(jj)=repJD(jj)+dfloat(slot)*1.0d-8
+         end do
       ELSE
          write(id10,'(I10)')eventId
          lencrc=length(crc250,250,10)
@@ -7596,7 +7796,7 @@ C
       character*100 fmt100
       character*30 T30
       character*16 t16
-      integer length,lend,lent
+      integer length,lend,lent,slot
       externale length
       logical bdeb
       data bdeb/.false./
@@ -7709,6 +7909,7 @@ C
          lent=length(T30,30,30)
       end if
 C     make reports
+      slot=-1
       nrep=nrep+1
       if (nrep.le.maxrep) then
          if (upperlimb.gt.-refraction) then ! moon is up
@@ -7720,8 +7921,9 @@ C     make reports
      &           T30(1:lent),event100(1:lend)," * BELOW HORISON"
             repval(nrep)=-1.0D0
          end if
+         slot=slot+1
          repJD(nrep)=JD
-         repid(nrep)=eventid + 0
+         repid(nrep)=eventid + slot
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
@@ -7738,8 +7940,9 @@ C     make reports
      &           T30(1:lent),event100(1:lend)," * NO POLAR EFFECT"
             repval(nrep)=0.0D0
          end if
+         slot=slot+1
          repJD(nrep)=JD + 1.0d-9
-         repid(nrep)=eventId + 1
+         repid(nrep)=eventId + slot
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
@@ -7761,9 +7964,10 @@ C     make reports
      &           " (waning crescent)"
          end if
          call chop0(rep250(nrep),250)
+         slot=slot+1
          repval(nrep)=phase
-         repJD(nrep)=JD + 2.0d-9
-         repid(nrep)=eventid + 2
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventid + slot
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
@@ -7771,8 +7975,9 @@ C     make reports
      &        T30(1:lent),event100(1:lend)," * SHADOW ANGLES (clock)"
          call chop0(rep250(nrep),250)
          repval(nrep)=cangle
-         repJD(nrep)=JD + 3.0d-9
-         repid(nrep)=eventid + 3
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventid + slot
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
@@ -7781,32 +7986,36 @@ C     make reports
      &        " * SHADOW ANGLES (insidence)"
          call chop0(rep250(nrep),250)
          repval(nrep)=iangle
-         repJD(nrep)=JD + 4.0d-9
-         repid(nrep)=eventid + 4
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventid + slot
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A," (azimuth)")')
+         write(rep250(nrep),'(A,X,A," (Lunar elevation)")')
      &        T30(1:lent),event100(1:lend)
-         repJD(nrep)=JD + dfloat(4+lazi)*1.0d-9
-         repid(nrep)=eventId + 4 + lazi
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
+         repval(nrep)=elevation
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A," (Lunar azimuth)")')
+     &        T30(1:lent),event100(1:lend)
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
          repval(nrep)=azimuth
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A," (range)")')
+         write(rep250(nrep),'(A,X,A," (Lunar range)")')
      &        T30(1:lent),event100(1:lend)
-         repJD(nrep)=JD + (4+lran)*1.0d-9
-         repid(nrep)=eventId + 4 + lran
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
          repval(nrep)=range
-      end if
-      nrep=nrep+1
-      if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A," (elevation)")')
-     &        T30(1:lent),event100(1:lend)
-         repJD(nrep)=JD + (4+lele)*1.0d-9
-         repid(nrep)=eventId + 4 + lele
-         repval(nrep)=elevation
       end if
       if (bdeb)write(*,*)myname,'Done.',irc
       return
@@ -8105,7 +8314,7 @@ C
       character*100 fmt100
       character*30 T30
       character*16 t16
-      integer length,lend,lent
+      integer length,lend,lent,slot
       externale length
       logical bdeb
       data bdeb/.false./
@@ -8288,29 +8497,33 @@ C     make report
             call chop0(T30,30)
             lent=length(T30,30,30)
          end if
+         slot=-1
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," (azimuth)")')
+            write(rep250(nrep),'(A,X,A," (Lunar elevation)")')
      &           T30(1:lent),event100(1:lend)
-            repJD(nrep)=JD - 1.0d-8 + (lazi-1)*1.0d-9
-            repid(nrep)=eventId - 1 + lazi
+            slot=slot+1
+            repJD(nrep)=JD - 1.0d-8 + dfloat(slot)*1.0d-9
+            repid(nrep)=eventId + slot
+            repval(nrep)=elevation
+         end if
+         nrep=nrep+1
+         if (nrep.le.maxrep) then
+            write(rep250(nrep),'(A,X,A," (Lunar azimuth)")')
+     &           T30(1:lent),event100(1:lend)
+            slot=slot+1
+            repJD(nrep)=JD - 1.0d-8 + dfloat(slot)*1.0d-9
+            repid(nrep)=eventId + slot
             repval(nrep)=azimuth
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," (range)")')
+            write(rep250(nrep),'(A,X,A," (Lunar range)")')
      &           T30(1:lent),event100(1:lend)
-            repJD(nrep)=JD - 1.0d-8 + (lran-1)*1.0d-9
-            repid(nrep)=eventId - 1 + lran
+            slot=slot+1
+            repJD(nrep)=JD - 1.0d-8 + dfloat(slot)*1.0d-9
+            repid(nrep)=eventId + slot
             repval(nrep)=range
-         end if
-         nrep=nrep+1
-         if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," (elevation)")')
-     &           T30(1:lent),event100(1:lend)
-            repJD(nrep)=JD - 1.0d-8 + (lele-1)*1.0d-9
-            repid(nrep)=eventId - 1 + lele
-            repval(nrep)=elevation
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
@@ -8414,7 +8627,7 @@ C
       real getMoonUpperElevation
 C
       real target               ! target value of Moon celestial longtitude
-      integer jj,inrep
+      integer jj
       real targetCycle
       parameter (targetCycle=720.0D0) ! target value which correponds to 0.0D0
       real refraction
@@ -8422,7 +8635,6 @@ C
 C
       Target= -refraction       ! target elevation
       dt=0.1D0                  ! initial time increment (days)
-      inrep=nrep+1
 C     
       call chop0(event100,100)
 C     
@@ -8443,10 +8655,6 @@ C
          return
       end if
 C     
-      do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0d-9
-      end do
-      
       return
       end subroutine reportMoonRise
       subroutine reportMoonSet(lat,lon,hgt,
@@ -8479,7 +8687,7 @@ C
       real getMoonUpperElevation
 C
       real target               ! target value of Moon celestial longtitude
-      integer jj,inrep
+      integer jj
       real targetCycle
       parameter (targetCycle=720.0D0) ! target value which correponds to 0.0D0
       real refraction
@@ -8487,7 +8695,6 @@ C
 C
       Target= -refraction       ! target elevation
       dt=0.1D0                  ! initial time increment (days)
-      inrep=nrep+1
 C     
       call chop0(event100,100)
 C     
@@ -8507,11 +8714,6 @@ C
          call chop0(crc250,250)
          return
       end if
-C     
-      do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0d-9
-      end do
-      
       return
       end subroutine reportMoonSet
       subroutine reportMoonUpperElevation(Target,
@@ -8823,7 +9025,7 @@ C
       character*100 fmt100
       character*30 T30
       character*16 t16
-      integer length,lend,lent
+      integer length,lend,lent,slot
       externale length
       logical bdeb
       data bdeb/.false./
@@ -9052,29 +9254,33 @@ C     make report
                call chop0(T30,30)
                lent=length(T30,30,30)
             end if
+            slot=-1
             nrep=nrep+1
             if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A," ",A," (azimuth)")')
+               write(rep250(nrep),'(A,X,A," ",A," (Solar elevation)")')
      &              T30(1:lent),event100(1:lend),body10
-               repJD(nrep)=JD + ii*1.0d-8 + dfloat(lazi)*1.0d-9
-               repid(nrep)=eventId + (ii-1)*10 -1 + lazi
+               slot=slot+1
+               repJD(nrep)=JD + ii*1.0d-8 + dfloat(slot)*1.0d-9
+               repid(nrep)=eventId + (ii-1)*10 + slot 
+               repval(nrep)=elevation
+            end if
+            nrep=nrep+1
+            if (nrep.le.maxrep) then
+               write(rep250(nrep),'(A,X,A," ",A," (Solar azimuth)")')
+     &              T30(1:lent),event100(1:lend),body10
+               slot=slot+1
+               repJD(nrep)=JD + ii*1.0d-8 + dfloat(slot)*1.0d-9
+               repid(nrep)=eventId + (ii-1)*10 + slot
                repval(nrep)=azimuth
             end if
             nrep=nrep+1
             if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A," ",A," (range)")')
+               write(rep250(nrep),'(A,X,A," ",A," (Solar range)")')
      &              T30(1:lent),event100(1:lend),body10
-               repJD(nrep)=JD + ii*1.0d-8 + lran*1.0d-9
-               repid(nrep)=eventId + (ii-1)*10 - 1 + lran
+               slot=slot+1
+               repJD(nrep)=JD + ii*1.0d-8 + dfloat(slot)*1.0d-9
+               repid(nrep)=eventId + (ii-1)*10 + slot
                repval(nrep)=range
-            end if
-            nrep=nrep+1
-            if (nrep.le.maxrep) then
-               write(rep250(nrep),'(A,X,A," ",A," (elevation)")')
-     &              T30(1:lent),event100(1:lend),body10
-               repJD(nrep)=JD + ii*1.0d-8 + lele*1.0d-9
-               repid(nrep)=eventId + (ii-1)*10 - 1 + lele
-               repval(nrep)=elevation
             end if
 C
             if (ii.eq.1) then
@@ -9591,7 +9797,7 @@ C
       character*100 fmt100
       character*30 T30
       character*16 t16
-      integer length,lend,lent
+      integer length,lend,lent,slot
       externale length
       logical bdeb
       data bdeb/.false./
@@ -9686,6 +9892,7 @@ C
          lent=length(T30,30,30)
       end if
 C     make reports
+      slot=-1
       nrep=nrep+1
       if (nrep.le.maxrep) then
          if (upperlimb.gt.-refraction) then ! sun is up
@@ -9697,8 +9904,9 @@ C     make reports
      &           T30(1:lent),event100(1:lend)," * BELOW HORISON"
             repval(nrep)=-1.0D0
          end if
-         repJD(nrep)=JD
-         repid(nrep)=eventId + 0
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
@@ -9715,32 +9923,36 @@ C     make reports
      &           T30(1:lent),event100(1:lend)," * NO POLAR EFFECT"
             repval(nrep)=0.0D0
          end if
-         repJD(nrep)=JD + 1.0d-9
-         repid(nrep)=eventId + 1
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A," (azimuth)")')
+            write(rep250(nrep),'(A,X,A," (Solar elevation)")')
+     &           T30(1:lent),event100(1:lend)
+         slot=slot+1
+         repval(nrep)=elevation
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
+      end if
+      nrep=nrep+1
+      if (nrep.le.maxrep) then
+         write(rep250(nrep),'(A,X,A," (Solar azimuth)")')
      &        T30(1:lent),event100(1:lend)
-         repJD(nrep)=JD + dfloat(1+lazi)*1.0d-9
-         repid(nrep)=eventId + 1 + lazi
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
          repval(nrep)=azimuth
       end if
       nrep=nrep+1
       if (nrep.le.maxrep) then
-         write(rep250(nrep),'(A,X,A," (range)")')
+         write(rep250(nrep),'(A,X,A," (Solar range)")')
      &        T30(1:lent),event100(1:lend)
-         repJD(nrep)=JD + (1+lran)*1.0d-9
-         repid(nrep)=eventId + 1 + lran
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
          repval(nrep)=range
-      end if
-      nrep=nrep+1
-      if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," (elevation)")')
-     &           T30(1:lent),event100(1:lend)
-         repval(nrep)=elevation
-         repJD(nrep)=JD + (1+lele)*1.0d-9
-         repid(nrep)=eventId + 1 + lele
       end if
       if (bdeb)write(*,*)myname,'Ended minor loop.',idt
       if (bdeb)write(*,*)myname,'Done.',irc
@@ -9994,7 +10206,7 @@ C
       character*100 fmt100
       character*30 T30
       character*16 t16
-      integer length,lend,lent
+      integer length,lend,lent,slot
       externale length
       logical bdeb
       data bdeb/.false./
@@ -10125,29 +10337,33 @@ C
             call chop0(T30,30)
             lent=length(T30,30,30)
          end if
+         slot=-1
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," (azimuth)")')
+            write(rep250(nrep),'(A,X,A," (Solar elevation)")')
      &           T30(1:lent),event100(1:lend)
-            repJD(nrep)=JD - 2.0d-8 + (lazi-1)*1.0d-9
-            repid(nrep)=eventId - 1 + lazi
+            slot=slot+1
+            repJD(nrep)=JD - 2.0d-8 + dfloat(slot)*1.0d-9
+            repid(nrep)=eventId + slot
+            repval(nrep)=elevation
+         end if
+         nrep=nrep+1
+         if (nrep.le.maxrep) then
+            write(rep250(nrep),'(A,X,A," (Solar azimuth)")')
+     &           T30(1:lent),event100(1:lend)
+            slot=slot+1
+            repJD(nrep)=JD - 2.0d-8 + dfloat(slot)*1.0d-9
+            repid(nrep)=eventId + slot
             repval(nrep)=azimuth
          end if
          nrep=nrep+1
          if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," (range)")')
+            write(rep250(nrep),'(A,X,A," (Solar range)")')
      &           T30(1:lent),event100(1:lend)
-            repJD(nrep)=JD - 2.0d-8 + (lran-1)*1.0d-9
-            repid(nrep)=eventId - 1 + lran
+            slot=slot+1
+            repJD(nrep)=JD - 2.0d-8 + dfloat(slot)*1.0d-9
+            repid(nrep)=eventId + slot
             repval(nrep)=range
-         end if
-         nrep=nrep+1
-         if (nrep.le.maxrep) then
-            write(rep250(nrep),'(A,X,A," (elevation)")')
-     &           T30(1:lent),event100(1:lend)
-            repJD(nrep)=JD - 2.0d-8 + (lele-1)*1.0d-9
-            repid(nrep)=eventId - 1 + lele
-            repval(nrep)=elevation
          end if
          if (bdeb)write(*,*)myname,'Ended minor loop.',dt
 C     increment time
@@ -11085,7 +11301,7 @@ C
 C
       character*100 fmt100
       character*30 T30
-      integer length,lent,lend
+      integer length,lent,lend,slot
       externale length
       logical bdeb,bdone
       data bdeb/.false./
@@ -11139,21 +11355,21 @@ C
       lend=length(event100,100,20)
       addLLreport=t30
 C
+      slot=-1
       nrep=nrep+1
       if (nrep.le.maxrep) then  ! make report
          if (zb(lval)) then
             write(rep250(nrep),'(A,X,A," (",F17.5," )")')
      &           T30(1:lent),event100(1:lend),value
-            repJD(nrep)=JD
-            repid(nrep)=eventId
             repval(nrep)=value
          else
             write(rep250(nrep),'(A,X,A)')
      &           T30(1:lent),event100(1:lend)
-            repJD(nrep)=JD
-            repid(nrep)=eventId
             repval(nrep)=value
          end if
+         slot=slot+1
+         repJD(nrep)=JD + dfloat(slot)*1.0d-9
+         repid(nrep)=eventId + slot
       end if
 C     
       if (zb(lsun).or.zb(lmoon)) then
@@ -11206,14 +11422,27 @@ C     sun position
          sran=sunPolar(1) ! range
 C     
          if (zb(lsun)) then
+            if (zp(lele)) then
+               nrep=nrep+1      ! sun center elevation
+               if (nrep.le.maxrep) then
+                  write(rep250(nrep),'(A,X,A,X,A)')
+     &                 T30(1:lent),event100(1:lend),
+     &                 " (Solar elevation)"
+                  slot=slot+1
+                  repval(nrep)=sele
+                  repJD(nrep)=JD + dfloat(slot)*1.0d-9
+                  repid(nrep)=eventid + slot
+               end if
+            end if
             if (zp(lazi)) then
                nrep=nrep+1      ! sun azimuth
                if (nrep.le.maxrep) then
                   write(rep250(nrep),'(A,X,A,X,A)')
-     &                 T30(1:lent),event100(1:lend)," (azimuth)"
+     &                 T30(1:lent),event100(1:lend)," (Solar azimuth)"
+                  slot=slot+1
                   repval(nrep)=sazi
-                  repJD(nrep)=JD + dfloat(lazi)*1.0d-9
-                  repid(nrep)=eventid + lazi
+                  repJD(nrep)=JD + dfloat(slot)*1.0d-9
+                  repid(nrep)=eventid + slot
                end if
             end if
             if (zp(lran)) then
@@ -11221,21 +11450,11 @@ C
                if (nrep.le.maxrep) then
                   write(rep250(nrep),'(A,X,A,X,A)')
      &                 T30(1:lent),event100(1:lend),
-     &                 " (range)"
+     &                 " (Solar range)"
+                  slot=slot+1
                   repval(nrep)=sran
-                  repJD(nrep)=JD + lran*1.0d-9
-                  repid(nrep)=eventid + lran
-               end if
-            end if
-            if (zp(lele)) then
-               nrep=nrep+1      ! sun center elevation
-               if (nrep.le.maxrep) then
-                  write(rep250(nrep),'(A,X,A,X,A)')
-     &                 T30(1:lent),event100(1:lend),
-     &                 " (elevation)"
-                  repval(nrep)=sele
-                  repJD(nrep)=JD + lele*1.0d-9
-                  repid(nrep)=eventid + lele
+                  repJD(nrep)=JD + dfloat(slot)*1.0d-9
+                  repid(nrep)=eventid + slot
                end if
             end if
          end if
@@ -11292,14 +11511,27 @@ C     moon position
             mele=moonPolar(2)*DEG ! + (rMoon/moonPolar(1))*DEG
             mran=moonPolar(1)    ! range
 C
+            if (zp(lele)) then
+               nrep=nrep+1      ! moon elevation
+               if (nrep.le.maxrep) then
+                  write(rep250(nrep),'(A,X,A,X,A)')
+     &                 T30(1:lent),event100(1:lend),
+     &                 " (Lunar elevation)"
+                  slot=slot+1
+                  repval(nrep)=mele
+                  repJD(nrep)=JD + dfloat(slot)*1.0d-9
+                  repid(nrep)=eventid + slot
+               end if
+            end if
             if (zp(lazi)) then
                nrep=nrep+1      ! moon azimuth
                if (nrep.le.maxrep) then
                   write(rep250(nrep),'(A,X,A,X,A)')
-     &                 T30(1:lent),event100(1:lend)," (azimuth)"
+     &                 T30(1:lent),event100(1:lend)," (Lunar azimuth)"
+                  slot=slot+1
                   repval(nrep)=mazi
-                  repJD(nrep)=JD + dfloat(2+lazi)*1.0d-9
-                  repid(nrep)=eventid + 2 + lazi
+                  repJD(nrep)=JD + dfloat(slot)*1.0d-9
+                  repid(nrep)=eventid + slot
                end if
             end if
             if (zp(lran)) then
@@ -11307,21 +11539,11 @@ C
                if (nrep.le.maxrep) then
                   write(rep250(nrep),'(A,X,A,X,A)')
      &                 T30(1:lent),event100(1:lend),
-     &                 " (range)"
+     &                 " (Lunar range)"
+                  slot=slot+1
                   repval(nrep)=mran
-                  repJD(nrep)=JD + (2+lran)*1.0d-9
-                  repid(nrep)=eventid + 2 + lran
-               end if
-            end if
-            if (zp(lele)) then
-               nrep=nrep+1      ! moon elevation
-               if (nrep.le.maxrep) then
-                  write(rep250(nrep),'(A,X,A,X,A)')
-     &                 T30(1:lent),event100(1:lend),
-     &                 " (elevation)"
-                  repval(nrep)=mele
-                  repJD(nrep)=JD + (2+lele)*1.0d-9
-                  repid(nrep)=eventid + 2 + lele
+                  repJD(nrep)=JD + dfloat(slot)*1.0d-9
+                  repid(nrep)=eventid + slot
                end if
             end if
             nrep=nrep+1         ! moon illumination
@@ -11329,9 +11551,10 @@ C
                write(rep250(nrep),'(A,X,A,X,A)')
      &              T30(1:lent),event100(1:lend),
      &              " (illumination)"
+               slot=slot+1
                repval(nrep)=mill
-               repJD(nrep)=JD + 6*1.0d-9
-               repid(nrep)=eventid + 6
+               repJD(nrep)=JD + dfloat(slot)*1.0d-9
+               repid(nrep)=eventid + slot
             end if
          end if
       end if
@@ -15149,7 +15372,7 @@ C
       real getMoonUpperElevation
 C
       real target               ! target value of Moon celestial longtitude
-      integer jj,inrep
+      integer jj
       real targetCycle
       parameter (targetCycle=720.0D0) ! target value which correponds to 0.0D0
       real refraction
@@ -15160,7 +15383,6 @@ C
 C
       Target= -refraction       ! target elevation
       dt=0.1D0                  ! initial time increment (days)
-      inrep=nrep+1
       if(direction.eq.1) then
          tendJD=tstartJD+1.5D0
       else 
@@ -15184,10 +15406,6 @@ C
          return
       end if
 C     
-      do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0d-9
-      end do
-      
       return
       end function searchMoonRise
       real function searchMoonSet(lat,lon,hgt,
@@ -15224,7 +15442,7 @@ C
       real getMoonUpperElevation
 C
       real target               ! target value of Moon celestial longtitude
-      integer jj,inrep
+      integer jj
       real targetCycle
       parameter (targetCycle=720.0D0) ! target value which correponds to 0.0D0
       real refraction
@@ -15234,7 +15452,6 @@ C
 C
       Target= -refraction       ! target elevation
       dt=0.1D0                  ! initial time increment (days)
-      inrep=nrep+1
       if(direction.eq.1) then
          tendJD=tstartJD+1.5D0
       else 
@@ -15258,10 +15475,6 @@ C
          return
       end if
 C     
-      do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0d-9
-      end do
-      
       return
       end function searchMoonSet
       real function searchMoonUpperElevation(Target,
@@ -16305,7 +16518,7 @@ C
       real getSunUpperElevation
 C
       real target               ! target value of Sun celestial longtitude
-      integer jj,inrep
+      integer jj
       real targetCycle
       parameter (targetCycle=720.0D0) ! target value which correponds to 0.0D0
       real refraction
@@ -16315,7 +16528,6 @@ C
 C
       Target= -refraction       ! target elevation
       dt=0.1D0                  ! initial time increment (days)
-      inrep=nrep+1
       if(direction.eq.1) then
          tendJD=tstartJD+1.5D0
       else 
@@ -16339,10 +16551,6 @@ C
          return
       end if
 C     
-      do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0d-9
-      end do
-      
       return
       end function searchSunRise
       real function searchSunSet(lat,lon,hgt,
@@ -16379,7 +16587,7 @@ C
       real getSunUpperElevation
 C
       real target               ! target value of Sun celestial longtitude
-      integer jj,inrep
+      integer jj
       real targetCycle
       parameter (targetCycle=720.0D0) ! target value which correponds to 0.0D0
       real refraction
@@ -16389,7 +16597,6 @@ C
 C
       Target= -refraction       ! target elevation
       dt=0.1D0                  ! initial time increment (days)
-      inrep=nrep+1
       if(direction.eq.1) then
          tendJD=tstartJD+1.5D0
       else 
@@ -16412,11 +16619,6 @@ C
          call chop0(crc250,250)
          return
       end if
-C     
-      do jj=inrep,nrep
-         repJD(jj)=repJD(jj)-1.0d-9
-      end do
-      
       return
       end function searchSunSet
       real function searchSunUpperElevation(Target,
