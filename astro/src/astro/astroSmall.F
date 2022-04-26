@@ -211,34 +211,34 @@ C     120 - REPORT LOCAL INITIAL SUN STATE
      &        crc250,           ! error description
      &        irc)              ! error return code (0=ok)
          do ii=1,nrep-4
-            if (repId(ii).eq.120 .and. ! sun state
-     &           repId(ii+1).eq.121 .and. ! polar effect
-     &           repId(ii+2).eq.122 .and. ! elevation
-     &           repId(ii+3).eq.123 .and. ! azimuth
-     &           repId(ii+4).eq.124) then ! range
+            if (repId(ii).eq.120 .and. ! elevation
+     &           repId(ii+1).eq.121 .and. ! azimuth
+     &           repId(ii+2).eq.122 .and. ! range
+     &           repId(ii+3).eq.123 .and. ! visible
+     &           repId(ii+4).eq.124) then ! polar effect
 C     ! write sun information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
-               if (nint(repVal(ii)).eq.1) then
+               x50=getValN50(repval(ii),lenx,4)
+               y50=getValN50(repval(ii+1),leny,4)
+               z50=getValN50(repval(ii+2),lenz,1)
+               if (nint(repVal(ii+3)).eq.1) then
                   u50="true"
                else
                   u50="false"
                end if
                lenu=len(trim(u50))
-               if (nint(repVal(ii+1)).eq.1) then
+               if (nint(repVal(ii+4)).eq.1) then
                   v50="day"
-               else if (nint(repVal(ii+1)).eq.0) then
+               else if (nint(repVal(ii+4)).eq.0) then
                   v50="none"
-               else if (nint(repVal(ii+1)).eq.-1) then
+               else if (nint(repVal(ii+4)).eq.-1) then
                   v50="night"
                end if
                lenv=len(trim(v50))
-               x50=getValN50(repval(ii+2),lenx,4)
-               y50=getValN50(repval(ii+3),leny,4)
-               z50=getValN50(repval(ii+4),lenz,1)
                write(s250,120)dat25,x50(1:lenx),y50(1:leny),z50(1:lenz),
      &              u50(1:lenu),v50(1:lenv)
                call chop0(s250,250)
@@ -290,37 +290,37 @@ C         do ii=1,nrep
 C            write(*,*)"Report:",ii,repid(ii),repval(ii),rep250(ii)(1:90)
 C         end do
          do ii=1,nrep-7
-            if (repId(ii).eq.100 .and. ! above horison
-     &           repId(ii+1).eq.101 .and. ! polar
-     &           repId(ii+2).eq.102 .and. ! phase
-     &           repId(ii+3).eq.103 .and. ! clock angle
-     &           repId(ii+4).eq.104 .and. ! incidence angle
-     &           repId(ii+5).eq.105 .and. ! elevation
-     &           repId(ii+6).eq.106 .and. ! azimuth
-     &           repId(ii+7).eq.107) then ! range
+            if (repId(ii).eq.100 .and. ! elevation
+     &           repId(ii+1).eq.101 .and. ! azimuth
+     &           repId(ii+2).eq.102 .and. ! range
+     &           repId(ii+3).eq.103 .and. ! visible
+     &           repId(ii+4).eq.104 .and. ! polar effects
+     &           repId(ii+5).eq.105 .and. ! incidence angle
+     &           repId(ii+6).eq.106 .and. ! clock angle
+     &           repId(ii+7).eq.107) then ! phase
 C     ! write moon shadow information
+               x50=getValN50(repval(ii),lenx,4) ! elevation
+               y50=getValN50(repval(ii+1),leny,4) ! azimuth
+               z50=getValN50(repval(ii+2),lenz,1) ! range
+               r50=getValN50(repval(ii+6),lenr,1) ! clock
+               t50=getValN50(repval(ii+5),lent,1) ! incidence
+               w50=getValN50(repval(ii+7),lenw,1) ! phase
                call chop0(rep250(ii),250)
-               lens=length(rep250(ii+1),250,20)
+               lens=length(rep250(ii+3),250,20)
                if (nint(repVal(ii)).eq.1) then
                   u50="true"
                else
                   u50="false"
                end if
                lenu=len(trim(u50))
-               if (nint(repVal(ii+1)).eq.1) then
+               if (nint(repVal(ii+4)).eq.1) then
                   v50="day"
-               else if (nint(repVal(ii+1)).eq.0) then
+               else if (nint(repVal(ii+4)).eq.0) then
                   v50="none"
-               else if (nint(repVal(ii+1)).eq.-1) then
+               else if (nint(repVal(ii+4)).eq.-1) then
                   v50="night"
                end if
                lenv=len(trim(v50))
-               w50=getValN50(repval(ii+2),lenw,1) ! phase
-               x50=getValN50(repval(ii+5),lenx,4) ! elevation
-               y50=getValN50(repval(ii+6),leny,4) ! azimuth
-               z50=getValN50(repval(ii+7),lenz,1) ! range
-               r50=getValN50(repval(ii+3),lenr,1) ! clock
-               t50=getValN50(repval(ii+4),lent,1) ! incidence
                write(s250,100)dat25,
      &              x50(1:lenx),y50(1:leny),z50(1:lenz),
      &              r50(1:lenr),t50(1:lent),
@@ -366,16 +366,15 @@ C     600 - DETECT LOCAL DIURNAL SUN RISE
 C     <xsl:template match="/*/astro:Event[@Id='600']/astro:Report">
 C     <sunrise time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-2
-            if (repId(ii).eq.600.and. ! event
-     &           repId(ii+1).eq.601) then ! azimuth
+         do ii=1,nrep
+            if (repId(ii).eq.600) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii),leny,4)
                write(s250,600)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -411,16 +410,15 @@ C     610 - DETECT LOCAL DIURNAL SUN SET
 C     <xsl:template match="/*/astro:Event[@Id='610']/astro:Report">
 C     <sunset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-2
-            if (repId(ii).eq.610.and. ! event
-     &           repId(ii+1).eq.611) then ! azimuth
+         do ii=1,nrep
+            if (repId(ii).eq.610) then ! azimuth
 C     ! write sunset information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii),leny,4)
                write(s250,610)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -594,16 +592,15 @@ C     660 - DETECT LOCAL DIURNAL NAUTICAL TWILIGHT START
 C     <xsl:template match="/*/astro:Event[@Id='600']/astro:Report">
 C     <twilight time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-2
-            if (repId(ii).eq.660.and. ! event
-     &           repId(ii+1).eq.661) then ! azimuth
+         do ii=1,nrep
+            if (repId(ii).eq.660) then ! azimuth
 C     ! write twilight information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii),leny,4)
                write(s250,660)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -639,16 +636,15 @@ C     670 - DETECT LOCAL DIURNAL NAUTICAL TWILIGHT STOP
 C     <xsl:template match="/*/astro:Event[@Id='610']/astro:Report">
 C     <sunset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-2
-            if (repId(ii).eq.670.and. ! event
-     &           repId(ii+1).eq.671) then ! azimuth
+         do ii=1,nrep
+            if (repId(ii).eq.670) then ! azimuth
 C     ! write twilight information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii),leny,4)
                write(s250,670)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -684,16 +680,15 @@ C     680 - DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT START
 C     <xsl:template match="/*/astro:Event[@Id='600']/astro:Report">
 C     <sunrise time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-2
-            if (repId(ii).eq.680.and. ! event
-     &           repId(ii+1).eq.681) then ! azimuth
+         do ii=1,nrep
+            if (repId(ii).eq.680) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii),leny,4)
                write(s250,680)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -730,16 +725,15 @@ C     690 - DETECT LOCAL DIURNAL ASTRONOMICAL TWILIGHT STOP
 C     <xsl:template match="/*/astro:Event[@Id='610']/astro:Report">
 C     <sunset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-2
-            if (repId(ii).eq.690.and. ! event
-     &           repId(ii+1).eq.691) then ! azimuth
+         do ii=1,nrep
+            if (repId(ii).eq.690) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii),leny,4)
                write(s250,690)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -776,16 +770,15 @@ C     700 - DETECT LOCAL DIURNAL NIGHT START
 C     <xsl:template match="/*/astro:Event[@Id='600']/astro:Report">
 C     <sunrise time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-2
-            if (repId(ii).eq.700.and. ! event
-     &           repId(ii+1).eq.701) then ! azimuth
+         do ii=1,nrep
+            if (repId(ii).eq.700) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii),leny,4)
                write(s250,700)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -821,16 +814,15 @@ C     710 - DETECT LOCAL DIURNAL NIGHT STOP
 C     <xsl:template match="/*/astro:Event[@Id='610']/astro:Report">
 C     <sunset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-2
-            if (repId(ii).eq.710.and. ! event
-     &           repId(ii+1).eq.711) then ! azimuth
+         do ii=1,nrep
+            if (repId(ii).eq.710) then ! azimuth
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
+               y50=getValn50(repval(ii),leny,4)
                write(s250,710)dat25,y50(1:leny) ! rep250(ii)(21:lens)
                call chop0(s250,250)
                lens=length(s250,250,30)
@@ -867,18 +859,17 @@ C     800 - DETECT LOCAL DIURNAL MOON RISE
 C     <xsl:template match="/*/astro:Event[@Id='800']/astro:Report">
 C     <moonrise time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
-         do ii=1,nrep-3
-            if (repId(ii).eq.800.and. ! event
-     &           repId(ii+1).eq.801 .and. ! azimuth
-     &           repId(ii+3).eq.803) then ! illumination
+         do ii=1,nrep-2
+            if (repId(ii).eq.800 .and. ! azimuth
+     &           repId(ii+2).eq.802) then ! illumination
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
-               z50=getValn50(repval(ii+3),lenz,1)
+               y50=getValn50(repval(ii),leny,4)
+               z50=getValn50(repval(ii+2),lenz,1)
                write(s250,800)dat25,y50(1:leny),
      &              z50(1:lenz) ! rep250(ii)(21:lens)
                call chop0(s250,250)
@@ -917,17 +908,16 @@ C     <xsl:template match="/*/astro:Event[@Id='810']/astro:Report">
 C     <moonset time="{@time}" desc="{substring(@hint,21)}"/>
 C     </xsl:template>
          do ii=1,nrep
-            if (repId(ii).eq.810.and. ! event
-     &           repId(ii+1).eq.811 .and. ! azimuth
-     &           repId(ii+3).eq.813) then ! illumination
+            if (repId(ii).eq.810 .and. ! azimuth
+     &           repId(ii+2).eq.812) then ! illumination
 C     ! write sunrise information
                t2000=repJD(ii)+offset
                call getDate(s2000,t2000,yy1,mm1,dd1,hh1,mi1,sec1)
                call chop0(rep250(ii),250)
                lens=length(rep250(ii),250,20)
                write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               y50=getValn50(repval(ii+1),leny,4)
-               z50=getValn50(repval(ii+3),lenz,1)
+               y50=getValn50(repval(ii),leny,4)
+               z50=getValn50(repval(ii+2),lenz,1)
                write(s250,810)dat25,y50(1:leny),
      &              z50(1:lenz) ! rep250(ii)(21:lens)
                call chop0(s250,250)
