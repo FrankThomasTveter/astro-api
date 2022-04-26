@@ -320,7 +320,7 @@ C     ! write moon shadow information
                y50=getValN50(repval(ii+6),leny,4) ! azimuth
                z50=getValN50(repval(ii+7),lenz,1) ! range
                r50=getValN50(repval(ii+3),lenr,1) ! clock
-               t50=getValN50(repval(ii+4),lent,1) ! insidence
+               t50=getValN50(repval(ii+4),lent,1) ! incidence
                write(s250,100)dat25,
      &              x50(1:lenx),y50(1:leny),z50(1:lenz),
      &              r50(1:lenr),t50(1:lent),

@@ -7983,7 +7983,7 @@ C     make reports
       if (nrep.le.maxrep) then
          write(rep250(nrep),'(A,X,A,X,A)')
      &        T30(1:lent),event100(1:lend),
-     &        " * SHADOW ANGLES (insidence)"
+     &        " * SHADOW ANGLES (incidence)"
          call chop0(rep250(nrep),250)
          repval(nrep)=iangle
          slot=slot+1
@@ -8539,7 +8539,7 @@ C     make report
          if (nrep.le.maxrep) then
             write(rep250(nrep),'(A,X,A,X,A)')
      &           T30(1:lent),event100(1:lend),
-     &           " * SHADOW ANGLES (insidence)"
+     &           " * SHADOW ANGLES (incidence)"
             call chop0(rep250(nrep),250)
             repval(nrep)=iangle
             repJD(nrep)=JD - 1.0d-8 + 4.0d-9
