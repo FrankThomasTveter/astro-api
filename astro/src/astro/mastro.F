@@ -1113,7 +1113,7 @@ C
          end if
       END IF
       IF (lfldat(20)) THEN      !  'DETECT EARTH IN APHELION -APHELION[0]'
-         eventId=200
+         eventId=195
          ii=0
          neventVal=0            ! number of event values
          call astroEvent(

@@ -17,15 +17,15 @@ C     have been completed (closes the JPL ephemeride file).
 C     The JPL epemeride interface subroutines are found in "jpleph.F".
 C     
       subroutine ASTROEVENT(
-     &     tstartJD,          ! start time (in julianDay)
+     &     tstartJD,            ! start time (in julianDay)
      &     searchCode,          ! search code; -1:previous, +1:next, 0: both, +2:until tendJD
-     &     tendJD,            ! report all events end time (in julianDay)
+     &     tendJD,              ! report all events end time (in julianDay)
      &     eventId,             ! requested event id (SEE TABLE BELOW)
      &     neventVal,           ! number of event input data (SEE TABLE BELOW)
      &     eventVal,            ! event input data (SEE TABLE BELOW)
      &     maxrep,              ! maximum number of output reports
      &     nrep,                ! number of output reports
-     &     repJD,             ! time of output report (in julianDay)
+     &     repJD,               ! time of output report (in julianDay)
      &     repId,               ! output report identification (SEE TABLE BELOW)
      &     repVal,              ! output report value (SEE TABLE BELOW)
      &     rep250,              ! output report string (redundant description)
@@ -6006,7 +6006,7 @@ C
       dtin=40.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getJupiterLon,addreport,
@@ -6402,7 +6402,7 @@ C
       dtin=0.05D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportLLTarget(Target,
      &     TargetCycle,getLunarTime,addLLreport,
@@ -6453,7 +6453,7 @@ C
       dtin=80.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getMarsLon,addreport,
@@ -6637,7 +6637,7 @@ C
       dtin=15.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       zb(lval)=.true.
       call reportMax(
@@ -6985,7 +6985,7 @@ C
       dtin=15.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getMercRelLon,addreport,
@@ -7064,7 +7064,7 @@ C
          tendJD=tstartJD + dtin
          maxxrep=0
          xrep=0
-         zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+         zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
          zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
          tstartJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getMercRelLon,addreport,
@@ -7109,7 +7109,7 @@ C            !write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=min(max(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,addreport,
@@ -7131,7 +7131,7 @@ C            !write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=max(min(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,addreport,
@@ -7689,7 +7689,7 @@ C
       dtin=0.05D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.false.;zp(lran)=.true.
       call reportLLTarget(Target,
      &     TargetCycle,getMoonAzimuth,addLLreport,
@@ -7740,7 +7740,7 @@ C
       dtin=3.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getMoonIllum,addreport,
@@ -8115,7 +8115,7 @@ C
 C     get list of moon-set
 C
       snrep=nrep
-      sid=eventId+8
+      sid=eventId+4
       ieventId=sid
       ievent100=event100(1:lend)//" * SET"
 C      if (.not.aboves) then
@@ -8257,7 +8257,7 @@ C
       dtin=3.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getMoonPhase,addreport,
@@ -8755,7 +8755,7 @@ C
       call chop0(event100,100)
 C
       dtin=0.05D0
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.false.;zp(lazi)=.true.;zp(lran)=.true.
       call reportLLTarget(Target,
      &     TargetCycle,getMoonUpperElevation,addLLreport,
@@ -8916,7 +8916,7 @@ C
       dtin=40.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getSaturnLon,addreport,
@@ -8971,7 +8971,7 @@ C
       dtin=0.05D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportLLTarget(Target,
      &     TargetCycle,getSolarTime,addLLreport,
@@ -9380,7 +9380,7 @@ C
       dtin=0.05D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportLLTarget(Target,
      &     TargetCycle,getSunAzimuth,addLLreport,
@@ -9431,12 +9431,14 @@ C
       data myname /'reportSunEclipse'/
 C
       logical bbok              ! did we find target
-      external getMoonPhase,getSunEclipse,getSunEclipseOcc,getSunOcc
-      real getMoonPhase,getSunEclipse,getSunEclipseOcc,getSunOcc
+      external getMoonPhase,getSunEclipse,getSunEclipseOcc,
+     &     getSunEclipseRu,getSunEclipseDD,getSunOcc
+      real getMoonPhase,getSunEclipse,getSunEclipseOcc,
+     &     getSunEclipseRu,getSunEclipseDD,getSunOcc
       real targetCycle
       parameter (targetCycle=100.0D0) ! target value which correponds to 0.0D0
       real dtin                 ! initial time increment
-      real Rm,Rp,Ru,xCycle,xJD,pJD,dt
+      real Rm,Rp,Ru,DD,xCycle,xJD,pJD,dt
       real tstartJD           ! start time
       real tendJD             ! end time
       integer xrep,maxxrep,yy1,mm1,dd1,hh1,mi1
@@ -9476,7 +9478,7 @@ C
          tendJD=tstartJD + dtin
          maxxrep=0
          xrep=0
-         zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+         zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
          zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
          xJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getMoonPhase,addreport,
@@ -9517,8 +9519,10 @@ C
                call chop0(crc250,250)
                return
             end if
-            proceed=(Rp.lt.Rm)
             occ=getSunEclipseOcc()
+            ru=getSunEclipseRu()
+            dd=getSunEclipseDD()
+            proceed=(dd.lt.rm+ru) ! must be eclipse
             CALL JD2DATE(tstartJD,
      &           YY1,
      &           MM1,
@@ -9545,7 +9549,7 @@ C     find out if sun is visible at maximum occultation...
                end if
             end if
             if (proceed) then  ! we have a solar eclipse
-C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
+C     search backwards for Rp (=dd-ru) .eq. Rm (PENSUNECLIPSE PARTIAL START)
                dt=-0.2D0        ! eclipse starts not more than 1 day earlier
                xeventId=eventId + 0
                xevent100=event100(1:lend)//' PARTIAL STARTS'
@@ -9554,7 +9558,7 @@ C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
                tendJD=max(min(tstartJDin,tendJDin),
      &              tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchLLTarget(Rm, ! find start
      &              xCycle,getSunEclipse,addLLreport,
@@ -9570,20 +9574,48 @@ C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
                   call chop0(crc250,250)
                   return
                end if
-C     !write(*,*) myname,'Ru:',rp,rm,rp.le.rm
-               if (Rp.le.-Rm) then               
-C     search backwards for Rp .eq. -Rm (TOTAL ECLIPSE START)
+               ! write(*,*) myname,'Ru:',rp,rm,rp.le.rm
+               if (dd.le.ru-rm) then ! moon inside sun               
+C     search backwards for Rp (=dd-ru) .eq. -Rm (ANNULAR ECLIPSE START)
                   dt=-0.2D0     ! eclipse starts not more than 1 day earlier
                   xeventId=eventId + 1
+                  xevent100=event100(1:lend)//' ANNULAR STARTS'
+                  call chop0(xevent100,100)
+                  xCycle=-1.0D0 ! disable variable cycling
+                  tendJD=max(min(tstartJDin,tendJDin),
+     &                 tstartJD+dt)
+                  dt=dt*0.1D0
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
+                  xJD=searchLLTarget(-Rm, ! find start
+     &                 xCycle,getSunEclipse,addLLreport,
+     &                 lat,lon,hgt,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
+     &                 maxrep,nrep,repJD,repid,repval,rep250,
+     &                 0,
+     &                 crc250,irc)
+                  if (irc.ne.0) then
+                     lencrc=length(crc250,250,10)
+                     crc250=crc250(1:lencrc)//' < '//myname//
+     &                    ' > Error return from searchLLTarget.'
+                     call chop0(crc250,250)
+                     return
+                  end if
+               end if
+               if (dd.le.rm-ru) then ! sun inside moon               
+C     search backwards for Rp (=dd-ru) .eq. Rm-2*Ru (TOTAL ECLIPSE START)
+                  dt=-0.2D0     ! eclipse starts not more than 1 day earlier
+                  xeventId=eventId + 2
                   xevent100=event100(1:lend)//' TOTAL STARTS'
                   call chop0(xevent100,100)
                   xCycle=-1.0D0 ! disable variable cycling
                   tendJD=max(min(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
-                  xJD=searchLLTarget(-Rm, ! find start
+                  xJD=searchLLTarget(Rm-2.0D0*Ru, ! find start
      &                 xCycle,getSunEclipse,addLLreport,
      &                 lat,lon,hgt,
      &                 tstartJD,tendJD,dt,secdec,bbok,
@@ -9626,13 +9658,13 @@ C     report max occulation
      &                 T30(1:lent),event100(1:lend),
      &                 occ
                   repJD(nrep)=tstartJD
-                  repid(nrep)=eventId + 2
+                  repid(nrep)=eventId + 3
                   repval(nrep)=occ
                end if
-               if (Rp.le.-Rm) then ! Moon totally within Sun cone
-C     search forwards for Ru .eq. -Rm (TOTAL ECLIPSE STOP)
+               if (dd.le.rm-ru) then ! Moon totally within Sun cone
+C     search forwards for Ru (=dd-ru) .eq. Rm-2*Ru (TOTAL ECLIPSE STOP)
                   dt=0.2D0      ! eclipse stops not more than 1 day later
-                  xeventId=eventId + 3
+                  xeventId=eventId + 4
                   xevent100=event100(1:lend)//
      &                 ' TOTAL STOPS'
                   call chop0(xevent100,100)
@@ -9640,7 +9672,36 @@ C     search forwards for Ru .eq. -Rm (TOTAL ECLIPSE STOP)
                   tendJD=min(max(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
+                  xJD=searchLLTarget(Rm-2.0D0*Ru, ! find stop
+     &                 xCycle,getSunEclipse,addLLreport,
+     &                 lat,lon,hgt,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
+     &                 maxrep,nrep,repJD,repid,repval,rep250,
+     &                 0,
+     &                 crc250,irc)
+                  if (irc.ne.0) then
+                     lencrc=length(crc250,250,10)
+                     crc250=crc250(1:lencrc)//' < '//myname//
+     &                    ' > Error return from searchLLTarget.'
+                     call chop0(crc250,250)
+                     return
+                  end if
+               end if
+               if (dd.le.ru-rm) then ! Moon totally within Sun cone
+C     search forwards for Ru (=dd-ru) .eq. -Rm (ANNULAR ECLIPSE STOP)
+                  dt=0.2D0      ! eclipse stops not more than 1 day later
+                  xeventId=eventId + 5
+                  xevent100=event100(1:lend)//
+     &                 ' ANNULAR STOPS'
+                  call chop0(xevent100,100)
+                  xCycle=-1.0D0 ! disable variable cycling
+                  tendJD=min(max(tstartJDin,tendJDin),
+     &                 tstartJD+dt)
+                  dt=dt*0.1D0
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                   xJD=searchLLTarget(-Rm, ! find stop
      &                 xCycle,getSunEclipse,addLLreport,
@@ -9660,14 +9721,14 @@ C     search forwards for Ru .eq. -Rm (TOTAL ECLIPSE STOP)
                end if
 C     search forwards for Rp .eq. Rm (PARTIAL ECLIPSE STOP)
                dt=0.2D0         ! eclipse stops not more than 1 day later
-               xeventId=eventId + 4
+               xeventId=eventId + 6
                xevent100=event100(1:lend)//' PARTIAL STOPS'
                call chop0(xevent100,100)
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=min(max(tstartJDin,tendJDin),
      &              tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchLLTarget(Rm, ! find stop
      &              xCycle,getSunEclipse,addLLreport,
@@ -10061,7 +10122,7 @@ C
 C     get list of sun-set
 C
       snrep=nrep
-      sid=eventId+5
+      sid=eventId+3
       ieventId=sid
 C      if (.not.aboves) then
 C        nrep=nrep+1
@@ -10426,7 +10487,7 @@ C
       dtin=30.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getSunRA,addreport,
@@ -10477,7 +10538,7 @@ C
       dtin=3.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getMoonRA,addreport,
@@ -10692,7 +10753,7 @@ C     !write(*,*)myname,'Umbra:',t16, rp,rm,proceed
                proceed=(proceed.and.(.not.loccMax.or.occ.le.occMax))
             end if
             if (proceed) then  ! we have a lunar eclipse
-C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
+C     search backwards for Rp (=dd-ru) .eq. Rm (PENUMBRA PARTIAL START)
                dt=-0.2D0        ! eclipse starts not more than 1 day earlier
                xeventId=eventId + 0
                xevent100=event100(1:lend)//
@@ -10702,7 +10763,7 @@ C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
                tendJD=max(min(tstartJDin,tendJDin),
      &              tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getPenumbra,addreport,
@@ -10721,7 +10782,7 @@ C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
                
 C     !write(*,*) myname,'Ru:',rp,rm,rp.le.rm
                if (Ru.le.Rm) then               
-C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
+C     search backwards for Ru (=dd-ru) .eq. Rm (UMBRA PARTIAL START)
                   dt=-0.2D0     ! eclipse starts not more than 1 day earlier
                   xeventId=eventId + 1
                   xevent100=event100(1:lend)//
@@ -10731,7 +10792,7 @@ C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
                   tendJD=max(min(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                   xJD=searchTarget(Rm, ! find start
      &                 xCycle,getUmbra,addreport,
@@ -10749,7 +10810,7 @@ C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
                   end if
                end if
                if (Ru.lt.-Rm) then ! Moon totally within Earth umbra
-C     search backwards for Ru .eq. -Rm (UMBRA TOTAL START)
+C     search backwards for Ru (=dd-ru) .eq. -Rm (UMBRA TOTAL START)
                   dt=-1.0D0     ! eclipse starts not more than 1 day earlier
                   xeventId=eventId + 2
                   xevent100=event100(1:lend)//
@@ -10759,7 +10820,7 @@ C     search backwards for Ru .eq. -Rm (UMBRA TOTAL START)
                   tendJD=max(min(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                   xJD=searchTarget(-Rm, ! find start
      &                 xCycle,getUmbra,addreport,
@@ -10809,7 +10870,7 @@ C     report max occulation
                   end if
                end if
                if (Ru.lt.-Rm) then ! Moon totally within Earth umbra
-C     search forwards for Ru .eq. -Rm (UMBRA TOTAL STOP)
+C     search forwards for Ru (=dd-ru) .eq. -Rm (UMBRA TOTAL STOP)
                   dt=0.2D0      ! eclipse stops not more than 1 day later
                   xeventId=eventId + 4
                   xevent100=event100(1:lend)//
@@ -10819,7 +10880,7 @@ C     search forwards for Ru .eq. -Rm (UMBRA TOTAL STOP)
                   tendJD=min(max(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                   xJD=searchTarget(-Rm, ! find stop
      &                 xCycle,getUmbra,addreport,
@@ -10836,7 +10897,7 @@ C     search forwards for Ru .eq. -Rm (UMBRA TOTAL STOP)
                      return
                   end if
                end if
-C     search forwards for Ru .eq. Rm (UMBRA PARTIAL STOP)
+C     search forwards for Ru (=dd-ru) .eq. Rm (UMBRA PARTIAL STOP)
                if (Ru.lt.Rm) then
                   dt=1.0D0      ! eclipse stops not more than 1 day later
                   xeventId=eventId + 5
@@ -10847,7 +10908,7 @@ C     search forwards for Ru .eq. Rm (UMBRA PARTIAL STOP)
                   tendJD=min(max(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                   xJD=searchTarget(Rm, ! find stop
      &                 xCycle,getUmbra,addreport,
@@ -10875,7 +10936,7 @@ C     search forwards for Rp .eq. -Rm (PENUMBRA TOTAL STOP)
                tendJD=min(max(tstartJDin,tendJDin),
      &              tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find stop
      &              xCycle,getPenumbra,addreport,
@@ -10948,7 +11009,7 @@ C
       dtin=60.0D0
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportTarget(Target,
      &     TargetCycle,getVenusRelLon,addreport,
@@ -11029,7 +11090,7 @@ C
 
          maxxrep=0
          xrep=0
-         zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+         zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
          zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
          tstartJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getVenusRelLon,addreport,
@@ -11069,7 +11130,7 @@ C            !write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=min(max(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getVenusTransit,addreport,
@@ -11092,7 +11153,7 @@ C            !write(*,*) myname,'Rp:',rp,rm,rp.le.rm
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=max(min(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getVenusTransit,addreport,
@@ -11175,7 +11236,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchJupiterLon=searchTarget(Target,
      &     TargetCycle,getJupiterLon,addreport,
@@ -12546,7 +12607,7 @@ C     do fine search...
                if (bdeb) then
                   CALL JD2DATE(TJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
                   WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
-                  write(*,*)myname,'Found:   ',t22,tjd
+                  write(*,*)myname,'Found:   ',t22,tjd,forward
                   CALL JD2DATE(TstartJD,YY1,MM1,DD1,HH1,MI1,SEC1) 
                   WRITE(T22,FMT=999) YY1,MM1,DD1,HH1,MI1,sec1
                   write(*,*)myname,'Start:   ',t22,tstartjd
@@ -12572,7 +12633,7 @@ C     do fine search...
                   bdone=bfirst  ! should we only report first event??
                else if (bdeb) then
                   write(*,*)myname,'Out of range:',
-     &                 tjd,tstartjd,tendjd
+     &                 tjd,tstartjd,tendjd,forward
                end if
             end if
          end if
@@ -12718,8 +12779,8 @@ C
          if (abs(dd).gt.1.0D-10.and.abs(dt).gt.dtmin) then
             ff = 0.5D0!max(0.0D0,min(1.0D0,-(dstart/dd)*1.5D0))
             jd = tstart + dt * ff
-            if (bdeb)write(*,*)myname,'Looping:',jd,brpitch,
-     &           val,"|",dval,"|",dstart,dend
+            if (bdeb)write(*,*)myname,'Looping:',jd,brpitch,"v=",
+     &           val,"d=",dval,"|",dstart,dend
 C            if (bdeb)write(*,*)myname,'Iterating:',cnt,brpitch,
 C     &           dstart,dend,dd,ff
          else ! already at target
@@ -13432,7 +13493,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchLunarTime=searchLLTarget(Target,
      &     TargetCycle,getLunarTime,addLLreport,
@@ -13537,7 +13598,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchMarsLon=searchTarget(Target,
      &     TargetCycle,getMarsLon,addreport,
@@ -14239,7 +14300,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchMercRelLon=searchTarget(Target,
      &     TargetCycle,getMercRelLon,addreport,
@@ -14367,7 +14428,7 @@ C     !write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=max(min(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,addreport,
@@ -14395,7 +14456,7 @@ C     !write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=min(max(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getMercTransit,addreport,
@@ -15159,7 +15220,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchMoonAzimuth=searchLLTarget(Target,
      &     TargetCycle,getMoonAzimuth,addLLreport,
@@ -15220,7 +15281,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchMoonIllum=searchTarget(Target,
      &     TargetCycle,getMoonIllum,addreport,
@@ -15281,7 +15342,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchMoonPhase=searchTarget(Target,
      &     TargetCycle,getMoonPhase,addreport,
@@ -15530,7 +15591,7 @@ C
          tendJD=tstartJD-1.5D0
       end if
 CC
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.false.;zp(lazi)=.true.;zp(lran)=.true.
       searchMoonUpperElevation=searchLLTarget(Target,
      &     TargetCycle,getMoonUpperElevation,addLLreport,
@@ -15769,7 +15830,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchSaturnLon=searchTarget(Target,
      &     TargetCycle,getSaturnLon,addreport,
@@ -15835,7 +15896,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchSolarTime=searchLLTarget(Target,
      &     TargetCycle,getSolarTime,addLLreport,
@@ -15945,7 +16006,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchSunAzimuth=searchLLTarget(Target,
      &     TargetCycle,getSunAzimuth,addLLreport,
@@ -15998,13 +16059,15 @@ C
       data myname /'searchSunEclipse'/
 C
       logical bbok              ! did we find target
-      external getMoonPhase,getSunEclipse,getSunEclipseOcc
+      external getMoonPhase,getSunEclipse,getSunEclipseOcc,
+     &     getSunEclipseRu,getSunEclipseDd
       external getSunOcc
-      real getMoonPhase,targetCycle,getSunEclipse,getSunEclipseOcc
+      real getMoonPhase,targetCycle,getSunEclipse,getSunEclipseOcc,
+     &     getSunEclipseRu,getSunEclipseDd
       real getSunOcc
       parameter (targetCycle=100.0D0) ! target value which correponds to 0.0D0
       real dtin                 ! initial time increment
-      real Rm,Rp,Ru,xCycle,xJD,pJD,dt
+      real Rm,Rp,Ru,DD,xCycle,xJD,pJD,dt
       real tstartJD           ! start time
       real tendJD             ! end time
       integer xrep,maxxrep,yy1,mm1,dd1,hh1,mi1
@@ -16052,7 +16115,7 @@ C
          tendJD=tstartJD + dtin
          maxxrep=0
          xrep=0
-         zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+         zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
          zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
          xJD=searchTarget(Target, ! only get time of 
      &        TargetCycle,getMoonPhase,addreport,
@@ -16073,7 +16136,7 @@ C         !&           tstartJD,bbok
             tstartJD=xJD
             maxxrep=0
             xrep=0
-            zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+            zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
             zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
             tstartJD=searchLLMax( ! only get time of 
      &           getSunOcc,addLLreport,
@@ -16097,8 +16160,10 @@ C         !&           tstartJD,bbok
                call chop0(crc250,250)
                return
             end if
-            proceed=(Rp.lt.Rm)
             occ=getSunEclipseOcc()
+            ru=getSunEclipseRu()
+            dd=getSunEclipseDD()
+            proceed=(dd.lt.rm+ru) ! must be eclipse
             CALL JD2DATE(tstartJD,
      &           YY1,
      &           MM1,
@@ -16128,7 +16193,7 @@ C     find out if sun is visible at maximum occultation...
 C     !write(*,*)myname,'Match.',t16,tstartJD
                searchSunEclipse=tstartJD ! returns center-time of eclipse
                bdone=.true.     ! we found a match and we are done
-C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
+C     search backwards for Rp (=dd-ru) .eq. Rm (PARTIAL ECLIPSE START)
                dt=-0.2D0        ! eclipse starts not more than 1 day earlier
                xeventId=eventId + 0
                xevent100=event100(1:lend)//' PARTIAL STARTS'
@@ -16137,7 +16202,7 @@ C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
                tendJD=max(min(tstartJDin,tendJDin),
      &              tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchLLTarget(Rm, ! find start
      &              xCycle,getSunEclipse,addLLreport,
@@ -16154,18 +16219,18 @@ C     search backwards for Rp .eq. Rm (PENSUNECLIPSE PARTIAL START)
                   call chop0(crc250,250)
                   return
                end if               
-C     !write(*,*) myname,'Ru:',rp,rm,rp.le.rm
-               if (Rp.le.-Rm) then               
-C     search backwards for Ru .eq. Rm (TOTAL ECLIPSE START)
-                  dt=-0.2D0     ! eclipse starts not more than 1 day earlier
+               ! write(*,*) myname,'Ru:',rp,rm,rp.le.rm
+               if (dd.le.ru-rm) then ! moon inside sun
+C     search backwards for Ru (=dd-ru) .eq. Rm (ANNULAR ECLIPSE START)
+                  dt=-0.01D0     ! eclipse starts not more than 1 day earlier
                   xeventId=eventId + 1
-                  xevent100=event100(1:lend)//' TOTAL STARTS'
+                  xevent100=event100(1:lend)//' ANNULAR STARTS'
                   call chop0(xevent100,100)
                   xCycle=-1.0D0 ! disable variable cycling
                   tendJD=max(min(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                   xJD=searchLLTarget(-Rm, ! find start
      &                 xCycle,getSunEclipse,addLLreport,
@@ -16182,6 +16247,36 @@ C     search backwards for Ru .eq. Rm (TOTAL ECLIPSE START)
                      call chop0(crc250,250)
                      return
                   end if
+               end if
+               if (dd.le.rm-ru) then ! sun inside mooon
+C     search backwards for Ru (=dd-ru) .eq. Rm-2*Ru (TOTAL ECLIPSE START)
+                  !write(*,*)"***Total start:",occ,dd,ru,rm,xjd
+                  dt=-0.01D0     ! eclipse starts not more than 14 minutes earlier
+                  xeventId=eventId + 2
+                  xevent100=event100(1:lend)//' TOTAL STARTS'
+                  call chop0(xevent100,100)
+                  xCycle=-1.0D0 ! disable variable cycling
+                  tendJD=max(min(tstartJDin,tendJDin),
+     &                 tstartJD+dt)
+                  dt=dt*0.1D0
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
+                  xJD=searchLLTarget(Rm-2.0D0*Ru, ! find start
+     &                 xCycle,getSunEclipse,addLLreport,
+     &                 lat,lon,hgt,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
+     &                 maxrep,nrep,repJD,repid,repval,rep250,
+     &                 0,
+     &                 crc250,irc)
+                  if (irc.ne.0) then
+                     lencrc=length(crc250,250,10)
+                     crc250=crc250(1:lencrc)//' < '//myname//
+     &                    ' > Error return from searchLLTarget.'
+                     call chop0(crc250,250)
+                     return
+                  end if
+                  !write(*,*)"***Total stop:",occ,dd,ru,rm,xjd
                end if
 C     report max occulation
                nrep=nrep+1
@@ -16210,13 +16305,13 @@ C     report max occulation
      &                 T30(1:lent),event100(1:lend),
      &                 occ
                   repJD(nrep)=tstartJD
-                  repid(nrep)=eventId + 2
+                  repid(nrep)=eventId + 3
                   repval(nrep)=occ
                end if
-               if (Rp.le.-Rm) then ! Moon totally within Sun cone
-C     search forwards for Ru .eq. -Rm (TOTAL ECLIPSE STOP)
-                  dt=0.2D0      ! eclipse stops not more than 1 day later
-                  xeventId=eventId + 3
+               if (dd.le.rm-ru) then ! Sun inside moon
+C     search forwards for Ru (=dd-ru) .eq. Rm-2*Ru (TOTAL ECLIPSE STOP)
+                  dt=0.01D0      ! eclipse stops not more than 14 minutes later
+                  xeventId=eventId + 4
                   xevent100=event100(1:lend)//
      &                 ' TOTAL STOPS'
                   call chop0(xevent100,100)
@@ -16224,7 +16319,36 @@ C     search forwards for Ru .eq. -Rm (TOTAL ECLIPSE STOP)
                   tendJD=min(max(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
+                  xJD=searchLLTarget(Rm-2.0D0*Ru, ! find stop
+     &                 xCycle,getSunEclipse,addLLreport,
+     &                 lat,lon,hgt,
+     &                 tstartJD,tendJD,dt,secdec,bbok,
+     &                 xeventId,xevent100,
+     &                 maxrep,nrep,repJD,repid,repval,rep250,
+     &                 0,
+     &                 crc250,irc)
+                  if (irc.ne.0) then
+                     lencrc=length(crc250,250,10)
+                     crc250=crc250(1:lencrc)//' < '//myname//
+     &                    ' > Error return from searchLLTarget.'
+                     call chop0(crc250,250)
+                     return
+                  end if
+               end if
+               if (dd.le.ru-rm) then ! moon inside sun
+C     search forwards for Ru (=dd-ru) .eq. -Rm (ANNULAR ECLIPSE STOP)
+                  dt=0.01D0      ! eclipse stops not more than 1 day later
+                  xeventId=eventId + 5
+                  xevent100=event100(1:lend)//
+     &                 ' ANNULAR STOPS'
+                  call chop0(xevent100,100)
+                  xCycle=-1.0D0 ! disable variable cycling
+                  tendJD=min(max(tstartJDin,tendJDin),
+     &                 tstartJD+dt)
+                  dt=dt*0.1D0
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                   xJD=searchLLTarget(-Rm, ! find stop
      &                 xCycle,getSunEclipse,addLLreport,
@@ -16244,14 +16368,14 @@ C     search forwards for Ru .eq. -Rm (TOTAL ECLIPSE STOP)
                end if
 C     search forwards for Rp .eq. -Rm (PARTIAL ECLIPSE STOP)
                dt=0.2D0         ! eclipse stops not more than 1 day later
-               xeventId=eventId + 4
+               xeventId=eventId + 6
                xevent100=event100(1:lend)//' PARTIAL STOPS'
                call chop0(xevent100,100)
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=min(max(tstartJDin,tendJDin),
      &              tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchLLTarget(Rm, ! find stop
      &              xCycle,getSunEclipse,addLLreport,
@@ -16405,7 +16529,7 @@ C
       end if
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchSunRA=searchTarget(Target,
      &     TargetCycle,getSunRA,addreport,
@@ -16467,7 +16591,7 @@ C
       end if
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchMoonRA=searchTarget(Target,
      &     TargetCycle,getMoonRA,addreport,
@@ -16896,7 +17020,7 @@ C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
                tendJD=max(min(tstartJDin,tendJDin),
      &              tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getPenumbra,addreport,
@@ -16915,7 +17039,7 @@ C     search backwards for Rp .eq. Rm (PENUMBRA PARTIAL START)
                
 C     !write(*,*) myname,'Ru:',rp,rm,rp.le.rm
                if (Ru.le.Rm) then               
-C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
+C     search backwards for Ru (=dd-ru) .eq. Rm (UMBRA PARTIAL START)
                   dt=-0.2D0     ! eclipse starts not more than 1 day earlier
                   xeventId=eventId + 1
                   xevent100=event100(1:lend)//
@@ -16925,7 +17049,7 @@ C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
                   tendJD=max(min(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                   xJD=searchTarget(Rm, ! find start
      &                 xCycle,getUmbra,addreport,
@@ -16943,7 +17067,7 @@ C     search backwards for Ru .eq. Rm (UMBRA PARTIAL START)
                   end if
                end if
                if (Ru.lt.-Rm) then ! Moon totally within Earth umbra
-C     search backwards for Ru .eq. -Rm (UMBRA TOTAL START)
+C     search backwards for Ru (=dd-ru) .eq. Rm-2*Ru (UMBRA TOTAL START)
                   dt=-1.0D0     ! eclipse starts not more than 1 day earlier
                   xeventId=eventid + 2
                   xevent100=event100(1:lend)//
@@ -16953,9 +17077,9 @@ C     search backwards for Ru .eq. -Rm (UMBRA TOTAL START)
                   tendJD=max(min(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
-                  xJD=searchTarget(-Rm, ! find start
+                  xJD=searchTarget(Rm-2.0D0*Ru, ! find start
      &                 xCycle,getUmbra,addreport,
      &                 tstartJD,tendJD,dt,secdec,bbok,
      &                 xeventId,xevent100,
@@ -17003,7 +17127,7 @@ C     report max occulation
                   end if
                end if
                if (Ru.lt.-Rm) then ! Moon totally within Earth umbra
-C     search forwards for Ru .eq. -Rm (UMBRA TOTAL STOP)
+C     search forwards for Ru (=dd-ru) .eq. -Rm (UMBRA TOTAL STOP)
                   dt=0.2D0      ! eclipse stops not more than 1 day later
                   xeventId=eventId + 4
                   xevent100=event100(1:lend)//
@@ -17013,7 +17137,7 @@ C     search forwards for Ru .eq. -Rm (UMBRA TOTAL STOP)
                   tendJD=min(max(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   xJD=searchTarget(-Rm, ! find stop
      &                 xCycle,getUmbra,addreport,
      &                 tstartJD,tendJD,dt,secdec,bbok,
@@ -17029,7 +17153,7 @@ C     search forwards for Ru .eq. -Rm (UMBRA TOTAL STOP)
                      return
                   end if
                end if
-C     search forwards for Ru .eq. Rm (UMBRA PARTIAL STOP)
+C     search forwards for Ru (=dd-ru) .eq. Rm (UMBRA PARTIAL STOP)
                if (Ru.lt.Rm) then
                   dt=1.0D0      ! eclipse stops not more than 1 day later
                   xeventId=eventId + 5
@@ -17040,7 +17164,7 @@ C     search forwards for Ru .eq. Rm (UMBRA PARTIAL STOP)
                   tendJD=min(max(tstartJDin,tendJDin),
      &                 tstartJD+dt)
                   dt=dt*0.1D0
-                  zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+                  zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   xJD=searchTarget(Rm, ! find stop
      &                 xCycle,getUmbra,addreport,
      &                 tstartJD,tendJD,dt,secdec,bbok,
@@ -17067,7 +17191,7 @@ C     search forwards for Rp .eq. -Rm (PENUMBRA TOTAL STOP)
                tendJD=min(max(tstartJDin,tendJDin),
      &              tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                xJD=searchTarget(Rm, ! find stop
      &              xCycle,getPenumbra,addreport,
      &              tstartJD,tendJD,dt,secdec,bbok,
@@ -17148,7 +17272,7 @@ C
 C
       call chop0(event100,100)
 C
-      zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+      zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
       zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       searchVenusRelLon=searchTarget(Target,
      &     TargetCycle,getVenusRelLon,addreport,
@@ -17278,7 +17402,7 @@ C           !write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=min(max(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find stop
      &              xCycle,getVenusTransit,addreport,
@@ -17301,7 +17425,7 @@ C           !write(*,*) myname,'Rp:',T16,rp,rm,rp.le.rm
                xCycle=-1.0D0    ! disable variable cycling
                tendJD=max(min(tstartJDin,tendJDin),tstartJD+dt)
                dt=dt*0.1D0
-               zb(lval)=.false.;zb(lsun)=.false.;zb(lmoon)=.false.
+               zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
                xJD=searchTarget(Rm, ! find start
      &              xCycle,getVenusTransit,addreport,
@@ -19988,8 +20112,8 @@ C
       real Re,Rs,Rm,ca,tai,alpha,res,iSun(3)
       real fact,ru,da,xpos(3),delta(3),dot,rem,desx,dx,ddx,h
       real occ,iocc
-      real area,d
-      common /CgetSunEclipse/occ
+      real area,dd
+      common /CgetSunEclipse/occ,dd,ru,rm
 C
       real sunCart(3),moonCart(3) ! TOPOCENTRIC (EAST,NORTH,ZENITH) (KM)
       real sunPolar(3),moonPolar(3)
@@ -20132,7 +20256,7 @@ C
       delta(2)=delta(2)-iSun(2)*da*tai
       delta(3)=delta(3)-iSun(3)*da*tai
 C
-      d=getAbs(delta)           ! distance from moon centre to cone centre
+      dd=getAbs(delta)           ! distance from moon centre to cone centre
 C
       xpos(1)=moonCart(1)-delta(1)
       xpos(2)=moonCart(2)-delta(2)
@@ -20144,17 +20268,17 @@ C
 C
 C     calculate occulation
 C
-      if ( d-rm .gt. ru) then  ! moon completely outside cone
+      if ( dd-ru .gt. rm) then  ! moon completely outside cone
          occ=0.0D0
-      else if (d+rm .lt. ru) then ! moon completely within cone
+      else if (dd-ru .lt. -rm) then ! moon completely within cone
          occ=100.0D0*(rm*rm)/(ru*ru)
-      else if (d+ru .lt. rm) then ! cone completely within moon radius
+      else if (dd+ru .lt. rm) then ! cone completely within moon radius
          occ=100.0D0
       else                      ! moon partially within cone
 C     http://mathworld.wolfram.com/Circle-CircleIntersection.html
-         Area=+(rm*rm)*acos((d*d+rm*rm-ru*ru)/(2.0*d*rm))
-     &        +(ru*ru)*acos((d*d+ru*ru-rm*rm)/(2.0*d*ru))
-     &        -0.5D0*dsqrt((-d+rm+ru)*(d+rm-ru)*(d-rm+ru)*(d+rm+ru))
+         Area=+(rm*rm)*acos((dd*dd+rm*rm-ru*ru)/(2.0*dd*rm))
+     &        +(ru*ru)*acos((dd*dd+ru*ru-rm*rm)/(2.0*dd*ru))
+     &        -0.5D0*dsqrt((-dd+rm+ru)*(dd+rm-ru)*(dd-rm+ru)*(dd+rm+ru))
          occ = 100.0D0* Area/(ru*ru*pi)
 C         !write(*,*)myname,'Occ:',occ
 
@@ -20162,22 +20286,57 @@ C         !write(*,*)myname,'Occ:',occ
 C
 C     get distance between SunEclipse and moon center
 C
-      getSunEclipse = d-ru      ! cone distance
+      getSunEclipse = dd-ru      ! cone distance
 C
-C     !write(*,*)'GETCONE:',JD,d,ru,d-ru,desx,dx
+C      write(*,*)'GETCONE:',JD,dd,ru,dd-ru,desx,dx
 C
       return
       end function getSunEclipse
 C
+C     dd > rm + ru   : moon outside sun
+C     dd < ru - rm   : moon inside sun (annular)
+C     dd < rm - ru   : sun inside moon (total)
+C     **********     : partial intersect
+C
       real function getSunEclipseOcc()
       implicit none
-      real occ
-      common /CgetSunEclipse/occ
+      real occ,dd,ru,rm
+      common /CgetSunEclipse/occ,dd,ru,rm
 C      !write(*,*)myname,'Get Occ:',occ
 C     Occulation (in %)
       getSunEclipseOcc=occ
       return
       end function getSunEclipseOcc
+C
+      real function getSunEclipseDD()
+      implicit none
+      real occ,dd,ru,rm
+      common /CgetSunEclipse/occ,dd,ru,rm
+C      !write(*,*)myname,'Get Dd:',dd
+C     Distance between Moon and Sun center at Moon distance
+      getSunEclipseDD=dd
+      return
+      end function getSunEclipseDD
+C
+      real function getSunEclipseRu()
+      implicit none
+      real occ,dd,ru,rm
+      common /CgetSunEclipse/occ,dd,ru,rm
+C      !write(*,*)myname,'Get Ru:',ru
+C     Sun radius at moon distance
+      getSunEclipseRu=Ru
+      return
+      end function getSunEclipseRu
+C
+      real function getSunEclipseRm()
+      implicit none
+      real occ,dd,ru,rm
+      common /CgetSunEclipse/occ,dd,ru,rm
+C      !write(*,*)myname,'Get Rm:',rm
+C     Moon radius
+      getSunEclipseRm=Rm
+      return
+      end function getSunEclipseRm
 C
       real function getSunElevation(JD,loclat,loclon,lochgt,
      &     crc250,irc)
