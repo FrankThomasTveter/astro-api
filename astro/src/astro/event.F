@@ -59,6 +59,7 @@ C
       real :: sec1,sec2,dsec1,dsec2,sec,cpuStart,cpuStop
       logical :: debug, silent, bdeb
       data bdeb /.false./
+      real, parameter :: undef =1.7E38
       integer :: cost
 C
 C      bdeb=.true.
@@ -528,7 +529,7 @@ C
             call jd2date(repJD(jj),yy,mm,dd,hh,mi,sec)
             call chop0(rep250(jj),250)
             lenr=length(rep250(jj),250,10)
-            if (nint(repVal(jj)).ne.-99999) then
+            if (nint(repVal(jj)).ne.-99999.and.repVal(jj).ne.undef) then
                val50=getVal50(repVal(jj))
                call chop0(val50,50)
                lenv=length(val50,50,10)
