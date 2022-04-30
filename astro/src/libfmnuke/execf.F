@@ -138,7 +138,8 @@ C     FIND FOLLOWING OBJECT
             QQ(2)=.FALSE.
             START=II
             CPOS=II+1
-            CALL ARGUMENT(STRING,N,CPOS,BUFF1,QQ,RR)
+            CALL ARGUMENT(STRING,N,CPOS,BUFF1,QQ,RRR)
+            RR=RRR(1)
             END=CPOS
             CALL CEQUAL(BUFF1,250,STRING,START,END)
             CALL CHOP0(BUFF1,250)
