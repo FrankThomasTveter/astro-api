@@ -20864,7 +20864,7 @@ C
      &     sunPolar,            ! RANGE, ELEVATION, AZIMUTH (KM,RAD)
      &     crc250,irc)
       if(irc.ne.0) then
-         lencrc=length(crc250,10)
+         lencrc=length(crc250,250,10)
          crc250=crc250(1:lencrc)//' > '//myname//
      &        ' > Error return from JPLephEFtoTC.'
          return
