@@ -6888,7 +6888,7 @@ C
 C
       dtin=0.05D0
       zb(lval)=.false.;zb(lsun)=.true.;zb(lmoon)=.false.
-      zp(lele)=.false.;zp(lazi)=.true.;zp(lran)=.true.
+      zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
       call reportLLMax(
      &     getSunElevation,addLLreport,
      &     lat,lon,hgt,
