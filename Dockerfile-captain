@@ -11,16 +11,13 @@
 # this approach (start with ubuntu and add apache2) is based on the dockerfile at: https://stackoverflow.com/a/44377561/4070848
 
 # start with ubuntu and add apache2 below
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # now install tini (an alternative to dumb-init)... good practice to have a dumb-init process as first process in container with PID=1
 # see: https://github.com/Yelp/dumb-init
 ENV TINI_VERSION v0.17.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
-
-# following ENV is to avoid the install script waiting on user input when "Configuring tzdata"
-ENV DEBIAN_FRONTEND=noninteractive
 
 # install apache2
 RUN apt-get update && \
