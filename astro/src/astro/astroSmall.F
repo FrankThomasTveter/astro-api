@@ -1312,23 +1312,23 @@ C     ! write sun information
             write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
             call chop0(rep250(ii),250)
             lens=length(rep250(ii),250,20)
+            x50=getValN50(repval(ii),lenx,4)
+            y50=getValN50(repval(ii+1),leny,4)
+            z50=getValN50(repval(ii+2),lenz,1)
             if (nint(repVal(ii)).eq.1) then
                u50="true"
             else
                u50="false"
             end if
             lenu=len(trim(u50))
-            if (nint(repVal(ii+1)).eq.1) then
+            if (nint(repVal(ii+4)).eq.1) then
                v50="day"
-            else if (nint(repVal(ii+1)).eq.0) then
+            else if (nint(repVal(ii+4)).eq.0) then
                v50="none"
-            else if (nint(repVal(ii+1)).eq.-1) then
+            else if (nint(repVal(ii+4)).eq.-1) then
                v50="night"
             end if
             lenv=len(trim(v50))
-            x50=getValN50(repval(ii+2),lenx,4)
-            y50=getValN50(repval(ii+3),leny,4)
-            z50=getValN50(repval(ii+4),lenz,1)
             write(s250,120)dat25,x50(1:lenx),y50(1:leny),z50(1:lenz),
      &           u50(1:lenu),v50(1:lenv)
             call chop0(s250,250)
@@ -1379,28 +1379,28 @@ C     </xsl:template>
      &        repId(ii+6).eq.106 .and. ! azimuth
      &        repId(ii+7).eq.107) then ! range
 C     ! write moon shadow information
+            x50=getValN50(repval(ii),lenx,4) ! elevation
+            y50=getValN50(repval(ii+1),leny,4) ! azimuth
+            z50=getValN50(repval(ii+2),lenz,1) ! range
+            r50=getValN50(repval(ii+6),lenr,1) ! clock
+            t50=getValN50(repval(ii+5),lent,1) ! incidence
+            w50=getValN50(repval(ii+7),lenw,1) ! phase
             call chop0(rep250(ii),250)
-            lens=length(rep250(ii+1),250,20)
+            lens=length(rep250(ii+3),250,20)
             if (nint(repVal(ii)).eq.1) then
                u50="true"
             else
                u50="false"
             end if
             lenu=len(trim(u50))
-            if (nint(repVal(ii+1)).eq.1) then
+            if (nint(repVal(ii+4)).eq.1) then
                v50="day"
-            else if (nint(repVal(ii+1)).eq.0) then
+            else if (nint(repVal(ii+4)).eq.0) then
                v50="none"
-            else if (nint(repVal(ii+1)).eq.-1) then
+            else if (nint(repVal(ii+4)).eq.-1) then
                v50="night"
             end if
             lenv=len(trim(v50))
-            w50=getValN50(repval(ii+2),lenw,1) ! phase
-            x50=getValN50(repval(ii+5),lenx,4) ! elevation
-            y50=getValN50(repval(ii+6),leny,4) ! azimuth
-            z50=getValN50(repval(ii+7),lenz,1) ! range
-            r50=getValN50(repval(ii+3),lenr,1) ! clock
-            t50=getValN50(repval(ii+4),lent,1) ! illumination
             write(s250,100)dat25,
      &           x50(1:lenx),y50(1:leny),z50(1:lenz),
      &           r50(1:lenr),t50(1:lent),
