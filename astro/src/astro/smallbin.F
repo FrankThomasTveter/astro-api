@@ -24,7 +24,8 @@ C
       end if
 C
 C      s1000="lat=65.745&lon=10.0&days=4;date=2020-06-19&offset=+01:00;"
-      s1000="lat=35.745&lon=10.0&days=4;date=2020-06-19&offset=+01:00;"
+      s1000="lat=35.745&lon=10.0&days=4;date=2020-07-19&offset=+01:00"//
+     &     "&events=all"
       CALL SMALL(s1000,         ! query string
      &     maxline,             ! maximum number of output lines
      &     nline,               ! number of output lines

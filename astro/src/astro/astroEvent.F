@@ -371,6 +371,7 @@ C     o  repId = 981 -> total solar eclipse starts
 C     o  repId = 982 -> repVal = maximum occultation
 C     o  repId = 983 -> total solar eclipse stops
 C     o  repId = 984 -> partial solar eclipse stops
+C
 C     EVENTID  = 990 : 'DETECT LOCAL SOLAR ECLIPSE'
 C     i  eventVal(1) = latitude of observer (deg)
 C     i  eventVal(2) = longtitude of observer (deg)
@@ -499,7 +500,7 @@ C
        secdec=max(0,min(3,secdec))
 C
       if (bdeb) then
-         write(*,*)myname,"Entering.",irc
+         write(*,*)myname,"***** Entering *****",irc
          write(*,*)myname,"tstartJD:",tstartJD ! start time (in julianDay)
          write(*,*)myname,"searchCode:",searchCode ! search for next event
          write(*,*)myname,"lnext:",lnext ! search for next event
@@ -5969,8 +5970,30 @@ C
          irc=100
          return
       END IF
-C      write(*,*) myname,'Returning with eventId:',eventId
-      if (bdeb)write(*,*)myname,"Done.",irc
+
+
+      if (bdeb) then
+         write(*,*)myname,"Exiting.",irc
+         write(*,*)myname,"tstartJD:",tstartJD ! start time (in julianDay)
+         write(*,*)myname,"searchCode:",searchCode ! search for next event
+         write(*,*)myname,"lnext:",lnext ! search for next event
+         write(*,*)myname,"lprev:",lprev ! search for previous event
+         write(*,*)myname,"lall:",lall ! report all events (no search)
+         write(*,*)myname,"tendJD:",tendJD ! report all events end time (in julianDay)
+         write(*,*)myname,"eventId:",eventId ! requested event id (SEE TABLE BELOW)
+         write(*,*)myname,"neventVal:",neventVal ! number of event input data (SEE TABLE BELOW)
+         write(*,*)myname,"eventVal:",(eventVal(ii),ii=1,neventVal) ! event input data (SEE TABLE BELOW)
+         write(*,*)myname,"maxrep:",maxrep ! maximum number of output reports
+         write(*,*)myname,"nrep:",nrep ! number of output reports
+         write(*,*)myname,"repJD:",(repJD(ii),ii=1,nrep) ! time of output report (in julianDay)
+         write(*,*)myname,"repId:",(repId(ii),ii=1,nrep) ! output report identification (SEE TABLE BELOW)
+         write(*,*)myname,"repVal:",(repVal(ii),ii=1,nrep) ! output report value (SEE TABLE BELOW)
+         write(*,*)myname,"rep250:",(rep250(ii),ii=1,nrep) ! output report string (redundant description)
+         write(*,*)myname,"secdec:",secdec ! number of second decimals used in output report string 
+      end if
+
+C     write(*,*) myname,'Returning with eventId:',eventId
+      if (bdeb)write(*,*)myname,"***** Done *****.",irc
 C
       return
       contains
@@ -9632,35 +9655,37 @@ C     search backwards for Rp (=dd-ru) .eq. Rm-2*Ru (TOTAL ECLIPSE START)
                   end if
                end if
 C     report max occulation
-               nrep=nrep+1
-               if (nrep.le.maxrep) then
-                  if (secdec.gt.0) then
-                     write(fmt100,'(A,I2.2,A,I1,A)')
-     &                    "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                    "I2.2,':',I2.2,F",
-     &                    secdec+1,".",secdec,")"
-                     fact=10.0D0**(real(secdec))
-                     write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                    int(sec1),real(int((sec1-int(sec1))*
-     &                    fact))/fact
-                  else
-                     write(fmt100,'(A,I2.2,A)')
-     &                    "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                    "I2.2,':',I2.2)"
-                     write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                    int(sec1)
+               !if (occ.gt.0.0D0) then               
+                  nrep=nrep+1
+                  if (nrep.le.maxrep) then
+                     if (secdec.gt.0) then
+                        write(fmt100,'(A,I2.2,A,I1,A)')
+     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                       "I2.2,':',I2.2,F",
+     &                       secdec+1,".",secdec,")"
+                        fact=10.0D0**(real(secdec))
+                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                       int(sec1),real(int((sec1-int(sec1))*
+     &                       fact))/fact
+                     else
+                        write(fmt100,'(A,I2.2,A)')
+     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                       "I2.2,':',I2.2)"
+                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                       int(sec1)
+                     end if
+                     call chop0(T30,30)
+                     lent=length(T30,30,30)
+                     lend=length(event100,100,30)
+                     write(rep250(nrep),
+     &                    '(A,X,A," MAX OCCULTATION=",F8.1,"%")')
+     &                    T30(1:lent),event100(1:lend),
+     &                    occ
+                     repJD(nrep)=tstartJD
+                     repid(nrep)=eventId + 3
+                     repval(nrep)=occ
                   end if
-                  call chop0(T30,30)
-                  lent=length(T30,30,30)
-                  lend=length(event100,100,30)
-                  write(rep250(nrep),
-     &                 '(A,X,A," MAX OCCULTATION=",F8.1,"%")')
-     &                 T30(1:lent),event100(1:lend),
-     &                 occ
-                  repJD(nrep)=tstartJD
-                  repid(nrep)=eventId + 3
-                  repval(nrep)=occ
-               end if
+               !end if
                if (dd.le.rm-ru) then ! Moon totally within Sun cone
 C     search forwards for Ru (=dd-ru) .eq. Rm-2*Ru (TOTAL ECLIPSE STOP)
                   dt=0.2D0      ! eclipse stops not more than 1 day later
@@ -10838,7 +10863,8 @@ C     search backwards for Ru (=dd-ru) .eq. -Rm (UMBRA TOTAL START)
                   end if
                end if
 C     report max occulation
-               if (Ru.le.Rm) then               
+               !write(*,*)myname,'A OCC:',occ
+               !if (occ.gt.0.0D0) then               
                   nrep=nrep+1
                   if (nrep.le.maxrep) then
                      if (secdec.gt.0) then
@@ -10868,7 +10894,7 @@ C     report max occulation
                      repid(nrep)=eventId + 3
                      repval(nrep)=occ
                   end if
-               end if
+               !end if
                if (Ru.lt.-Rm) then ! Moon totally within Earth umbra
 C     search forwards for Ru (=dd-ru) .eq. -Rm (UMBRA TOTAL STOP)
                   dt=0.2D0      ! eclipse stops not more than 1 day later
@@ -16279,35 +16305,37 @@ C     search backwards for Ru (=dd-ru) .eq. Rm-2*Ru (TOTAL ECLIPSE START)
                   !write(*,*)"***Total stop:",occ,dd,ru,rm,xjd
                end if
 C     report max occulation
-               nrep=nrep+1
-               if (nrep.le.maxrep) then
-                  if (secdec.gt.0) then
-                     write(fmt100,'(A,I2.2,A,I1,A)')
-     &                    "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                    "I2.2,':',I2.2,F",
-     &                    secdec+1,".",secdec,")"
-                     fact=10.0D0**(real(secdec))
-                     write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                    int(sec1),real(int((sec1-int(sec1))*
-     &                    fact))/fact
-                  else
-                     write(fmt100,'(A,I2.2,A)')
-     &                    "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
-     &                    "I2.2,':',I2.2)"
-                     write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
-     &                    int(sec1)
+               !if (occ.gt.0.0D0) then               
+                  nrep=nrep+1
+                  if (nrep.le.maxrep) then
+                     if (secdec.gt.0) then
+                        write(fmt100,'(A,I2.2,A,I1,A)')
+     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                       "I2.2,':',I2.2,F",
+     &                       secdec+1,".",secdec,")"
+                        fact=10.0D0**(real(secdec))
+                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                       int(sec1),real(int((sec1-int(sec1))*
+     &                       fact))/fact
+                     else
+                        write(fmt100,'(A,I2.2,A)')
+     &                       "(I4,'/',I2.2,'/',I2.2,X,I2.2,':',"//
+     &                       "I2.2,':',I2.2)"
+                        write(T30,FMT=FMT100) YY1,MM1,DD1,HH1,MI1,
+     &                       int(sec1)
+                     end if
+                     call chop0(T30,30)
+                     lent=length(T30,30,30)
+                     lend=length(event100,100,30)
+                     write(rep250(nrep),
+     &                    '(A,X,A," MAX OCCULTATION=",F8.1,"%")')
+     &                    T30(1:lent),event100(1:lend),
+     &                    occ
+                     repJD(nrep)=tstartJD
+                     repid(nrep)=eventId + 3
+                     repval(nrep)=occ
                   end if
-                  call chop0(T30,30)
-                  lent=length(T30,30,30)
-                  lend=length(event100,100,30)
-                  write(rep250(nrep),
-     &                 '(A,X,A," MAX OCCULTATION=",F8.1,"%")')
-     &                 T30(1:lent),event100(1:lend),
-     &                 occ
-                  repJD(nrep)=tstartJD
-                  repid(nrep)=eventId + 3
-                  repval(nrep)=occ
-               end if
+               !end if
                if (dd.le.rm-ru) then ! Sun inside moon
 C     search forwards for Ru (=dd-ru) .eq. Rm-2*Ru (TOTAL ECLIPSE STOP)
                   dt=0.01D0      ! eclipse stops not more than 14 minutes later
@@ -16901,7 +16929,7 @@ C
       real targetCycle
       parameter (targetCycle=100.0D0) ! target value which correponds to 0.0D0
       real dtin                 ! initial time increment
-      real Rm,Rp,Ru,xCycle,xJD,pJD,dt
+      real Rm,Rp,Ru,xCycle,xJD,pJD,dt,gu
       real tstartJD           ! start time
       real tendJD             ! end time
       integer xrep,maxxrep,yy1,mm1,dd1,hh1,mi1
@@ -17079,7 +17107,7 @@ C     search backwards for Ru (=dd-ru) .eq. Rm-2*Ru (UMBRA TOTAL START)
                   dt=dt*0.1D0
                   zb(lval)=.true.;zb(lsun)=.false.;zb(lmoon)=.false.
                   zp(lele)=.true.;zp(lazi)=.true.;zp(lran)=.true.
-                  xJD=searchTarget(Rm-2.0D0*Ru, ! find start
+                  xJD=searchTarget(-Rm, ! find start
      &                 xCycle,getUmbra,addreport,
      &                 tstartJD,tendJD,dt,secdec,bbok,
      &                 xeventId,xevent100,
@@ -17094,8 +17122,9 @@ C     search backwards for Ru (=dd-ru) .eq. Rm-2*Ru (UMBRA TOTAL START)
                      return
                   end if
                end if
-               if (Ru.le.Rm) then !moon in earth umbra
 C     report max occulation
+               !write(*,*)myname,'B OCC:',occ
+               !if (occ.gt.0.0D0) then               
                   nrep=nrep+1
                   if (nrep.le.maxrep) then
                      if (secdec.gt.0) then
@@ -17125,7 +17154,7 @@ C     report max occulation
                      repid(nrep)=eventId + 3
                      repval(nrep)=occ
                   end if
-               end if
+               !end if
                if (Ru.lt.-Rm) then ! Moon totally within Earth umbra
 C     search forwards for Ru (=dd-ru) .eq. -Rm (UMBRA TOTAL STOP)
                   dt=0.2D0      ! eclipse stops not more than 1 day later
@@ -21035,7 +21064,7 @@ C
          getUmbra = d-ru      ! umbra distance
       end if
 C
-C       !write(*,*)'GETUMBRA:',JD,d,ru,d-ru,desx,dx
+C       write(*,*)'GETUMBRA:',JD,d,ru,d-ru,-rm,desx,dx,occ
 C
       return
       end function getUmbra

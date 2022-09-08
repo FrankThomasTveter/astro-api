@@ -12,7 +12,7 @@ C
       integer :: lenline(maxline)
       character*250 :: line250(maxline)
 C
-      character*10 :: lat10,lon10,hgt10,day10,dat10
+      character*10 :: lat10,lon10,hgt10,day10,dat10,eve10
       character*6 :: off6
 C
       integer, external :: length
@@ -41,6 +41,7 @@ C
       day10="1"
       dat10="2020-01-01"
       off6="+00:00"
+      eve10=""
 C
       ii=1
       mode=1                    ! initial
@@ -85,7 +86,13 @@ C
             else if (s1000(ii:min(1000,ii+5)).eq.'offset') then
                if (bdeb) write(*,*) 'Found "small"',ii,mode
                mode=7           ! search for seq or type
-               ii=ii+4
+               ii=ii+6
+               istart=ii
+               istop=istart-1
+            else if (s1000(ii:min(1000,ii+5)).eq.'events') then
+               if (bdeb) write(*,*) 'Found "small"',ii,mode
+               mode=8           ! search for seq or type
+               ii=ii+6
                istart=ii
                istop=istart-1
             else ! strange character
@@ -110,6 +117,8 @@ C
                   dat10=s1000(istart:istop)
                else if (mode.eq.7) then ! offset
                   off6=s1000(istart:istop)
+               else if (mode.eq.8) then ! event
+                  eve10=s1000(istart:istop)
                end if
                ii=ii+1
                mode=1
@@ -121,7 +130,7 @@ C
          bdone=(ii.gt.lens)
       end do
 
-      call astroSmall(lat10,lon10,hgt10,day10,dat10,off6, ! query string
+      call astroSmall(lat10,lon10,hgt10,day10,dat10,off6,eve10, ! query string
      &     maxline,             ! maximum number of output lines
      &     nline,               ! number of output lines
      &     lenline,             ! length of each out250
