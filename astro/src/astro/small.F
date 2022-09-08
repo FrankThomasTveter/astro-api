@@ -89,10 +89,10 @@ C
                ii=ii+6
                istart=ii
                istop=istart-1
-            else if (s1000(ii:min(1000,ii+4)).eq.'event ') then
+            else if (s1000(ii:min(1000,ii+5)).eq.'events ') then
                if (bdeb) write(*,*) 'Found "small"',ii,mode
                mode=8           ! search for seq or type
-               ii=ii+5
+               ii=ii+6
                istart=ii
                istop=istart-1
             else ! strange character

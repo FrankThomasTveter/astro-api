@@ -1431,184 +1431,10 @@ C     write events tag if requested
          call chop0(s250,250)
          lens=length(s250,250,30)
          inline=min(imaxline,inline+1)
-         write(iline250(inline),'(A)') ' '//s250(1:lens)
+         write(iline250(inline),'(A)') '  '//s250(1:lens)
          ilenline(inline)=len(trim(iline250(inline)))
          !
          nline=0
-         !
-         tstartjd=date-offset
-C     150 - DETECT SOUTHERN SOLSTICE
-         eventId=150
-         nrep=0
-         irc=0
-         tstopjd=tstartjd
-         call astroEvent(
-     &        tstartJD,         ! start time (in julianDay)
-     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
-     &        tstopJD,          ! report all events end time (in julianDay)
-     &        eventId,          ! requested event id (SEE TABLE BELOW)
-     &        neventVal,        ! number of event input data (SEE TABLE BELOW)
-     &        eventVal,         ! event input data (SEE TABLE BELOW)
-     &        maxrep,           ! maximum number of output reports
-     &        nrep,             ! number of output reports
-     &        repJD,            ! time of output report (in julianDay)
-     &        repId,            ! output report identification (SEE TABLE BELOW)
-     &        repVal,           ! output report value (SEE TABLE BELOW)
-     &        rep250,           ! output report string (redundant description)
-     &        secdec,           ! number of second decimals used in output report string 
-     &        crc250,           ! error description
-     &        irc)              ! error return code (0=ok)
-C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
-C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
-C     </xsl:template>
-         do ii=1,nrep
-            if (repId(ii).eq.150) then ! event
-C     ! write southern solstice information
-               t2000=repJD(ii)+offset
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
-               call chop0(rep250(ii),250)
-               lens=length(rep250(ii),250,20)
-               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               write(s250,150)dat25 ! rep250(ii)(21:lens)
-               call chop0(s250,250)
-               lens=length(s250,250,30)
-               nline=min(maxline,nline+1)
-               jdline(nline)=t2000
-               write(line250(nline),'(A)') '   '//s250(1:lens)
-               lenline(nline)=len(trim(line250(nline)))
-            end if
-         end do
- 150     FORMAT('<southernSolstice time="',A25,'"/>')
-
-C     160 - DETECT ASCENDING EQUINOX
-         eventId=160
-         nrep=0
-         irc=0
-         tstopjd=tstartjd
-         call astroEvent(
-     &        tstartJD,         ! start time (in julianDay)
-     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
-     &        tstopJD,          ! report all events end time (in julianDay)
-     &        eventId,          ! requested event id (SEE TABLE BELOW)
-     &        neventVal,        ! number of event input data (SEE TABLE BELOW)
-     &        eventVal,         ! event input data (SEE TABLE BELOW)
-     &        maxrep,           ! maximum number of output reports
-     &        nrep,             ! number of output reports
-     &        repJD,            ! time of output report (in julianDay)
-     &        repId,            ! output report identification (SEE TABLE BELOW)
-     &        repVal,           ! output report value (SEE TABLE BELOW)
-     &        rep250,           ! output report string (redundant description)
-     &        secdec,           ! number of second decimals used in output report string 
-     &        crc250,           ! error description
-     &        irc)              ! error return code (0=ok)
-C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
-C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
-C     </xsl:template>
-         do ii=1,nrep
-            if (repId(ii).eq.160) then ! event
-C     ! write autumnal solstice information
-               t2000=repJD(ii)+offset
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
-               call chop0(rep250(ii),250)
-               lens=length(rep250(ii),250,20)
-               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               write(s250,160)dat25 ! rep250(ii)(21:lens)
-               call chop0(s250,250)
-               lens=length(s250,250,30)
-               nline=min(maxline,nline+1)
-               jdline(nline)=t2000
-               write(line250(nline),'(A)') '   '//s250(1:lens)
-               lenline(nline)=len(trim(line250(nline)))
-            end if
-         end do
- 160     FORMAT('<autumnalEquinox time="',A25,'"/>')
-
-C     170 - DETECT NORTHERN SOLSTICE
-         eventId=170
-         nrep=0
-         irc=0
-         tstopjd=tstartjd
-         call astroEvent(
-     &        tstartJD,         ! start time (in julianDay)
-     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
-     &        tstopJD,          ! report all events end time (in julianDay)
-     &        eventId,          ! requested event id (SEE TABLE BELOW)
-     &        neventVal,        ! number of event input data (SEE TABLE BELOW)
-     &        eventVal,         ! event input data (SEE TABLE BELOW)
-     &        maxrep,           ! maximum number of output reports
-     &        nrep,             ! number of output reports
-     &        repJD,            ! time of output report (in julianDay)
-     &        repId,            ! output report identification (SEE TABLE BELOW)
-     &        repVal,           ! output report value (SEE TABLE BELOW)
-     &        rep250,           ! output report string (redundant description)
-     &        secdec,           ! number of second decimals used in output report string 
-     &        crc250,           ! error description
-     &        irc)              ! error return code (0=ok)
-C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
-C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
-C     </xsl:template>
-         do ii=1,nrep
-            if (repId(ii).eq.170) then ! event
-C     ! write northern solstice information
-               t2000=repJD(ii)+offset
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
-               call chop0(rep250(ii),250)
-               lens=length(rep250(ii),250,20)
-               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               write(s250,170)dat25 ! rep250(ii)(21:lens)
-               call chop0(s250,250)
-               lens=length(s250,250,30)
-               nline=min(maxline,nline+1)
-               jdline(nline)=t2000
-               write(line250(nline),'(A)') '   '//s250(1:lens)
-               lenline(nline)=len(trim(line250(nline)))
-            end if
-         end do
- 170     FORMAT('<northernSolstice time="',A25,'"/>')
-
-C     180 - DETECT NORTHERN SOLSTICE
-         eventId=180
-         nrep=0
-         irc=0
-         tstopjd=tstartjd
-         call astroEvent(
-     &        tstartJD,         ! start time (in julianDay)
-     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
-     &        tstopJD,          ! report all events end time (in julianDay)
-     &        eventId,          ! requested event id (SEE TABLE BELOW)
-     &        neventVal,        ! number of event input data (SEE TABLE BELOW)
-     &        eventVal,         ! event input data (SEE TABLE BELOW)
-     &        maxrep,           ! maximum number of output reports
-     &        nrep,             ! number of output reports
-     &        repJD,            ! time of output report (in julianDay)
-     &        repId,            ! output report identification (SEE TABLE BELOW)
-     &        repVal,           ! output report value (SEE TABLE BELOW)
-     &        rep250,           ! output report string (redundant description)
-     &        secdec,           ! number of second decimals used in output report string 
-     &        crc250,           ! error description
-     &        irc)              ! error return code (0=ok)
-C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
-C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
-C     </xsl:template>
-         do ii=1,nrep
-            if (repId(ii).eq.180) then ! event
-C     ! write vernal equinox information
-               t2000=repJD(ii)+offset
-               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
-               call chop0(rep250(ii),250)
-               lens=length(rep250(ii),250,20)
-               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
-               write(s250,180)dat25 ! rep250(ii)(21:lens)
-               call chop0(s250,250)
-               lens=length(s250,250,30)
-               nline=min(maxline,nline+1)
-               jdline(nline)=t2000
-               write(line250(nline),'(A)') '   '//s250(1:lens)
-               lenline(nline)=len(trim(line250(nline)))
-            end if
-         end do
- 180     FORMAT('<vernalEquinox time="',A25,'"/>')
-
 C     990 - DETECT LOCAL SOLAR ECLIPSE
          eventId=990
          nrep=0
@@ -1710,6 +1536,216 @@ C     </xsl:template>
             lenline(nline)=len(trim(line250(nline)))
          end if
  990  FORMAT('   <solarEclipse ',A,'/>')
+         !
+         do ii=1,nline
+            indline(ii)=ii
+         end do
+         call heapsort1(nline,jdline,newnn,nline,indline,1.0D-9,.false.)
+         !
+         do ii=1,newnn
+            inline=min(imaxline,inline+1)
+            iline250(inline)=line250(indline(ii))
+            ilenline(inline)=lenline(indline(ii))
+         end do
+         !
+         write(s250,96)
+         call chop0(s250,250)
+         lens=length(s250,250,30)
+         inline=min(imaxline,inline+1)
+         write(iline250(inline),'(A)') '  '//s250(1:lens)
+         ilenline(inline)=len(trim(iline250(inline)))
+      end if
+C     close location tag
+      write(s250,81)
+      call chop0(s250,250)
+      lens=length(s250,250,30)
+      inline=min(imaxline,inline+1)
+      write(iline250(inline),'(A)') ' '//s250(1:lens)
+      ilenline(inline)=len(trim(iline250(inline)))
+
+
+      if (events) then
+         write(s250,95)
+         call chop0(s250,250)
+         lens=length(s250,250,30)
+         inline=min(imaxline,inline+1)
+         write(iline250(inline),'(A)') ' '//s250(1:lens)
+         ilenline(inline)=len(trim(iline250(inline)))
+         !
+         nline=0
+         !
+         tstartjd=date-offset
+C     150 - DETECT SOUTHERN SOLSTICE
+         eventId=150
+         nrep=0
+         irc=0
+         tstopjd=tstartjd
+         call astroEvent(
+     &        tstartJD,         ! start time (in julianDay)
+     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
+     &        tstopJD,          ! report all events end time (in julianDay)
+     &        eventId,          ! requested event id (SEE TABLE BELOW)
+     &        neventVal,        ! number of event input data (SEE TABLE BELOW)
+     &        eventVal,         ! event input data (SEE TABLE BELOW)
+     &        maxrep,           ! maximum number of output reports
+     &        nrep,             ! number of output reports
+     &        repJD,            ! time of output report (in julianDay)
+     &        repId,            ! output report identification (SEE TABLE BELOW)
+     &        repVal,           ! output report value (SEE TABLE BELOW)
+     &        rep250,           ! output report string (redundant description)
+     &        secdec,           ! number of second decimals used in output report string 
+     &        crc250,           ! error description
+     &        irc)              ! error return code (0=ok)
+C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
+C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
+C     </xsl:template>
+         do ii=1,nrep
+            if (repId(ii).eq.150) then ! event
+C     ! write southern solstice information
+               t2000=repJD(ii)+offset
+               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+               call chop0(rep250(ii),250)
+               lens=length(rep250(ii),250,20)
+               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
+               write(s250,150)dat25 ! rep250(ii)(21:lens)
+               call chop0(s250,250)
+               lens=length(s250,250,30)
+               nline=min(maxline,nline+1)
+               jdline(nline)=t2000
+               write(line250(nline),'(A)') '  '//s250(1:lens)
+               lenline(nline)=len(trim(line250(nline)))
+            end if
+         end do
+ 150     FORMAT('<southernSolstice time="',A25,'"/>')
+
+C     160 - DETECT ASCENDING EQUINOX
+         eventId=160
+         nrep=0
+         irc=0
+         tstopjd=tstartjd
+         call astroEvent(
+     &        tstartJD,         ! start time (in julianDay)
+     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
+     &        tstopJD,          ! report all events end time (in julianDay)
+     &        eventId,          ! requested event id (SEE TABLE BELOW)
+     &        neventVal,        ! number of event input data (SEE TABLE BELOW)
+     &        eventVal,         ! event input data (SEE TABLE BELOW)
+     &        maxrep,           ! maximum number of output reports
+     &        nrep,             ! number of output reports
+     &        repJD,            ! time of output report (in julianDay)
+     &        repId,            ! output report identification (SEE TABLE BELOW)
+     &        repVal,           ! output report value (SEE TABLE BELOW)
+     &        rep250,           ! output report string (redundant description)
+     &        secdec,           ! number of second decimals used in output report string 
+     &        crc250,           ! error description
+     &        irc)              ! error return code (0=ok)
+C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
+C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
+C     </xsl:template>
+         do ii=1,nrep
+            if (repId(ii).eq.160) then ! event
+C     ! write autumnal solstice information
+               t2000=repJD(ii)+offset
+               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+               call chop0(rep250(ii),250)
+               lens=length(rep250(ii),250,20)
+               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
+               write(s250,160)dat25 ! rep250(ii)(21:lens)
+               call chop0(s250,250)
+               lens=length(s250,250,30)
+               nline=min(maxline,nline+1)
+               jdline(nline)=t2000
+               write(line250(nline),'(A)') '  '//s250(1:lens)
+               lenline(nline)=len(trim(line250(nline)))
+            end if
+         end do
+ 160     FORMAT('<autumnalEquinox time="',A25,'"/>')
+
+C     170 - DETECT NORTHERN SOLSTICE
+         eventId=170
+         nrep=0
+         irc=0
+         tstopjd=tstartjd
+         call astroEvent(
+     &        tstartJD,         ! start time (in julianDay)
+     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
+     &        tstopJD,          ! report all events end time (in julianDay)
+     &        eventId,          ! requested event id (SEE TABLE BELOW)
+     &        neventVal,        ! number of event input data (SEE TABLE BELOW)
+     &        eventVal,         ! event input data (SEE TABLE BELOW)
+     &        maxrep,           ! maximum number of output reports
+     &        nrep,             ! number of output reports
+     &        repJD,            ! time of output report (in julianDay)
+     &        repId,            ! output report identification (SEE TABLE BELOW)
+     &        repVal,           ! output report value (SEE TABLE BELOW)
+     &        rep250,           ! output report string (redundant description)
+     &        secdec,           ! number of second decimals used in output report string 
+     &        crc250,           ! error description
+     &        irc)              ! error return code (0=ok)
+C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
+C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
+C     </xsl:template>
+         do ii=1,nrep
+            if (repId(ii).eq.170) then ! event
+C     ! write northern solstice information
+               t2000=repJD(ii)+offset
+               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+               call chop0(rep250(ii),250)
+               lens=length(rep250(ii),250,20)
+               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
+               write(s250,170)dat25 ! rep250(ii)(21:lens)
+               call chop0(s250,250)
+               lens=length(s250,250,30)
+               nline=min(maxline,nline+1)
+               jdline(nline)=t2000
+               write(line250(nline),'(A)') '  '//s250(1:lens)
+               lenline(nline)=len(trim(line250(nline)))
+            end if
+         end do
+ 170     FORMAT('<northernSolstice time="',A25,'"/>')
+
+C     180 - DETECT NORTHERN SOLSTICE
+         eventId=180
+         nrep=0
+         irc=0
+         tstopjd=tstartjd
+         call astroEvent(
+     &        tstartJD,         ! start time (in julianDay)
+     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
+     &        tstopJD,          ! report all events end time (in julianDay)
+     &        eventId,          ! requested event id (SEE TABLE BELOW)
+     &        neventVal,        ! number of event input data (SEE TABLE BELOW)
+     &        eventVal,         ! event input data (SEE TABLE BELOW)
+     &        maxrep,           ! maximum number of output reports
+     &        nrep,             ! number of output reports
+     &        repJD,            ! time of output report (in julianDay)
+     &        repId,            ! output report identification (SEE TABLE BELOW)
+     &        repVal,           ! output report value (SEE TABLE BELOW)
+     &        rep250,           ! output report string (redundant description)
+     &        secdec,           ! number of second decimals used in output report string 
+     &        crc250,           ! error description
+     &        irc)              ! error return code (0=ok)
+C     <xsl:template match="/*/astro:Event[@Id='920']/astro:Report">
+C     <polarnightstart time="{@time}" desc="{substring(@hint,21)}"/>
+C     </xsl:template>
+         do ii=1,nrep
+            if (repId(ii).eq.180) then ! event
+C     ! write vernal equinox information
+               t2000=repJD(ii)+offset
+               call jd2date(t2000,yy1,mm1,dd1,hh1,mi1,sec1)
+               call chop0(rep250(ii),250)
+               lens=length(rep250(ii),250,20)
+               write(dat25,999)yy1,mm1,dd1,hh1,mi1,int(sec1),off6
+               write(s250,180)dat25 ! rep250(ii)(21:lens)
+               call chop0(s250,250)
+               lens=length(s250,250,30)
+               nline=min(maxline,nline+1)
+               jdline(nline)=t2000
+               write(line250(nline),'(A)') '  '//s250(1:lens)
+               lenline(nline)=len(trim(line250(nline)))
+            end if
+         end do
+ 180     FORMAT('<vernalEquinox time="',A25,'"/>')
 
 C     560 - DETECT LUNAR ECLIPSE
          eventId=560
@@ -1809,7 +1845,7 @@ C     </xsl:template>
             write(line250(nline),560)s250(1:lens)
             lenline(nline)=len(trim(line250(nline)))
          end if
- 560  FORMAT('   <lunarEclipse ',A,'/>')
+ 560  FORMAT('  <lunarEclipse ',A,'/>')
 
 
 C     210 - DETECT NEW MOON
@@ -1851,7 +1887,7 @@ C     &              offset ! rep250(ii)(21:lens)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
                jdline(nline)=t2000
-               write(line250(nline),'(A)') '   '//s250(1:lens)
+               write(line250(nline),'(A)') '  '//s250(1:lens)
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
@@ -1897,7 +1933,7 @@ C     &              offset ! rep250(ii)(21:lens)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
                jdline(nline)=t2000
-               write(line250(nline),'(A)') '   '//s250(1:lens)
+               write(line250(nline),'(A)') '  '//s250(1:lens)
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
@@ -1943,7 +1979,7 @@ C     &              offset ! rep250(ii)(21:lens)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
                jdline(nline)=t2000
-               write(line250(nline),'(A)') '   '//s250(1:lens)
+               write(line250(nline),'(A)') '  '//s250(1:lens)
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
@@ -1990,7 +2026,7 @@ C     &              offset ! rep250(ii)(21:lens)
                lens=length(s250,250,30)
                nline=min(maxline,nline+1)
                jdline(nline)=t2000
-               write(line250(nline),'(A)') '   '//s250(1:lens)
+               write(line250(nline),'(A)') '  '//s250(1:lens)
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
@@ -2014,21 +2050,14 @@ C     &              offset ! rep250(ii)(21:lens)
          write(iline250(inline),'(A)') ' '//s250(1:lens)
          ilenline(inline)=len(trim(iline250(inline)))
       end if
-C     close location tag
-      write(s250,81)
-      call chop0(s250,250)
-      lens=length(s250,250,30)
-      inline=min(imaxline,inline+1)
-      write(iline250(inline),'(A)') ' '//s250(1:lens)
-      ilenline(inline)=len(trim(iline250(inline)))
-
+      !
  80   FORMAT('<location latitude="',A
      &     ,'" longitude="',A,'" height="',A,'">')
  81   FORMAT('</location>')
  90   FORMAT('<time date="',A10,'">')
  91   FORMAT('</time>')
  95   FORMAT('<events>')
- 96   FORMAT('</events')
+ 96   FORMAT('</events>')
 
 
  999  FORMAT(I4.4,"-",I2.2,"-",I2.2,"T",I2.2,":",I2.2,":",I2.2,A6) ! 19
