@@ -1435,14 +1435,15 @@ C     write events tag if requested
          ilenline(inline)=len(trim(iline250(inline)))
          !
          nline=0
+         tstartjd=date-offset
 C     990 - DETECT LOCAL SOLAR ECLIPSE
          eventId=990
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
-     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
+     &        searchUntil,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
      &        tstopJD,          ! report all events end time (in julianDay)
      &        eventId,          ! requested event id (SEE TABLE BELOW)
      &        neventVal,        ! number of event input data (SEE TABLE BELOW)
@@ -1575,11 +1576,12 @@ C     close location tag
          nline=0
          !
          tstartjd=date-offset
+
 C     150 - DETECT SOUTHERN SOLSTICE
          eventId=150
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
      &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
@@ -1622,7 +1624,7 @@ C     160 - DETECT ASCENDING EQUINOX
          eventId=160
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
      &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
@@ -1659,13 +1661,13 @@ C     ! write autumnal solstice information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 160     FORMAT('<autumnalEquinox time="',A25,'"/>')
+ 160     FORMAT('<vernalEquinox time="',A25,'"/>')
 
 C     170 - DETECT NORTHERN SOLSTICE
          eventId=170
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
      &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
@@ -1708,7 +1710,7 @@ C     180 - DETECT NORTHERN SOLSTICE
          eventId=180
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
      &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
@@ -1745,16 +1747,16 @@ C     ! write vernal equinox information
                lenline(nline)=len(trim(line250(nline)))
             end if
          end do
- 180     FORMAT('<vernalEquinox time="',A25,'"/>')
+ 180     FORMAT('<autumnalEquinox time="',A25,'"/>')
 
 C     560 - DETECT LUNAR ECLIPSE
          eventId=560
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
-     &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
+     &        searchUntil,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
      &        tstopJD,          ! report all events end time (in julianDay)
      &        eventId,          ! requested event id (SEE TABLE BELOW)
      &        neventVal,        ! number of event input data (SEE TABLE BELOW)
@@ -1847,12 +1849,11 @@ C     </xsl:template>
          end if
  560  FORMAT('  <lunarEclipse ',A,'/>')
 
-
 C     210 - DETECT NEW MOON
          eventId=210
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
      &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
@@ -1893,12 +1894,11 @@ C     &              offset ! rep250(ii)(21:lens)
          end do
  210     FORMAT('<newMoon time="',A25,'"/>')
 
-
 C     220 - FIRST QUARTER
          eventId=220
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
      &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
@@ -1939,12 +1939,11 @@ C     &              offset ! rep250(ii)(21:lens)
          end do
  220     FORMAT('<firstQuarter time="',A25,'"/>')
 
-
-C     230 - DETECT NEW MOON
+C     230 - DETECT FULL MOON
          eventId=230
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
      &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
@@ -1985,13 +1984,11 @@ C     &              offset ! rep250(ii)(21:lens)
          end do
  230     FORMAT('<fullMoon time="',A25,'"/>')
 
-
-
 C     240 - DETECT LAST QUARTER
          eventId=240
          nrep=0
          irc=0
-         tstopjd=tstartjd
+         tstopjd=tstartjd + real(days)
          call astroEvent(
      &        tstartJD,         ! start time (in julianDay)
      &        searchNext,       ! search code; -1:previous, +1:next, 0: both, +2:until tstopJD
