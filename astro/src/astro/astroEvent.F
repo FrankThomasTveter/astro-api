@@ -6100,7 +6100,7 @@ C
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       JD=tstartJD-dt
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,dtin
@@ -6271,7 +6271,7 @@ C
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       JD=tstartJD-dt
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,dtin
@@ -6542,7 +6542,7 @@ C
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       JD=tstartJD-dt
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,dtin
@@ -7240,7 +7240,7 @@ C
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       JD=tstartJD-dt
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,dtin
@@ -8375,7 +8375,7 @@ C
       lend=length(event100,100,20)
       JD=tstartJD
       mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin
       first=.true.
@@ -9084,7 +9084,7 @@ C
       lend=length(event100,100,20)
       JD=tstartJD
       mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin
       first=.true.
@@ -10329,7 +10329,7 @@ C
       lend=length(event100,100,20)
       JD=tstartJD
       mindt=(10.0D0**(-real(secdec)))/(3.33D0*86400D0)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
       if (bdeb)write(*,*)myname,'Range:',JD,tendJD,mindt,dtin
       first=.true.
@@ -11704,7 +11704,7 @@ C
 C     
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       JD=tstartJD-dt
       searchLLMax=tstartJD
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
@@ -11960,7 +11960,7 @@ C
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       JD=tstartJD-dt
       searchLLMin=tstartJD
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
@@ -13692,7 +13692,7 @@ C
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       JD=tstartJD-dt
       searchMax=tstartJD
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
@@ -14587,7 +14587,7 @@ C
 C
       if (bdeb)write(*,*)myname,'Entering.',irc
       lend=length(event100,100,20)
-      dt=sign(max(6.9D-3,abs(dtin)),tendJD-tstartJD)
+      dt=sign(max(6.94443D-4,abs(dtin)),tendJD-tstartJD)
       JD=tstartJD-dt
       searchMin=tstartJD
       if (bdeb)write(*,*)myname,'Interval:',tstartJD,tendJD,dt
@@ -20870,6 +20870,7 @@ C
          return
       end if
 C
+C      write(*,*)myname,'Not correcting flight time...'
       call JPLephLight(sunPos,crc250,irc) ! correct for light flight time...
       if (irc.ne.0) then
          lencrc=length(crc250,250,10)
