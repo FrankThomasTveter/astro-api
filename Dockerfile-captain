@@ -70,4 +70,4 @@ RUN a2enmod cgi \
 
 # and finally, set the main show going...
 # start service in foreground as per https://stackoverflow.com/a/44377561/4070848
-CMD [ "apachectl", "-D", "FOREGROUND" ]
+ENTRYPOINT [ "apachectl", "-D", "FOREGROUND" ]
