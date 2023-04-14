@@ -11,13 +11,14 @@
 # this approach (start with ubuntu and add apache2) is based on the dockerfile at: https://stackoverflow.com/a/44377561/4070848
 
 # start with ubuntu and add apache2 below
-FROM ubuntu:22.04
+# https://hub.docker.com/_/ubuntu
+FROM ubuntu:22.10
 
 # now install tini (an alternative to dumb-init)... good practice to have a dumb-init process as first process in container with PID=1
-# see: https://github.com/Yelp/dumb-init
-ENV TINI_VERSION v0.17.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
+# https://github.com/krallin/tini
+RUN apt-get update && apt install -y git tini \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # install apache2
 RUN apt-get update && \
@@ -60,8 +61,8 @@ RUN a2enmod cgi && \
     cat /usr/src/app/captain-apache2.conf >> /etc/apache2/apache2.conf
 
 # set tini (like dumb-init) as the entrypoint to make it PID=1 (see note above)
-ENTRYPOINT ["/tini", "--"]
+ENTRYPOINT [ "/tini", "--" ]
 
 # and finally, set the main show going...
 # start service in foreground as per https://stackoverflow.com/a/44377561/4070848
-CMD apachectl -D FOREGROUND
+CMD [ "apachectl" "-D" "FOREGROUND" ]
