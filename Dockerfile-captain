@@ -1,4 +1,3 @@
-
 # this is the dockerfile for use when deploying with CapRover:
 #    https://github.com/caprover/caprover/
 # this is suitable for deploying to an ubuntu-based docker container running apache2
@@ -29,11 +28,12 @@ RUN apt-get update \
 
 # install dependencies required for astro-api compilation
 RUN apt-get update \
- && apt-get install -y tcsh \
- && apt-get install -y make \
- && apt-get install -y gfortran \
- && apt-get install -y devscripts \
- && apt-get install -y libapache2-mod-perl2 \
+ && apt-get install -y \
+    tcsh \
+    make \
+    gfortran \
+    devscripts \
+    libapache2-mod-perl2 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -45,15 +45,15 @@ WORKDIR /usr/src/app
 COPY . /usr/src/app
 
 # compile astro-api
-RUN cd astro/src; make && \
-    cd astro/perl; perl Makefile.PL; make clean; perl Makefile.PL; make && \
-    make install
+RUN cd astro/src; make \
+ && cd astro/perl; perl Makefile.PL; make clean; perl Makefile.PL; make \
+ && make install
 
 # copy compiled files to apache2 folders appropriate to ubuntu installation
 # note that we copy rather than move because that preserves the previous astro-api compilation layer
 # so that it does not need to be re-run on the next deploy
-RUN cp -a /usr/src/app/html/astro /var/www/html && \
-    cp -a /usr/src/app/cgi-bin/astro /usr/lib/cgi-bin
+RUN cp -a /usr/src/app/html/astro /var/www/html \
+ && cp -a /usr/src/app/cgi-bin/astro /usr/lib/cgi-bin
 
 # expose port 80 to make this accessible to others
 EXPOSE 80
@@ -62,12 +62,12 @@ EXPOSE 80
 # this involves enabling the cgi module (https://askubuntu.com/a/54259/760204) and
 # appending some custom config lines to the default apache2 config file (based on
 # some lines in the docker file from the astro-api repo)
-RUN a2enmod cgi && \
-    cat /usr/src/app/captain-apache2.conf >> /etc/apache2/apache2.conf
+RUN a2enmod cgi \
+ && cat /usr/src/app/captain-apache2.conf >> /etc/apache2/apache2.conf
 
 # set tini (like dumb-init) as the entrypoint to make it PID=1 (see note above)
-# ENTRYPOINT [ "/tini", "--" ]
+ENTRYPOINT [ "/tini", "--" ]
 
 # and finally, set the main show going...
 # start service in foreground as per https://stackoverflow.com/a/44377561/4070848
-CMD [ "apachectl" "-D" "FOREGROUND" ]
+# CMD apachectl -D FOREGROUND
