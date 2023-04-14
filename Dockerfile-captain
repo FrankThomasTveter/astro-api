@@ -13,13 +13,6 @@
 # https://hub.docker.com/_/ubuntu
 FROM ubuntu:22.10
 
-# now install tini (an alternative to dumb-init)... good practice to have a dumb-init process as first process in container with PID=1
-# https://github.com/krallin/tini
-# RUN apt-get update \
-#  && apt-get install -y tini \
-#  && apt-get clean \
-#  && rm -rf /var/lib/apt/lists/*
-
 # install apache2
 RUN apt-get update \
  && apt-get install -y apache2 \
@@ -64,9 +57,6 @@ EXPOSE 80
 # some lines in the docker file from the astro-api repo)
 RUN a2enmod cgi \
  && cat /usr/src/app/captain-apache2.conf >> /etc/apache2/apache2.conf
-
-# set tini (like dumb-init) as the entrypoint to make it PID=1 (see note above)
-# ENTRYPOINT [ "/tini", "--" ]
 
 # and finally, set the main show going...
 # start service in foreground as per https://stackoverflow.com/a/44377561/4070848
