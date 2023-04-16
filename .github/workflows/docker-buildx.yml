@@ -33,4 +33,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           file: "Dockerfile-captain"
           push: true
-          tags: drmrbrewer/app:latest
+          tags: drmrbrewer/app,drmrbrewer/app:v1
