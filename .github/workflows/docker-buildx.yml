@@ -5,7 +5,7 @@
 name: docker-buildx
 
 on:
-  # you see to need to set workflow_dispatch to be able to run it manually?
+  # you see to need to set workflow_dispatch to be able to run it manually:
   # https://stackoverflow.com/a/67523883/4070848
   workflow_dispatch: {}
   push:
