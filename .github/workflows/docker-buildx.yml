@@ -1,4 +1,4 @@
-name: ci
+name: docker-buildx
 
 on:
   workflow_dispatch: {}
