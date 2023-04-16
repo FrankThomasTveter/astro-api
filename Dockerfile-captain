@@ -23,7 +23,7 @@ RUN apt-get update \
 RUN apt-get update \
  && apt-get install -y \
     tcsh \
-    build-essential \
+    make \
     gfortran \
     devscripts \
     libapache2-mod-perl2 \
