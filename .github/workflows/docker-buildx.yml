@@ -39,7 +39,8 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           # what tags to apply to the generated image:
-          tags: drmrbrewer/astro-api-test,drmrbrewer/astro-api-test:v1
+          # the images will be pushed to: https://hub.docker.com/repository/docker/drmrbrewer/astro-api/general
+          tags: drmrbrewer/astro-api,drmrbrewer/astro-api:v20
           # where in the repo to run the build from:
           context: .
           # this is a multi-platform build... specify required platforms here:
