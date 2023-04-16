@@ -10,7 +10,8 @@ on:
   workflow_dispatch: {}
   push:
     branches:
-      - "main"
+      - main
+      - master
 
 jobs:
   docker:
